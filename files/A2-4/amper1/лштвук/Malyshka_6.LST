@@ -1,0 +1,710 @@
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 1   
+
+
+C51 COMPILER V6.14, COMPILATION OF MODULE MALYSHKA_6
+OBJECT MODULE PLACED IN Malyshka_6.OBJ
+COMPILER INVOKED BY: D:\PROGRAM FILES\CYGNAL\IDEFILES\C51\BIN\C51.EXE Malyshka_6.C DB OE
+
+stmt level    source
+
+   1          //---------------------------------------
+   2          // Main-программа модуля управления "Детский стол" 
+   3          // V 6    05.11.2007
+   4          //  C Cygnal c8051f005  кварц=22118400
+   5          //---------------------------------------
+   6          #include "c8051f000.h"
+   7          #include "MyDef005.h"
+*** WARNING 317 IN LINE 281 OF MyDef005.h: redefinition of macro 'AD'
+*** WARNING 317 IN LINE 284 OF MyDef005.h: redefinition of macro 'AD'
+   8          # include "T0_sys.h" 
+   9          # include <stdio.h>
+  10          # include <stdlib.h>
+  11          # include <string.h>
+  12          //#include  "tm_rt_cy40.h"
+  13          # include "lcd_moda.h"
+  14          
+  15          #define T0 300	//0x12A	//5C3	//127
+  16          #define Tgr 64	//+,last=90
+  17          
+  18          	// кнопки
+  19          #define Key_rabota (P1&0x20)
+  20          #define Key_datchik (P1&0x40)
+  21          #define Key_razogrew (P1&0x80)
+  22          
+  23          // звуковой сигнал 1-вкл сигнал аварии, 0-выкл
+  24          #define Zwuk P06 
+  25          #define byte unsigned char
+  26          
+  27          
+  28          //---------------------------------------
+  29          // Объявление ОЗУ
+  30          //---------------------------------------
+  31          
+  32            unsigned char idata sss[20]; //?120 буфер индикации
+  33            unsigned int idata ttt_key;      // счетчик времени опроса кнопок
+  34            unsigned char idata regim1;   // режим работы 1-подготовка, 2-разогрев, 
+  35                                         // 3-работа
+  36            unsigned int idata T_opory;
+  37            //unsigned
+  38             int idata T_lampy1,T_lampy2; // заданная температура
+  39            unsigned int idata Pred_lampy1,Pred_lampy2, cnt_izm_lampy1, cnt_izm_lampy2;
+  40            unsigned int idata Pred_wozd, cnt_izm_wozd;
+  41            unsigned char rez;
+  42          
+  43            bit fl_key, fl_sboy, fl_lampy1, fl_lampy2,fl_gotow;
+  44            bit fl_Zwuk1,fl_Zwuk2,fl_Zwuk3,fl_wykl_zwuk;
+  45            unsigned int cnt_mig,cnt_lampy1,cnt_lampy2,cnt_L1;
+  46            unsigned char idata regim2;   // // режим работы (для контроля WDT)
+  47            unsigned char stat_lampy1,stat_lampy2,stat_12,stat_12_pred;//состояние лампы 0-вкл, 1-выкл, 2-авария
+  48            unsigned int Time_3min;
+  49          
+  50          void msprintf(void);	//int Temperatur);
+  51          
+  52          //////////////////////////////////////
+  53          
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 2   
+
+  54          void SYSCLK_Crystal_Init_F005(void)
+  55          {
+  56   1      int i; 
+  57   1      
+  58   1      OSCXCN = 0x77; // start external oscillator with
+  59   1      				// 22.1184MHz crystal
+  60   1      for (i=0; i < 256; i++) ; // XTLVLD blanking interval (>1ms)
+  61   1      while (!(OSCXCN & 0x80)) ; // Wait for crystal osc. to settle
+  62   1      OSCICN = 0x88; 			// select external oscillator as SYSCLK
+  63   1      						// source and enable missing clock detector
+  64   1      }
+  65          
+  66          int Temper(void);//+float  Temper(void);
+  67          int Temperatur,Temperatur_n, Mas_Temperatur[16], Sum_usr;//Temperatur_new float
+  68          int Min_T, Max_T;//byte;float Min_T, Max_T;
+  69          unsigned char ind_Mas;
+  70          
+  71          
+  72          void izm_Temper_datchika (void)
+  73              {
+  74   1      	  unsigned char i;
+  75   1      
+  76   1      	if (Time_datchik>=10)	//?100
+  77   1      	  {
+  78   2              Temperatur = Temper();
+  79   2      		 
+  80   2      //		Mas_Temperatur[ind_Mas] = Temperatur-T0;
+  81   2      
+  82   2      //	Sum_usr+= Temperatur-T0;
+  83   2      	Sum_usr+= Temperatur;//+ADC
+  84   2      
+  85   2      		if (ind_Mas < Tgr)
+  86   2      		{
+  87   3      		ind_Mas++;
+  88   3      		}
+  89   2      		else
+  90   2      		{
+  91   3      		ind_Mas=0;
+  92   3      //		Sum_usr = 0;
+  93   3      	
+  94   3      //	    for (i=0;i<16;i++)	//8
+  95   3      //           {  Sum_usr += (Mas_Temperatur[i]); }
+  96   3      
+  97   3      	    Temperatur_n =Sum_usr;//?(( Sum_usr+8)>>4);//&0x7F;//was 4 3???
+  98   3      		Sum_usr = 0;
+  99   3      		}
+ 100   2      /*		Sum_usr = 0;
+ 101   2      	    for (i=0;i<16;i++)	//8
+ 102   2                 {  Sum_usr += (Mas_Temperatur[i]); }
+ 103   2      
+ 104   2      	    Temperatur_n =Sum_usr;//?(( Sum_usr+8)>>4);//&0x7F;//was 4 3???
+ 105   2      */		Time_datchik=0;
+ 106   2            }
+ 107   1      
+ 108   1          }
+*** WARNING C280 IN LINE 74 OF MALYSHKA_6.C: 'i': unreferenced local variable
+ 109          /*
+ 110          void init_izm_Temper_datchika (void)
+ 111          	{
+ 112          	  unsigned char i;
+ 113          
+ 114          	  	ind_Mas=0;
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 3   
+
+ 115          
+ 116          		Temperatur = Temper();
+ 117          		for (i=0;i<16;i++)
+ 118             		   {  Mas_Temperatur[i]=Temperatur; }
+ 119          	
+ 120          	}
+ 121          */
+ 122          // опрос кнопок
+ 123          // 0 - нет нажатия
+ 124          // 1 - кн1 нагрев
+ 125          // 2 - кн2 датчик
+ 126          // 3 - кн3 работа
+ 127          // 4 - кн1+кн2 - выход в режим подготовки
+ 128          // 5 - кн1+кн2+кн3 выход в тестовый режим
+ 129          
+ 130          unsigned char Scan_Key (void)
+ 131              {
+ 132   1      
+ 133   1              P36=1; P37=1; P26=1;
+ 134   1      // ??        if ((P1&0xe0) == 0) return 6;
+ 135   1              if (((P3&0xc0) == 0)&&((P2&0x40) == 0)) return 5;
+ 136   1              if ((P3&0xc0) == 0) return 4;
+ 137   1              if ((P3&0x40) == 0) return 1;
+ 138   1              if ((P3&0x80) == 0) return 2;
+ 139   1              if ((P2&0x40) == 0) return 3;
+ 140   1      
+ 141   1              return 0;
+ 142   1          }
+ 143          
+ 144          
+ 145          void Wywod_stat_lampy(void)
+ 146          	{
+ 147   1      		fl_lampy1=fl_lampy2=0;
+ 148   1      		LCD_xy(15,0);
+ 149   1      		 if (stat_lampy1==0) LCD_dw(0x2a);  // вкл
+ 150   1      	else if (stat_lampy1==1) LCD_dw('o');  // выкл
+ 151   1      	else if (stat_lampy1==2) { LCD_dw(0x41); fl_lampy1=1; } // авария
+ 152   1      		LCD_xy(14,0);
+ 153   1      		 if (stat_lampy2==0) { LCD_dw(0x2a); } // вкл
+ 154   1      	else if (stat_lampy2==1) { LCD_dw('o'); } // выкл
+ 155   1      	else if (stat_lampy2==2) { LCD_dw(0x41); fl_lampy2=1; } // авария
+ 156   1      
+ 157   1      	}
+ 158          
+ 159          void Pisk_awar_lamp (void)
+ 160              {
+ 161   1      unsigned int i;
+ 162   1      
+ 163   1      		if (fl_lampy1||fl_lampy2)
+ 164   1      		  {
+ 165   2            		Zwuk = 1;
+ 166   2              	for (i=0;i<20000;i++) {WDTreset;}//delay_1();//
+ 167   2            		Zwuk = 0;
+ 168   2      		  }
+ 169   1      		fl_lampy1=0; fl_lampy2=0;
+ 170   1      	}
+ 171          
+ 172          //code unsigned char S_det_stol[17]=
+ 173          //{0x20,0xe0,0x65,0xbf,0x63,0xba,0xb8,0xb9,0x20,0x63,0xbf,0xef,0xbb,0x20,0x20,0x20,0x00};
+ 174          code unsigned char T_s[]="T=";
+ 175          
+ 176          code unsigned char S_podgot[17]=
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 4   
+
+ 177          {0x20,0x20,0x20,0xa8,0xef,0xe3,0xb4,0xef,0xbf,0xef,0xb3,0xba,0x61,0x20,0x20,0x20,0x00};
+ 178          
+ 179          // "Нагрев  Стол=   "
+ 180          code unsigned char S_nagrew[17]=
+ 181          {0x48,0x61,0xb4,0x70,0x65,0xb3,0x20,0x20,0x43,0xbf,0xef,0xbb,0x20,0x20,0x20,0x20,0x00};
+ 182          
+ 183          // "Датчик на стол "
+ 184          code unsigned char S_dat[17]=
+ 185          {0xe0,0x61,0xbf,0xc0,0xb8,0xba,0x20,0xbd,0x61,0x20,0x43,0xbf,0xef,0xbb,0x20,0x20,0x00};
+ 186          
+ 187          // "     Готов      "
+ 188          code unsigned char S_gotow[17]=
+ 189          {0x20,0x20,0x20,0x20,0x20,0xa1,0xef,0xbf,0xef,0xb3,0x20,0x20,0x20,0x20,0x20,0x20,0x00};
+ 190          
+ 191          // "Работа"
+ 192          code unsigned char S_rabota[7]=
+ 193          {0x50,0x61,0xb2,0xef,0xbf,0x61,0x00};
+ 194          
+ 195          //" Авария секции 1 "
+ 196          code unsigned char S_awar1[17]=
+ 197          {0x41,0xb3,0x61,0x70,0xb8,0xc7,0x20,0x63,0x65,0xba,0xe5,0xb8,0xb8,0x31,0x20,0x20,0x00};
+ 198          
+ 199          //" Авария секции 2 "
+ 200          code unsigned char S_awar2[17]=
+ 201          {0x41,0xb3,0x61,0x70,0xb8,0xc7,0x20,0x63,0x65,0xba,0xe5,0xb8,0xb8,0x32,0x20,0x20,0x00};
+ 202          
+ 203          //" Авария секции 12 "
+ 204          code unsigned char S_awar12[17]=
+ 205          {0x41,0xb3,0x61,0x70,0xb8,0xc7,0x20,0x63,0x65,0xba,0xe5,0xb8,0xb9,0x31,0x32,0x20,0x00};
+ 206          
+ 207          //" Выкл. секции 1 "
+ 208          code unsigned char S_wykl1[17]=
+ 209          {0x42,0xc3,0xba,0xbb,0x2e,0x20,0x20,0x63,0x65,0xba,0xe5,0xb8,0xb8,0x31,0x20,0x20,0x00};
+ 210          
+ 211          //" Выкл. секции 2 "
+ 212          code unsigned char S_wykl2[17]=
+ 213          {0x42,0xc3,0xba,0xbb,0x2e,0x20,0x20,0x63,0x65,0xba,0xe5,0xb8,0xb8,0x32,0x20,0x20,0x00};
+ 214          
+ 215          //" Выкл. секции 12 "
+ 216          code unsigned char S_wykl12[17]=
+ 217          {0x42,0xc3,0xba,0xbb,0x2e,0x20,0x20,0x63,0x65,0xba,0xe5,0xb8,0xb9,0x31,0x32,0x20,0x00};
+ 218          
+ 219          // перегрев
+ 220          code unsigned char S_peregrew[17]=
+ 221          {0x20,0x20,0x20,0x20,0xa8,0x45,0x50,0x45,0xa1,0x50,0x45,0x42,0x20,0x20,0x20,0x20,0x00};
+ 222          
+ 223          code unsigned char S_clr[]={"                "};
+ 224          sbit TMbit = P0^2;
+ 225          
+ 226           void main(void)
+ 227          	{
+ 228   1      unsigned int i;
+ 229   1      
+ 230   1      
+ 231   1      	Zwuk = 0;	// выключить звук
+ 232   1         WDTCN = 0xde;
+ 233   1         WDTCN = 0xad;
+ 234   1        SYSCLK_Crystal_Init_F005 ();   
+ 235   1         // Инициализация кроссбара
+ 236   1         XBR2 = 0xc0;
+ 237   1      fl_sboy = 0; 
+ 238   1      	T0_init();
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 5   
+
+ 239   1      	LCD_init();     //инициализация LCD
+ 240   1      	LCD_clear();
+ 241   1      	WDTreset;
+ 242   1      
+ 243   1      // инициализация ОЗУ
+ 244   1      //init_izm_Temper_datchika ();
+ 245   1      
+ 246   1       Time_1000=0;
+ 247   1      
+ 248   1      fl_key = 0; 
+ 249   1      
+ 250   1      stat_lampy1=0; stat_lampy2=2;
+ 251   1      
+ 252   1      //void ADC_Init (void)
+ 253   1      {
+ 254   2         ADC0CN = 0x00;	// ADC disabled; normal tracking mode
+ 255   2         REF0CN = 0x03;//7;	// enable temp sensor, on-chip VREF, VREF output buffer
+ 256   2         AMX0CF = 0x60;	// dual 4&5;0-separate pins
+ 257   2         AMX0SL = 0x04;	// AIN4
+ 258   2         ADC0CF = 0x86;	// ADC conversion clock = sysclk/16
+ 259   2      }
+ 260   1      
+ 261   1      /////////////////////////
+ 262   1      
+ 263   1      while (1)
+ 264   1       {
+ 265   2      
+ 266   2           WDTreset;
+ 267   2      
+ 268   2      L_podgot: ;
+ 269   2      // режим подготовка
+ 270   2      regim1 = regim2 = 1;
+ 271   2      
+ 272   2      
+ 273   2      //for (i=0; i < 16; i++)	Mas_Temperatur[i] = 0;
+ 274   2      Temperatur_n=T0*16;
+ 275   2      
+ 276   2      	LCD_xy(0,0); LCD_string(S_podgot);
+ 277   2      	LCD_xy(0,1); LCD_string(S_clr);
+ 278   2          // ожидаем нажатия кнопки "Разогрев"
+ 279   2          cnt_mig = 0;
+ 280   2        
+ 281   2          while ((Scan_Key ()) != 1)
+ 282   2               {
+ 283   3                  izm_Temper_datchika ();
+ 284   3      			msprintf();	//sss,"   T=%4.1f      ",Temperatur); 
+ 285   3      //			sss[9]=0xdf; sss[10]=0;//??
+ 286   3      	//for(i=8;i>1;i--) sss[i]=sss[i-2];
+ 287   3      	//sss[0]='T'; sss[1]='=';
+ 288   3      			LCD_xy(0,1); LCD_string(T_s);	LCD_string(sss);
+ 289   3      			Wywod_stat_lampy();
+ 290   3                  Pisk_awar_lamp ();
+ 291   3                  if (cnt_mig == 4)	            // мигаем номером кнопки, которую нужно нажать
+ 292   3                    {  cnt_mig = 0;
+ 293   4                       if (fl_key == 0) { LCD_xy(15,1); LCD_dw(0x31); fl_key = 1; }
+ 294   4                         else { LCD_xy(15,1); LCD_dw(0x20); fl_key = 0; }
+ 295   4                    }
+ 296   3                    cnt_mig++;
+ 297   3               }
+ 298   2      ////////////////////////////////////////////////
+ 299   2      L_nagrew: 		// режим Разогрев
+ 300   2      		regim1 = regim2 = 2;
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 6   
+
+ 301   2      
+ 302   2          LCD_xy(0,0); LCD_rus_string("Нагрев          ");
+ 303   2          LCD_xy(0,1); LCD_string(S_dat); // "Датчик на стол "
+ 304   2                izm_Temper_datchika ();
+ 305   2       			Wywod_stat_lampy();
+ 306   2      			Pisk_awar_lamp ();
+ 307   2          // ожидаем нажатия кнопки "Датчик"
+ 308   2          cnt_mig = 0;
+ 309   2          while ((Scan_Key ()) != 2) 
+ 310   2               {
+ 311   3                  izm_Temper_datchika ();
+ 312   3      			msprintf();	//sss,"%4.1f",Temperatur);
+ 313   3      //?			 sss[4]=0xdf; sss[5]=0;
+ 314   3      			LCD_xy(7,0); LCD_string(sss);
+ 315   3      
+ 316   3       			Wywod_stat_lampy();
+ 317   3      			Pisk_awar_lamp ();
+ 318   3      
+ 319   3                  // мигаем номером кнопки, которую нужно нажать
+ 320   3                  if (cnt_mig == 4)
+ 321   3                    {  cnt_mig = 0;
+ 322   4                       if (fl_key == 0) { LCD_xy(15,1); LCD_dw(0x32); fl_key = 1; }
+ 323   4                         else { LCD_xy(15,1); LCD_dw(0x20); fl_key = 0; }
+ 324   4                    }
+ 325   3                    cnt_mig++;
+ 326   3      
+ 327   3               }
+ 328   2          // убрать сообщение "Датчик на стол "
+ 329   2      
+ 330   2          LCD_xy(0,1); LCD_string(S_clr);
+ 331   2      
+ 332   2          // отслеживаем достижение заданной температуры нагрева
+ 333   2      Min_T=Max_T=Temperatur/10;
+ 334   2       Time_1000=0;
+ 335   2      Time_3min=0;
+ 336   2      stat_12_pred=stat_12;
+ 337   2      
+ 338   2      fl_wykl_zwuk=0;
+ 339   2      fl_gotow =0;
+ 340   2      
+ 341   2      while (fl_gotow==0) 
+ 342   2               {
+ 343   3                  izm_Temper_datchika ();
+ 344   3      			msprintf();	//sss,"%3.1f",Temperatur);
+ 345   3      //?			 sss[4]=0xdf; sss[5]=0;
+ 346   3      			LCD_xy(8,0); LCD_string(sss);
+ 347   3      
+ 348   3       			Wywod_stat_lampy();
+ 349   3      			Pisk_awar_lamp ();
+ 350   3      
+ 351   3                  // проверка на перегрев
+ 352   3                  if (fl_wykl_zwuk==0)
+ 353   3                    {
+ 354   4                      if (Temperatur/10 >= 40)
+ 355   4                        { Zwuk = 1;  LCD_xy(0,1); LCD_string(S_peregrew);  }
+ 356   4                      else 
+ 357   4                        { Zwuk = 0; LCD_xy(0,1); LCD_string(S_clr); }
+ 358   4                    }
+ 359   3                  else
+ 360   3                    { Zwuk = 0;
+ 361   4                      if (Temperatur/10 >= 40)
+ 362   4                        {   LCD_xy(0,1); LCD_string(S_peregrew);  }
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 7   
+
+ 363   4                      else 
+ 364   4                        {  LCD_xy(0,1); LCD_string(S_clr); }
+ 365   4                    }
+ 366   3      
+ 367   3                 // проверка нагрева воздуха через 10 cek
+ 368   3                  if (Time_1000 >= 1000)
+ 369   3                    {
+ 370   4                      if (Temperatur/10 < Min_T) Min_T=Temperatur/10;
+ 371   4                      if (Temperatur/10 > Max_T) Max_T=Temperatur/10;
+ 372   4      
+ 373   4      				if ((Max_T-Min_T)< 1 ) //0.5)
+ 374   4      				  if (stat_12_pred==stat_12) Time_3min++;
+ 375   4      				    else { Time_3min = 0; stat_12_pred=stat_12; }
+ 376   4      				else 
+ 377   4      				   { Time_3min=0; Min_T=Max_T=Temperatur/10; }
+ 378   4      
+ 379   4                      Time_1000=0;
+ 380   4      
+ 381   4                    }
+ 382   3                  // если в течении 5 минут T воздуха не растет, то готов
+ 383   3                  if (Time_3min >= 30) fl_gotow=1;	// !!!!!!!!!! 18
+ 384   3      
+ 385   3      
+ 386   3                  if ((Scan_Key ()) == 3) break;
+ 387   3      
+ 388   3                  // выключить звуковой сигнал по нажатию кнопки 1	
+ 389   3                  if ((Scan_Key ()) == 1) { Zwuk = 0; fl_wykl_zwuk=1; }
+ 390   3      
+ 391   3               }
+ 392   2      
+ 393   2      
+ 394   2      
+ 395   2          // выдать звуковой сигнал и сообщение "Готов"
+ 396   2      
+ 397   2      		if (fl_gotow==1) Zwuk = 1;
+ 398   2      		Time_1000=0;
+ 399   2      
+ 400   2              LCD_xy(0,1); LCD_string(S_gotow); // "     Готов      "
+ 401   2      
+ 402   2          // ожидаем нажатия кнопки "Работа"
+ 403   2          cnt_mig = 0;
+ 404   2       
+ 405   2          while ((Scan_Key ()) != 3) 
+ 406   2               {
+ 407   3                 WDTreset;
+ 408   3                  // мигаем номером кнопки, которую нужно нажать
+ 409   3                  if (cnt_mig == 20000)
+ 410   3                    {  cnt_mig = 0;
+ 411   4                       if (fl_key == 0) { LCD_xy(15,1); LCD_dw(0x33); fl_key = 1; }
+ 412   4                         else { LCD_xy(15,1); LCD_dw(0x20); fl_key = 0; }
+ 413   4                    }
+ 414   3                    cnt_mig++;
+ 415   3      
+ 416   3                  // выключить звук через 10 сек
+ 417   3                  if (Time_1000 >= 1000) Zwuk = 0;
+ 418   3               }
+ 419   2      
+ 420   2      ////////////////////////////////////////////////
+ 421   2      L_rabota: ;
+ 422   2      // режим Работа
+ 423   2      regim1 = regim2 = 3;
+ 424   2          // выключить звуковой сигнал
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 8   
+
+ 425   2          Zwuk = 0;
+ 426   2      stat_12_pred=stat_12;
+ 427   2      
+ 428   2      //    memcpy(sss,S_rabota,6);
+ 429   2      //    memcpy(sss,"       ",7);//memcpy(sss+6,"          ",10);
+ 430   2          LCD_xy(0,0); LCD_string(S_rabota);
+ 431   2      
+ 432   2          // убрать сообщение "Готов "
+ 433   2          LCD_xy(0,1); LCD_string(S_clr);
+ 434   2      
+ 435   2      
+ 436   2          for (i=0;i<20000;i++) {WDTreset;}
+ 437   2      
+ 438   2          // ожидаем нажатия кнопки "Работа"
+ 439   2          cnt_mig = 0;
+ 440   2       
+ 441   2          fl_Zwuk1=fl_Zwuk2=fl_Zwuk3=fl_wykl_zwuk=0;
+ 442   2      
+ 443   2       while ((Scan_Key ()) != 3) 
+ 444   2       {
+ 445   3                  izm_Temper_datchika ();
+ 446   3       			msprintf();	//sss,"%3.1f",Temperatur);
+ 447   3      //?			 sss[4]=0xdf; sss[5]=0;
+ 448   3      			LCD_xy(8,0); LCD_string(sss);
+ 449   3      
+ 450   3       			Wywod_stat_lampy();
+ 451   3      
+ 452   3      // слежение за состоянием ламп
+ 453   3         if (fl_wykl_zwuk==0)
+ 454   3         {
+ 455   4           // проверка на перегрев
+ 456   4           if (Temperatur/10 >= 40)
+ 457   4            {
+ 458   5               	 Zwuk = 1; fl_Zwuk3=1; 
+ 459   5      			 LCD_xy(0,1); LCD_string(S_peregrew); /* " перегрев Т > 40 "*/ 
+ 460   5      
+ 461   5            }
+ 462   4          else 
+ 463   4            {
+ 464   5                if ((fl_Zwuk1==0)&&(fl_Zwuk2==0))
+ 465   5                   { Zwuk = 0; LCD_xy(0,1); LCD_string(S_clr); }
+ 466   5      
+ 467   5            }
+ 468   4           
+ 469   4        	 // проверка на аварии
+ 470   4      	 if (stat_12== 0x22)
+ 471   4      	  { 
+ 472   5               	 Zwuk = 1; fl_Zwuk1=1; fl_Zwuk2=1;
+ 473   5      			 LCD_xy(0,1); LCD_string(S_awar12); /* " Авария секции 12 "*/ 
+ 474   5      			 goto l_endif;
+ 475   5      	  }
+ 476   4           if ((stat_12&0xf0)== 0x20)
+ 477   4      	  { 
+ 478   5      	   		Zwuk = 1; fl_Zwuk1=1;
+ 479   5      	   		LCD_xy(0,1); LCD_string(S_awar1); /* " Авария секции 1 "*/ 
+ 480   5      			 goto l_endif;
+ 481   5      	  }
+ 482   4           if ((stat_12&0x0f)== 0x02)
+ 483   4            { 
+ 484   5      	   		Zwuk = 1; fl_Zwuk2=1;
+ 485   5      	   		LCD_xy(0,1); LCD_string(S_awar2); /* " Авария секции 2 " */
+ 486   5      			 goto l_endif;
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 9   
+
+ 487   5      	  }
+ 488   4      	 
+ 489   4      	 // изменилось состояние секции  	 
+ 490   4      	 if ((stat_12_pred!=stat_12)&&(stat_12== 0x11))
+ 491   4      	  { 
+ 492   5      		   	 // выдать звуковой сигнал
+ 493   5               	 Zwuk = 1; fl_Zwuk1=1; fl_Zwuk2=1;
+ 494   5      			 LCD_xy(0,1); LCD_string(S_wykl12); /* " Выкл. секции 12 "*/
+ 495   5      			 goto l_endif; 
+ 496   5      	  }	 
+ 497   4      
+ 498   4      	 if ((stat_12_pred&0xf0) != (stat_12&0xf0)) 
+ 499   4      	  {	// изменилось состояние секции1
+ 500   5      	     // выдать звуковой сигнал
+ 501   5      		 Zwuk = 1; fl_Zwuk1=1;
+ 502   5      	    if ((stat_12&0xf0)== 0x10)
+ 503   5      		   { LCD_xy(0,1); LCD_string(S_wykl1); /* " Выключена секция 1 "*/ }
+ 504   5      	  } 
+ 505   4           else 
+ 506   4            {
+ 507   5      	    fl_Zwuk1=0;
+ 508   5             if ((fl_Zwuk2==0)&&(fl_Zwuk3==0))
+ 509   5                    { Zwuk = 0; LCD_xy(0,1); LCD_string(S_clr); }
+ 510   5            }
+ 511   4      	 if ((stat_12_pred&0x0f) != (stat_12&0x0f)) 
+ 512   4      	  {	// изменилось состояние секции2
+ 513   5      	     // выдать звуковой сигнал
+ 514   5               Zwuk = 1; fl_Zwuk2=1;
+ 515   5      	   if ((stat_12&0x0f)== 0x01)
+ 516   5       			{ LCD_xy(0,1); LCD_string(S_wykl2); /* " Выключена секция 1 "*/ }
+ 517   5            }
+ 518   4           else 
+ 519   4            {  fl_Zwuk2=0;
+ 520   5              if ((fl_Zwuk1==0)&&(fl_Zwuk3==0))
+ 521   5                   { Zwuk = 0; LCD_xy(0,1); LCD_string(S_clr); }
+ 522   5            }
+ 523   4         } // if слежение
+ 524   3       else
+ 525   3         { 
+ 526   4          if (Temperatur/10 >= 40)
+ 527   4               {   LCD_xy(0,1); LCD_string(S_peregrew);  }
+ 528   4          else 
+ 529   4               {  LCD_xy(0,1); LCD_string(S_clr); }
+ 530   4         }
+ 531   3      
+ 532   3      l_endif: ;
+ 533   3                 // мигаем номером кнопки, которую нужно нажать
+ 534   3            if (cnt_mig == 1)
+ 535   3             {  cnt_mig = 0;
+ 536   4               if (fl_key == 0)
+ 537   4      		 	 { LCD_xy(15,1); LCD_dw(0x33); fl_key = 1; }
+ 538   4               else 
+ 539   4      		 	 { LCD_xy(15,1); LCD_dw(0x20); fl_key = 0; }
+ 540   4             }
+ 541   3            cnt_mig++;
+ 542   3      	// выключить звуковой сигнал по нажатию кнопки 1	
+ 543   3           if ((Scan_Key ()) == 1) { Zwuk = 0; fl_wykl_zwuk=1; }
+ 544   3      
+ 545   3       } // while
+ 546   2      
+ 547   2          // выключить звуковой сигнал
+ 548   2          Zwuk = 0;
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 10  
+
+ 549   2      
+ 550   2      // переход в режим подготовки
+ 551   2      
+ 552   2      WDTreset;
+ 553   2      
+ 554   2      ////////////////////////////////
+ 555   2      
+ 556   2        }  // end while(1)
+ 557   1      
+ 558   1      
+ 559   1      
+ 560   1      }  	// end main()
+*** WARNING C280 IN LINE 268 OF MALYSHKA_6.C: 'L_podgot': unreferenced label
+*** WARNING C280 IN LINE 299 OF MALYSHKA_6.C: 'L_nagrew': unreferenced label
+*** WARNING C280 IN LINE 421 OF MALYSHKA_6.C: 'L_rabota': unreferenced label
+ 561          
+ 562          
+ 563          
+ 564          int Temper(void)
+ 565          {
+ 566   1      //int i,j;
+ 567   1      
+ 568   1      	ADCEN = 1;//ADC0CN=0x10;		// Enable ADC0
+ 569   1      	ADBUSY = 1;	// Initiate conversion
+ 570   1      	while (!ADCINT);// Wait for conversion to complete
+ 571   1      	ADCINT = 0;	// Clear end-of-conversion indicator
+ 572   1      	T_lampy2=ADC0;
+ 573   1      	return(T_lampy2);
+ 574   1      
+ 575   1      }
+ 576          void msprintf(void)	//int ur)
+ 577          {
+ 578   1      //unsigned int si;
+ 579   1      
+ 580   1      //ADC 
+ 581   1      		Temperatur=(Temperatur_n+32)>>6;
+ 582   1      /*old
+ 583   1      	T_lampy2=(Temperatur_n-4770-854);//?4770 T0*16+2;3
+ 584   1      	T_lampy1=T_lampy2*32;
+ 585   1      	T_lampy2=(T_lampy1+27)/55+487;//500; 0x197-12A=109
+ 586   1      */
+ 587   1      /*last
+ 588   1      	T_lampy2=(Temperatur_n+5)/10-10;//500; 0x197-12A=109
+ 589   1      if(T_lampy2 < 0 )
+ 590   1      	{
+ 591   1      	sss[0]='-';
+ 592   1      	Temperatur=-T_lampy2;
+ 593   1      	}
+ 594   1      	else
+ 595   1      	{
+ 596   1      	sss[0]=' ';
+ 597   1      	Temperatur=T_lampy2;
+ 598   1      	}
+ 599   1      */
+ 600   1      sss[1]=Temperatur/1000;
+ 601   1       T_lampy1=Temperatur-sss[1]*1000;//tail
+ 602   1      sss[2]=T_lampy1/100;
+ 603   1       T_lampy2=T_lampy1-sss[2]*100;//tail
+ 604   1      sss[3]=T_lampy2/10;
+ 605   1      sss[5]=T_lampy2-sss[3]*10;//tail
+ 606   1      if(sss[1] == 0) sss[1]=' '; else sss[1]|=0x30;
+ 607   1      if((sss[2] == 0) && (sss[1] == ' ')) sss[2]=' '; else sss[2]|=0x30;
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 11  
+
+ 608   1      sss[3]|=0x30;
+ 609   1      sss[4]=',';
+ 610   1      sss[5]|=0x30;
+ 611   1      sss[6]='\0';
+ 612   1      }
+ 613          
+ 614          /*
+ 615          int Temper(void)
+ 616          {
+ 617          //int i,j;
+ 618          
+ 619          	ADCEN = 1;//ADC0CN=0x10;		// Enable ADC0
+ 620          	ADBUSY = 1;	// Initiate conversion
+ 621          	while (!ADCINT);// Wait for conversion to complete
+ 622          	ADCINT = 0;	// Clear end-of-conversion indicator
+ 623          	T_lampy2=(ADC0-T0);//?-1
+ 624          	T_lampy1=T_lampy2*105;
+ 625          	T_lampy2=(T_lampy1+5)/11-5;//-55; 0x193-T0=127
+ 626          //if( j < 0 ) j=0;
+ 627          	return(T_lampy2);
+ 628          
+ 629          }
+ 630          void msprintf(void)	//int ur)
+ 631          {
+ 632          //int i;
+ 633          
+ 634          sss[0]=' ';
+ 635          if(Temperatur_n < 0 )
+ 636          	{
+ 637          	sss[0]='-';
+ 638          	Temperatur=-Temperatur_n;
+ 639          	}
+ 640          	else
+ 641          	{
+ 642          	sss[0]=' ';
+ 643          	Temperatur=Temperatur_n;
+ 644          	}
+ 645          
+ 646          sss[1]=Temperatur/1000;
+ 647           T_lampy1=Temperatur-sss[1]*1000;//tail
+ 648          sss[2]=T_lampy1/100;
+ 649           T_lampy2=T_lampy1-sss[2]*100;//tail
+ 650          sss[3]=T_lampy2/10;
+ 651          sss[5]=T_lampy2-sss[3]*10;//tail
+ 652          if(sss[1] == 0) sss[1]=' '; else sss[1]|=0x30;
+ 653          if((sss[2] == 0) && (sss[1] == ' ')) sss[2]=' '; else sss[2]|=0x30;
+ 654          sss[3]|=0x30;
+ 655          sss[4]=',';
+ 656          sss[5]|=0x30;
+ 657          sss[6]='\0';
+ 658          }
+ 659          */
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1855    ----
+   CONSTANT SIZE    =    231    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     58       1
+   IDATA SIZE       =     42    ----
+   BIT SIZE         =      9    ----
+C51 COMPILER V6.14  MALYSHKA_6                                                             03/10/2008 20:02:12 PAGE 12  
+
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  6 WARNING(S),  0 ERROR(S)

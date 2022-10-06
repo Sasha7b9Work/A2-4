@@ -1,0 +1,886 @@
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE     1
+
+
+MACRO ASSEMBLER A51 V6.14a
+NO OBJECT MODULE REQUESTED
+ASSEMBLER INVOKED BY: D:\PROGRAM FILES\CYGNAL\IDEFILES\C51\BIN\A51.EXE amp_asm1.asm XR GEN DB EP NOMOD51
+
+LOC  OBJ            LINE     SOURCE
+
+                       1        ;$include (c8051f020.inc) ; Include register definition file.
+                +1     2     ;-----------------------------------------------------------------------------
+                +1     3     ;       Copyright (C) 2001 CYGNAL INTEGRATED PRODUCTS, INC.
+                +1     4     ;       All rights reserved.
+                +1     5     ;
+                +1     6     ;
+                +1     7     ;       FILE NAME       : C8051F020.INC 
+                +1     8     ;       TARGET MCUs     : C8051F020, 'F021, 'F022, 'F023 
+                +1     9     ;       DESCRIPTION     : Register/bit definitions for the C8051F02x product family.  
+                +1    10     ;
+                +1    11     ;       REVISION 1.0    
+                +1    12     ;
+                +1    13     ;-----------------------------------------------------------------------------
+                +1    14     ;REGISTER DEFINITIONS
+                +1    15     ;
+  0080          +1    16     P0       DATA  080H   ; PORT 0
+  0081          +1    17     SP       DATA  081H   ; STACK POINTER
+  0082          +1    18     DPL      DATA  082H   ; DATA POINTER - LOW BYTE
+  0083          +1    19     DPH      DATA  083H   ; DATA POINTER - HIGH BYTE
+  0084          +1    20     P4       DATA  084H   ; PORT 4
+  0085          +1    21     P5       DATA  085H   ; PORT 5
+  0086          +1    22     P6       DATA  086H   ; PORT 6
+  0087          +1    23     PCON     DATA  087H   ; POWER CONTROL
+  0088          +1    24     TCON     DATA  088H   ; TIMER CONTROL
+  0089          +1    25     TMOD     DATA  089H   ; TIMER MODE
+  008A          +1    26     TL0      DATA  08AH   ; TIMER 0 - LOW BYTE
+  008B          +1    27     TL1      DATA  08BH   ; TIMER 1 - LOW BYTE
+  008C          +1    28     TH0      DATA  08CH   ; TIMER 0 - HIGH BYTE
+  008D          +1    29     TH1      DATA  08DH   ; TIMER 1 - HIGH BYTE
+  008E          +1    30     CKCON    DATA  08EH   ; CLOCK CONTROL
+  008F          +1    31     PSCTL    DATA  08FH   ; PROGRAM STORE R/W CONTROL
+  0090          +1    32     P1       DATA  090H   ; PORT 1
+  0091          +1    33     TMR3CN   DATA  091H   ; TIMER 3 CONTROL
+  0092          +1    34     TMR3RLL  DATA  092H   ; TIMER 3 RELOAD REGISTER - LOW BYTE
+  0093          +1    35     TMR3RLH  DATA  093H   ; TIMER 3 RELOAD REGISTER - HIGH BYTE
+  0094          +1    36     TMR3L    DATA  094H   ; TIMER 3 - LOW BYTE
+  0095          +1    37     TMR3H    DATA  095H   ; TIMER 3 - HIGH BYTE
+  0096          +1    38     P7       DATA  096H   ; PORT 7
+  0098          +1    39     SCON0    DATA  098H   ; SERIAL PORT 0 CONTROL
+  0099          +1    40     SBUF0    DATA  099H   ; SERIAL PORT 0 BUFFER
+  009A          +1    41     SPI0CFG  DATA  09AH   ; SERIAL PERIPHERAL INTERFACE 0 CONFIGURATION
+  009B          +1    42     SPI0DAT  DATA  09BH   ; SERIAL PERIPHERAL INTERFACE 0 DATA
+  009C          +1    43     ADC1     DATA  09CH   ; ADC 1 DATA
+  009D          +1    44     SPI0CKR  DATA  09DH   ; SERIAL PERIPHERAL INTERFACE 0 CLOCK RATE CONTROL
+  009E          +1    45     CPT0CN   DATA  09EH   ; COMPARATOR 0 CONTROL
+  009F          +1    46     CPT1CN   DATA  09FH   ; COMPARATOR 1 CONTROL 
+  00A0          +1    47     P2       DATA  0A0H   ; PORT 2
+  00A1          +1    48     EMI0TC   DATA  0A1H   ; EMIF TIMING CONTROL
+  00A3          +1    49     EMI0CF   DATA  0A3H   ; EXTERNAL MEMORY INTERFACE (EMIF) CONFIGURATION
+  00A4          +1    50     P0MDOUT  DATA  0A4H   ; PORT 0 OUTPUT MODE CONFIGURATION
+  00A5          +1    51     P1MDOUT  DATA  0A5H   ; PORT 1 OUTPUT MODE CONFIGURATION
+  00A6          +1    52     P2MDOUT  DATA  0A6H   ; PORT 2 OUTPUT MODE CONFIGURATION
+  00A7          +1    53     P3MDOUT  DATA  0A7H   ; PORT 3 OUTPUT MODE CONFIGURATION
+  00A8          +1    54     IE       DATA  0A8H   ; INTERRUPT ENABLE
+  00A9          +1    55     SADDR0   DATA  0A9H   ; SERIAL PORT 0 SLAVE ADDRESS
+  00AA          +1    56     ADC1CN  DATA  0AAH   ; ADC 1 CONTROL
+  00AB          +1    57     ADC1CF   DATA  0ABH   ; ADC 1 ANALOG MUX CONFIGURATION
+  00AC          +1    58     AMX1SL   DATA  0ACH   ; ADC 1 ANALOG MUX CHANNEL SELECT
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE     2
+
+  00AD          +1    59     P3IF     DATA  0ADH   ; PORT 3 EXTERNAL INTERRUPT FLAGS
+  00AE          +1    60     SADEN1   DATA  0AEH   ; SERIAL PORT 1 SLAVE ADDRESS MASK
+  00AF          +1    61     EMI0CN   DATA  0AFH   ; EXTERNAL MEMORY INTERFACE CONTROL
+  00B0          +1    62     P3       DATA  0B0H   ; PORT 3
+  00B1          +1    63     OSCXCN   DATA  0B1H   ; EXTERNAL OSCILLATOR CONTROL
+  00B2          +1    64     OSCICN   DATA  0B2H   ; INTERNAL OSCILLATOR CONTROL
+  00B5          +1    65     P74OUT   DATA  0B5H   ; PORTS 4 - 7 OUTPUT MODE
+  00B6          +1    66     FLSCL    DATA  0B6H   ; FLASH MEMORY TIMING PRESCALER
+  00B7          +1    67     FLACL    DATA  0B7H   ; FLASH ACESS LIMIT 
+  00B8          +1    68     IP       DATA  0B8H   ; INTERRUPT PRIORITY
+  00B9          +1    69     SADEN0   DATA  0B9H   ; SERIAL PORT 0 SLAVE ADDRESS MASK
+  00BA          +1    70     AMX0CF   DATA  0BAH   ; ADC 0 MUX CONFIGURATION
+  00BB          +1    71     AMX0SL   DATA  0BBH   ; ADC 0 MUX CHANNEL SELECTION
+  00BC          +1    72     ADC0CF   DATA  0BCH   ; ADC 0 CONFIGURATION
+  00BD          +1    73     P1MDIN   DATA  0BDH   ; PORT 1 INPUT MODE
+  00BE          +1    74     ADC0L    DATA  0BEH   ; ADC 0 DATA - LOW BYTE
+  00BF          +1    75     ADC0H    DATA  0BFH   ; ADC 0 DATA - HIGH BYTE 
+  00C0          +1    76     SMB0CN   DATA  0C0H   ; SMBUS 0 CONTROL
+  00C1          +1    77     SMB0STA  DATA  0C1H   ; SMBUS 0 STATUS
+  00C2          +1    78     SMB0DAT  DATA  0C2H   ; SMBUS 0 DATA 
+  00C3          +1    79     SMB0ADR  DATA  0C3H   ; SMBUS 0 SLAVE ADDRESS
+  00C4          +1    80     ADC0GTL  DATA  0C4H   ; ADC 0 GREATER-THAN REGISTER - LOW BYTE
+  00C5          +1    81     ADC0GTH  DATA  0C5H   ; ADC 0 GREATER-THAN REGISTER - HIGH BYTE
+  00C6          +1    82     ADC0LTL  DATA  0C6H   ; ADC 0 LESS-THAN REGISTER - LOW BYTE
+  00C7          +1    83     ADC0LTH  DATA  0C7H   ; ADC 0 LESS-THAN REGISTER - HIGH BYTE
+  00C8          +1    84     T2CON    DATA  0C8H   ; TIMER 2 CONTROL
+  00C9          +1    85     T4CON    DATA  0C9H   ; TIMER 4 CONTROL
+  00CA          +1    86     RCAP2L   DATA  0CAH   ; TIMER 2 CAPTURE REGISTER - LOW BYTE
+  00CB          +1    87     RCAP2H   DATA  0CBH   ; TIMER 2 CAPTURE REGISTER - HIGH BYTE
+  00CC          +1    88     TL2      DATA  0CCH   ; TIMER 2 - LOW BYTE
+  00CD          +1    89     TH2      DATA  0CDH   ; TIMER 2 - HIGH BYTE
+  00CF          +1    90     SMB0CR   DATA  0CFH   ; SMBUS 0 CLOCK RATE
+  00D0          +1    91     PSW      DATA  0D0H   ; PROGRAM STATUS WORD
+  00D1          +1    92     REF0CN   DATA  0D1H   ; VOLTAGE REFERENCE 0 CONTROL
+  00D2          +1    93     DAC0L    DATA  0D2H   ; DAC 0 REGISTER - LOW BYTE
+  00D3          +1    94     DAC0H    DATA  0D3H   ; DAC 0 REGISTER - HIGH BYTE
+  00D4          +1    95     DAC0CN   DATA  0D4H   ; DAC 0 CONTROL
+  00D5          +1    96     DAC1L    DATA  0D5H   ; DAC 1 REGISTER - LOW BYTE
+  00D6          +1    97     DAC1H    DATA  0D6H   ; DAC 1 REGISTER - HIGH BYTE
+  00D7          +1    98     DAC1CN   DATA  0D7H   ; DAC 1 CONTROL
+  00D8          +1    99     PCA0CN   DATA  0D8H   ; PCA 0 COUNTER CONTROL
+  00D9          +1   100     PCA0MD   DATA  0D9H   ; PCA 0 COUNTER MODE
+  00DA          +1   101     PCA0CPM0 DATA  0DAH   ; CONTROL REGISTER FOR PCA 0 MODULE 0
+  00DB          +1   102     PCA0CPM1 DATA  0DBH   ; CONTROL REGISTER FOR PCA 0 MODULE 1
+  00DC          +1   103     PCA0CPM2 DATA  0DCH   ; CONTROL REGISTER FOR PCA 0 MODULE 2
+  00DD          +1   104     PCA0CPM3 DATA  0DDH   ; CONTROL REGISTER FOR PCA 0 MODULE 3
+  00DE          +1   105     PCA0CPM4 DATA  0DEH   ; CONTROL REGISTER FOR PCA 0 MODULE 4
+  00E0          +1   106     ACC      DATA  0E0H   ; ACCUMULATOR
+  00E1          +1   107     XBR0     DATA  0E1H   ; DIGITAL CROSSBAR CONFIGURATION REGISTER 0
+  00E2          +1   108     XBR1     DATA  0E2H   ; DIGITAL CROSSBAR CONFIGURATION REGISTER 1
+  00E3          +1   109     XBR2     DATA  0E3H   ; DIGITAL CROSSBAR CONFIGURATION REGISTER 2
+  00E4          +1   110     RCAP4L   DATA  0E4H   ; TIMER 4 CAPTURE REGISTER - LOW BYTE
+  00E5          +1   111     RCAP4H   DATA  0E5H   ; TIMER 4 CAPTURE REGISTER - HIGH BYTE
+  00E6          +1   112     EIE1     DATA  0E6H   ; EXTERNAL INTERRUPT ENABLE 1
+  00E7          +1   113     EIE2     DATA  0E7H   ; EXTERNAL INTERRUPT ENABLE 2
+  00E8          +1   114     ADC0CN   DATA  0E8H   ; ADC 0 CONTROL
+  00E9          +1   115     PCA0L    DATA  0E9H   ; PCA 0 TIMER - LOW BYTE
+  00EA          +1   116     PCA0CPL0 DATA  0EAH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 0 - LOW BYTE
+  00EB          +1   117     PCA0CPL1 DATA  0EBH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 1 - LOW BYTE
+  00EC          +1   118     PCA0CPL2 DATA  0ECH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 2 - LOW BYTE
+  00ED          +1   119     PCA0CPL3 DATA  0EDH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 3 - LOW BYTE
+  00EE          +1   120     PCA0CPL4 DATA  0EEH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 4 - LOW BYTE
+  00EF          +1   121     RSTSRC   DATA  0EFH   ; RESET SOURCE 
+  00F0          +1   122     B        DATA  0F0H   ; B REGISTER
+  00F1          +1   123     SCON1    DATA  0F1H   ; SERIAL PORT 1 CONTROL
+  00F2          +1   124     SBUF1    DATA  0F2H   ; SERAIL PORT 1 DATA
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE     3
+
+  00F3          +1   125     SADDR1   DATA  0F3H   ; SERAIL PORT 1 
+  00F4          +1   126     TL4      DATA  0F4H   ; TIMER 4 DATA - LOW BYTE
+  00F5          +1   127     TH4      DATA  0F5H   ; TIMER 4 DATA - HIGH BYTE
+  00F6          +1   128     EIP1     DATA  0F6H   ; EXTERNAL INTERRUPT PRIORITY REGISTER 1
+  00F7          +1   129     EIP2     DATA  0F7H   ; EXTERNAL INTERRUPT PRIORITY REGISTER 2
+  00F8          +1   130     SPI0CN   DATA  0F8H   ; SERIAL PERIPHERAL INTERFACE 0 CONTROL 
+  00F9          +1   131     PCA0H    DATA  0F9H   ; PCA 0 TIMER - HIGH BYTE
+  00FA          +1   132     PCA0CPH0 DATA  0FAH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 0 - HIGH BYTE
+  00FB          +1   133     PCA0CPH1 DATA  0FBH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 1 - HIGH BYTE
+  00FC          +1   134     PCA0CPH2 DATA  0FCH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 2 - HIGH BYTE
+  00FD          +1   135     PCA0CPH3 DATA  0FDH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 3 - HIGH BYTE
+  00FE          +1   136     PCA0CPH4 DATA  0FEH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 4 - HIGH BYTE
+  00FF          +1   137     WDTCN    DATA  0FFH   ; WATCHDOG TIMER CONTROL 
+                +1   138     ;
+                +1   139     ;------------------------------------------------------------------------------
+                +1   140     ;BIT DEFINITIONS
+                +1   141     ;
+                +1   142     ; TCON 88H
+  0088          +1   143     IT0      BIT   TCON.0 ; EXT. INTERRUPT 0 TYPE
+  0089          +1   144     IE0      BIT   TCON.1 ; EXT. INTERRUPT 0 EDGE FLAG
+  008A          +1   145     IT1      BIT   TCON.2 ; EXT. INTERRUPT 1 TYPE
+  008B          +1   146     IE1      BIT   TCON.3 ; EXT. INTERRUPT 1 EDGE FLAG
+  008C          +1   147     TR0      BIT   TCON.4 ; TIMER 0 ON/OFF CONTROL
+  008D          +1   148     TF0      BIT   TCON.5 ; TIMER 0 OVERFLOW FLAG
+  008E          +1   149     TR1      BIT   TCON.6 ; TIMER 1 ON/OFF CONTROL
+  008F          +1   150     TF1      BIT   TCON.7 ; TIMER 1 OVERFLOW FLAG
+                +1   151     ;
+                +1   152     ; SCON0 98H
+  0098          +1   153     RI       BIT   SCON0.0 ; RECEIVE INTERRUPT FLAG
+  0099          +1   154     TI       BIT   SCON0.1 ; TRANSMIT INTERRUPT FLAG
+  009A          +1   155     RB8      BIT   SCON0.2 ; RECEIVE BIT 8
+  009B          +1   156     TB8      BIT   SCON0.3 ; TRANSMIT BIT 8
+  009C          +1   157     REN      BIT   SCON0.4 ; RECEIVE ENABLE
+  009D          +1   158     SM2      BIT   SCON0.5 ; MULTIPROCESSOR COMMUNICATION ENABLE
+  009E          +1   159     SM1      BIT   SCON0.6 ; SERIAL MODE CONTROL BIT 1
+  009F          +1   160     SM0      BIT   SCON0.7 ; SERIAL MODE CONTROL BIT 0
+                +1   161     ; 
+                +1   162     ; IE A8H
+  00A8          +1   163     EX0      BIT   IE.0   ; EXTERNAL INTERRUPT 0 ENABLE
+  00A9          +1   164     ET0      BIT   IE.1   ; TIMER 0 INTERRUPT ENABLE
+  00AA          +1   165     EX1      BIT   IE.2   ; EXTERNAL INTERRUPT 1 ENABLE
+  00AB          +1   166     ET1      BIT   IE.3   ; TIMER 1 INTERRUPT ENABLE
+  00AC          +1   167     ES       BIT   IE.4   ; SERIAL PORT INTERRUPT ENABLE
+  00AD          +1   168     ET2      BIT   IE.5   ; TIMER 2 INTERRUPT ENABLE
+  00AF          +1   169     EA       BIT   IE.7   ; GLOBAL INTERRUPT ENABLE
+                +1   170     ;
+                +1   171     ; IP B8H
+  00B8          +1   172     PX0      BIT   IP.0   ; EXTERNAL INTERRUPT 0 PRIORITY
+  00B9          +1   173     PT0      BIT   IP.1   ; TIMER 0 PRIORITY
+  00BA          +1   174     PX1      BIT   IP.2   ; EXTERNAL INTERRUPT 1 PRIORITY
+  00BB          +1   175     PT1      BIT   IP.3   ; TIMER 1 PRIORITY
+  00BC          +1   176     PS       BIT   IP.4   ; SERIAL PORT PRIORITY
+  00BD          +1   177     PT2      BIT   IP.5   ; TIMER 2 PRIORITY
+                +1   178     ;
+                +1   179     ; SMB0CN C0H
+  00C0          +1   180     SMBTOE   BIT   SMB0CN.0 ; SMBUS 0 TIMEOUT ENABLE
+  00C1          +1   181     SMBFTE   BIT   SMB0CN.1 ; SMBUS 0 FREE TIMER ENABLE
+  00C2          +1   182     AA       BIT   SMB0CN.2 ; SMBUS 0 ASSERT/ACKNOWLEDGE FLAG
+  00C3          +1   183     SI       BIT   SMB0CN.3 ; SMBUS 0 INTERRUPT PENDING FLAG
+  00C4          +1   184     STO      BIT   SMB0CN.4 ; SMBUS 0 STOP FLAG
+  00C5          +1   185     STA      BIT   SMB0CN.5 ; SMBUS 0 START FLAG
+  00C6          +1   186     ENSMB    BIT   SMB0CN.6 ; SMBUS 0 ENABLE 
+                +1   187     ;
+                +1   188     ; T2CON C8H
+  00C8          +1   189     CPRL2    BIT   T2CON.0 ; CAPTURE OR RELOAD SELECT
+  00C9          +1   190     CT2      BIT   T2CON.1 ; TIMER OR COUNTER SELECT
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE     4
+
+  00CA          +1   191     TR2      BIT   T2CON.2 ; TIMER 2 ON/OFF CONTROL
+  00CB          +1   192     EXEN2    BIT   T2CON.3 ; TIMER 2 EXTERNAL ENABLE FLAG
+  00CC          +1   193     TCLK     BIT   T2CON.4 ; TRANSMIT CLOCK FLAG
+  00CD          +1   194     RCLK     BIT   T2CON.5 ; RECEIVE CLOCK FLAG
+  00CE          +1   195     EXF2     BIT   T2CON.6 ; EXTERNAL FLAG
+  00CF          +1   196     TF2      BIT   T2CON.7 ; TIMER 2 OVERFLOW FLAG
+                +1   197     ;
+                +1   198     ; PSW D0H
+  00D0          +1   199     P        BIT   PSW.0  ; ACCUMULATOR PARITY FLAG
+  00D1          +1   200     F1       BIT   PSW.1  ; USER FLAG 1
+  00D2          +1   201     OV       BIT   PSW.2  ; OVERFLOW FLAG
+  00D3          +1   202     RS0      BIT   PSW.3  ; REGISTER BANK SELECT 0
+  00D4          +1   203     RS1      BIT   PSW.4  ; REGISTER BANK SELECT 1
+  00D5          +1   204     F0       BIT   PSW.5  ; USER FLAG 0
+  00D6          +1   205     AC       BIT   PSW.6  ; AUXILIARY CARRY FLAG
+  00D7          +1   206     CY       BIT   PSW.7  ; CARRY FLAG
+                +1   207     ;
+                +1   208     ; PCA0CN D8H
+  00D8          +1   209     CCF0     BIT   PCA0CN.0 ; PCA 0 MODULE 0 INTERRUPT FLAG
+  00D9          +1   210     CCF1     BIT   PCA0CN.1 ; PCA 0 MODULE 1 INTERRUPT FLAG
+  00DA          +1   211     CCF2     BIT   PCA0CN.2 ; PCA 0 MODULE 2 INTERRUPT FLAG
+  00DB          +1   212     CCF3     BIT   PCA0CN.3 ; PCA 0 MODULE 3 INTERRUPT FLAG
+  00DC          +1   213     CCF4     BIT   PCA0CN.4 ; PCA 0 MODULE 4 INTERRUPT FLAG
+  00DE          +1   214     CR       BIT   PCA0CN.6 ; PCA 0 COUNTER RUN CONTROL BIT
+  00DF          +1   215     CF       BIT   PCA0CN.7 ; PCA 0 COUNTER OVERFLOW FLAG
+                +1   216     ;
+                +1   217     ; ADC0CN E8H
+  00E8          +1   218     AD0LJST  BIT   ADC0CN.0 ; ADC 0 RIGHT JUSTIFY DATA BIT
+  00E9          +1   219     AD0WINT  BIT   ADC0CN.1 ; ADC 0 WINDOW COMPARE INTERRUPT FLAG
+  00EA          +1   220     AD0STM0  BIT   ADC0CN.2 ; ADC 0 START OF CONVERSION MODE BIT 0
+  00EB          +1   221     AD0STM1  BIT   ADC0CN.3 ; ADC 0 START OF CONVERSION MODE BIT 1
+  00EC          +1   222     AD0BUSY  BIT   ADC0CN.4 ; ADC 0 BUSY FLAG
+  00ED          +1   223     AD0INT   BIT   ADC0CN.5 ; ADC 0 CONVERISION COMPLETE INTERRUPT FLAG 
+  00EE          +1   224     AD0TM    BIT   ADC0CN.6 ; ADC 0 TRACK MODE
+  00EF          +1   225     AD0EN    BIT   ADC0CN.7 ; ADC 0 ENABLE
+                +1   226     ;
+                +1   227     ; SPI0CN F8H
+  00F8          +1   228     SPIEN    BIT   SPI0CN.0 ; SPI 0 SPI ENABLE
+  00F9          +1   229     MSTEN    BIT   SPI0CN.1 ; SPI 0 MASTER ENABLE
+  00FA          +1   230     SLVSEL   BIT   SPI0CN.2 ; SPI 0 SLAVE SELECT
+  00FB          +1   231     TXBSY    BIT   SPI0CN.3 ; SPI 0 TX BUSY FLAG
+  00FC          +1   232     RXOVRN   BIT   SPI0CN.4 ; SPI 0 RX OVERRUN FLAG
+  00FD          +1   233     MODF     BIT   SPI0CN.5 ; SPI 0 MODE FAULT FLAG
+  00FE          +1   234     WCOL     BIT   SPI0CN.6 ; SPI 0 WRITE COLLISION FLAG
+  00FF          +1   235     SPIF     BIT   SPI0CN.7 ; SPI 0 INTERRUPT FLAG
+                     236             
+                     237     NAME    MAIN
+                     238     
+0000                 239                             org 0h;    cseg AT 0
+                     240     
+0000 020000   F      241                 jmp begin;;;;Main               ; Locate a jump to the start of code at 
+                     242                                             
+0003                 243                                                     org 3
+0003 32              244                                                     reti
+000B                 245                                                     org 0bh
+000B 32              246                                                     reti
+0013                 247                                                     org 13h
+0013 32              248                                                     reti
+001B                 249                                                     org 1bh
+001B 32              250                                                     reti
+0023                 251                                                     org 23h
+0023 32              252                                                     reti
+002B                 253                                                     org 2bh
+002B 32              254                                                     reti
+0033                 255                                                     org 33h
+0033 32              256                                                     reti
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE     5
+
+003B                 257                                                     org 3bh
+003B 32              258                                                     reti
+0043                 259                                                     org 43h
+0043 32              260                                                     reti
+004B                 261                                                     org 4bh
+004B 32              262                                                     reti
+0053                 263                                                     org 53h
+0053 32              264                                                     reti
+005B                 265                                                     org 5bh
+                     266                                                     
+005B 32              267                                                     reti
+0063                 268                                                     org 63h
+0063 32              269                                                     reti
+006B                 270                                                     org 6bh
+006B 32              271                                                     reti
+0073                 272                                                      org 73h
+0073 32              273                                                     reti
+                     274                                                     
+                     275     Main         SEGMENT  CODE
+                     276     
+----                 277                                     DSEG
+                     278     
+  002E               279     bufind  DATA    2eh;буффер индикации
+  004F               280     abin            DATA    4fh;4byte
+  0053               281     adec            DATA    53h;10byte
+                     282     
+  00CA               283     TMR2RLL  DATA 0cah;    // TIMER 2 RELOAD LOW                                       */
+  00CB               284     TMR2RLH  DATA 0cbh;    // TIMER 2 RELOAD HIGH                                      */
+                     285                     
+  0020               286     cellbit         DATA    20h
+  0000               287     bitznak                 BIT                     cellbit.0                       ;20.0 фл вк
+                             л режима измерения сопротивления изоляции
+                     288      
+                     289      
+                     290      
+----                 291                  rseg     Main          ; Switch to this code segment.
+                     292     
+                     293                  using    0              ; Specify register bank for the following
+                     294     
+0100                 295     org 100h
+                     296     ;$EJECT
+                     297     
+0100 7581E0          298     begin:     mov  sp, #0e0h
+0103 75E900          299                                             mov             PCA0L,#00;=0x00;
+0106 75D900          300                                             mov     PCA0MD,#00;= 0x00;
+0109 75A41F          301                                             mov     P0MDOUT,#1fh;=0x1f;
+010C 75A58F          302                                             mov     P1MDOUT,#8fh;=0x8f;
+010F 75A600          303                                             mov     P2MDOUT,#00;=0x00;
+                     304             
+                     305             
+0112 75B5FF          306             mov     P74OUT ,#0ffh;=0xff;
+0115 75D103          307             mov     REF0CN,#03h;=0x03;
+                     308             
+0118 75E114          309             mov     XBR0,#14h;= 0x14;
+011B 75E200          310             mov     XBR1,#00; =0x00;
+011E 75E300          311             mov XBR2,#00;=0x00;
+                     312      
+0121 75FFDE          313             mov     WDTCN,#0deh;=0xde;       //запрет работы WDT
+0124 75FFAD          314             mov     WDTCN,#0adh;=0xad;                                   
+0127 758922          315             mov     TMOD,#22h;=0x22;        //регистр режимов
+012A 758E30          316             mov     CKCON,#30h;=0x30; //сист частота/12     
+012D 758CF9          317             mov     TH0,#0f9h;=0xf9;//      ; Установка таймера
+0130 758AF9          318             mov     TL0,#0f9h;=0xf9; 
+0133 75E680          319             mov     EIE1,#80h;=0x80;
+                     320     
+0136 75D480          321             mov     DAC0CN,#80h;=0x80;
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE     6
+
+0139 75D780          322             mov     DAC1CN,#80h;=0x80;
+013C 75B167          323             mov     OSCXCN,#67h;=0x67;
+                     324     
+                     325      
+013F E5B1            326     gener:     mov a, oscxcn
+0141 B4E7FB          327                cjne a,#11100111b,gener
+                     328                            
+0144 75B284          329             mov     OSCICN,#84h;=0x84;
+0147 75CA00          330         mov TMR2RLL,#0;=0;
+014A 75CBD1          331         mov TMR2RLH,#0d1h;=0xd1;
+                     332       
+014D D28E            333                     setb  TCON.6                    ;регистр управления
+014F D28C            334                      setb tcon.4
+                     335     
+0151 75EF00          336             mov     RSTSRC,#0;=00   ;//источники сброса 
+                     337     
+                     338             
+0154 75E340          339          mov        XBR2,#40h;=0x40;
+                     340     
+                     341     ;ozu
+0157 E4              342                                                             clr     a
+0158 F5D0            343                                                             mov     psw,a
+015A 7820            344                                                             mov     r0,#20h 
+015C F6              345     mecle:                          mov     @r0,a                   ;обнулить озу 256 байт
+015D 08              346                                                             inc     r0
+015E B87FFB          347                                                             cjne    r0,#7fh,mecle
+0161 7880            348                                                             mov     r0,#80h
+0163 F6              349     meff:                                   mov     @r0,a 
+0164 08              350                                                             inc     r0
+0165 B8DFFB          351                                                             cjne    r0,#0dfh,meff
+                     352     
+                     353     ;START
+                     354     ;                                       rez_A0=0;
+                     355     ;        SUMM=0; //обнуление скользящего массива
+                     356     ;        over_mas=0;
+                     357     ;        count_mas=0;
+                     358     
+                     359     
+                     360     
+0168 C2B4            361               clr P3.4
+016A 120000   F      362                     call z_100         ;строб
+016D D2B4            363                     setb P3.4
+016F C2B3            364        clr P3.3
+0171 C2B2            365                     clr P3.2
+0173 120000   F      366       call z_15         ;задержка 15 мс
+                     367              ;установка регистра команд
+0176 7430            368         mov A,#30h     ;устанавливаем разрядность шины
+0178 120000   F      369                     call write_x1;x1  ;переход к записи
+017B 120000   F      370             call z_15         ;задержка 15 мс
+017E 120000   F      371             call write_x1;x1  ;переход к записи
+0181 120000   F      372             call z_100        ;задержка 100 мкс
+                     373              
+0184 120000   F      374                     call write_x1;x1;запись
+0187 120000   F      375                     call loop            ;проверка флага BF
+018A 7438            376         mov A,#38h     ;устанавливаем режим развертки изображения в две строки
+018C 120000   F      377             call write_x1;x1 ;запись
+018F 120000   F      378             call loop                     ;проверка флага BF
+                     379     
+0192 7406            380             mov A,#06h     ;устанавливаем режим автоматического перемещения курсора слева-напра
+                             во после вывода каждого символа 
+0194 120000   F      381             call write_x1;x1   ;запись
+0197 120000   F      382                     call loop                     ;проверка флага BF 
+                     383     
+019A 7402            384         mov A,#02h     ;начало строки адресуется в начале DDRAM
+019C 120000   F      385                     call write_x1;x1    ;запись
+019F 120000   F      386                     call loop                     ;проверка флага BF
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE     7
+
+01A2 740C            387         mov A,#0Ch     ;включаем отбражение на кране ЖКИ-модуля, без отображения курсоров
+01A4 120000   F      388                     call write_x1;x1       ;запись
+01A7 120000   F      389                     call loop                     ;проверка флага BF
+01AA 75E001          390                     mov     acc,#01;
+01AD 120000   F      391                     call write_x1;x1;write();//
+                     392     
+01B0 782E            393                             mov             r0,#bufind
+01B2                 394     age1:
+01B2 7621            395                             mov             @r0,#21h
+01B4 08              396                             inc             r0
+01B5 B84FFA          397                             cjne    r0,#4fh,age1            
+                     398     
+01B8 120000   F      399     age2:           call    ind
+                     400     
+01BB 7EFF            401                                             mov R6,#0ffh
+01BD DEFE            402                                             djnz R6,$
+                     403               
+                     404     ;инициализация ACP
+01BF 3095FD          405                           jnb P1.5,$
+01C2 2095FD          406               jb  p1.5,$
+01C5 00              407               nop
+01C6 00              408                                             nop
+01C7 120000   F      409                                             call tim
+01CA 7464            410                                             mov A,#01100100b
+01CC 120000   F      411                                             call zapadc   ;запись INSR
+01CF 00              412                                             nop
+01D0 00              413                                             nop
+01D1 120000   F      414                                             call tim
+01D4 7460            415                                             mov A,#01100000b
+01D6 120000   F      416                                             call zapadc     ;старший байт УС
+01D9 7420            417               mov A,#00100000b
+01DB 120000   F      418                                             call zapadc      ;второй байт УС
+01DE 7403            419                                             mov A,#00000011b
+01E0 120000   F      420                                             call zapadc        ;первый байт УС
+01E3 740C            421               mov A,#00001100b
+01E5 120000   F      422                                             call zapadc     ;младший байт УС
+01E8 75D500          423                                             mov             DAC1L,#0;
+01EB 75D608          424                                             mov             DAC1H,#8;
+                     425     
+                     426     ;измерение ACP 
+01EE 3095FD          427                                 jnb P1.5,$
+01F1 2095FD          428              jb P1.5, $
+01F4 00              429               nop
+01F5 00              430                                             nop
+01F6 120000   F      431                                             call tim
+01F9 74C0            432                                             mov A,#11000000b ;запись INSR
+01FB 120000   F      433                                             call zapadc
+01FE 00              434                                             nop
+01FF 00              435                                             nop
+0200 120000   F      436                                             call    tim
+0203 120000   F      437                                             call    chtadc
+0206 F550            438                                             mov     abin+1,A                ;ст байт
+0208 120000   F      439                                             call    chtadc
+020B F551            440                     mov     abin+2,A
+020D 120000   F      441                                       call  chtadc
+0210 F552            442               mov   abin+3,A                ;r2r3r4r5
+0212 00              443                                             nop
+0213 00              444                                             nop
+0214 7850            445                                             mov             r0,#abin+1
+0216 E6              446                                             mov             a,@r0
+0217 20E70C          447                                             jb              acc.7,znplus;
+021A D200            448                                             setb    bitznak                         ;-
+                     449                                             
+021C 7F03            450                                             mov             r7,#3
+021E E6              451     invers:         mov             a,@r0
+021F F4              452                                             cpl             a
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE     8
+
+0220 F6              453                                             mov             @r0,a
+0221 08              454                                             inc             r0
+0222 DFFA            455                                             djnz    r7,invers
+0224 8003            456                                             jmp             goznak
+0226 547F            457     znplus:         anl             a,#7fh                  ;+
+0228 F6              458                                             mov             @r0,a
+0229 7853            459     goznak:         mov             r0,#adec
+022B 7952            460                                             mov             r1,#abin+3
+                     461                                             ;call   bindec
+                     462     
+                     463     ;                                       mov             a,r3
+                     464     ;                                       jnc             acc.7,minzn
+                     465     ;                                       anl             a,#7fh
+                     466     ;                                       clr             bitznak
+                     467     
+                     468     ;minzn:         setb    bitznak
+                     469                                             
+                     470     
+                     471                                             
+                     472     
+                     473                                     
+                     474                                                       
+                     475              
+022D 0100     F      476                                             ajmp age2
+                     477     
+                     478     
+                     479                                     
+                     480                     
+                     481     
+022F 7A08            482     zapadc:   mov R2,#8
+0231 D297            483     sdv:      setb P1.7
+0233 33              484               rlc A
+0234 9296            485                                             mov P1.6,C
+0236 120000   F      486                                             call tim2
+0239 C297            487                                             clr P1.7
+023B 120000   F      488                                             call tim2
+023E DAF1            489                                             djnz R2,sdv
+0240 D296            490                                             setb P1.6
+0242 22              491                                             ret
+                     492     
+0243 7A08            493     chtadc:   mov R2,#8
+0245 D297            494     sdv1:     setb P1.7
+0247 120000   F      495               call tim2
+024A C297            496                                             clr P1.7
+024C A296            497                                             mov C,P1.6
+024E 33              498                                             rlc A
+024F 120000   F      499                                             call tim2
+0252 DAF1            500                                             djnz R2,sdv1
+0254 22              501                                             ret
+                     502     
+0255 7E38            503     tim:      mov R6,#38h
+0257 DEFE            504     tim1:     djnz R6,tim1
+0259 22              505               ret
+                     506               
+025A 7E14            507     tim2:     mov R6,#14h
+025C DEFE            508     tim3:     djnz R6,tim3
+025E 22              509               ret
+                     510     
+                     511     ;запись из acc
+025F C3              512     write_x1: clr   c
+0260                 513     writeD_x1:
+0260 92B1            514                                       mov P3.1,c        ;запись
+0262 F5A0            515               mov P2,A
+0264 D2B3            516                                       setb P3.3
+0266 120000   F      517                                       call z_5
+0269 C2B3            518                                       clr P3.3
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE     9
+
+026B 75A0FF          519                                       mov P2,#0FFh
+026E 22              520                                       ret
+                     521     
+                     522     ;чтение в acc
+026F C3              523     read_x2:  clr   c  
+0270 92B1            524               mov P3.1,c        ;чтение
+0272 D2B2            525               setb P3.2
+0274 D2B3            526                                       setb P3.3
+0276 120000   F      527                                             call z_5
+0279 E5A0            528                                       mov A,P2
+027B C2B3            529                                       clr P3.3
+027D C2B2            530                                       clr P3.2
+027F 22              531                                       ret
+                     532     
+                     533     
+0280 120000   F      534     loop:     call read_x2;x2    ;ожидание флага готовности
+0283 20E7FA          535                                       jb ACC.7,loop     ;переход на чтение, если бит А(7)=1
+0286 22              536                                 ret           ;возврат, если бит А(7)<>1
+                     537                                      
+                     538                                        
+0287 22              539     ret
+                     540     
+                     541     ;задержка 100 мкс
+0288 7978            542     z_100:    mov R1,#78h     ;загрузка первого числа
+028A 7A02            543     z100:     mov R2,#2h     ;загрузка второго числа
+028C DAFE            544     count:    djnz R2, count;декремент R2 и внутренний цикл, если R2<>0     
+028E D9FA            545               djnz R1, z100 ;декремент R1 и внутренний цикл, если R1<>0
+0290 22              546               ret           
+                     547     
+                     548     ;задержка 34 мкс
+0291 7B8B            549     z_5:      mov R3,#8Bh      ;загрузка числа
+0293 DBFE            550     ct:       djnz R3,ct
+0295 22              551               ret
+                     552     
+                     553     ;задержка 15 мс
+0296 79FA            554     z_15:     mov R1,#0FAh    ;загрузка первого числа
+0298 7AED            555     z15:      mov R2,#0EDh   ;загрузка второго числа
+029A DAFE            556     zz:       djnz R2, zz   ;декремент R2 и внутренний цикл, если R2<>0
+029C D9FA            557               djnz R1, z15  ;декремент R1 и внутренний цикл, если R1<>0
+029E 22              558               ret   
+                     559                                               
+                     560     ;;;;;;;;;;;;;;;
+029F 782E            561     ind:            mov     r0,#2eh
+02A1 120000   F      562                     call    loop
+02A4 7480            563               mov A,#10000000b  ;установка адреса
+02A6 120000   F      564                                             call write_x1
+                     565                                             
+02A9 120000   F      566     M2:                     call loop
+                     567               
+02AC E6              568                                             mov A,@R0      ;пересылаем содержимое R0 в аккумуля
+                             тор
+02AD D3              569               setb c         ;установка регистра данных
+02AE 120000   F      570                                             call writeD_x1               ;запись
+02B1 08              571               inc r0
+02B2 B83EF4          572                                             cjne r0,#3Eh,M2  ;сравнение аккумулятора с констант
+                             ой и переход, если не =0  
+                     573     
+02B5 120000   F      574     f5:       call loop               ;проверка флага BF
+02B8 74C0            575                               mov A,#0C0h        ;установка адреса
+02BA 120000   F      576                     call write_x1               ;запись
+                     577     
+02BD 783E            578                                     mov r0,#3Eh      ;загрузка счетчика
+02BF 120000   F      579     M3:                     call    loop       ;проверка флага BF
+02C2 E6              580                     mov A,@R0     ;пересылаем содержимое R0 в аккумулятор
+02C3 D3              581                     setb    c                       ;установка регистра данных 
+02C4 120000   F      582                                             call writeD_x1               ;запись
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE    10
+
+02C7 08              583                     inc R0          ;инкремент счетчика
+                     584                             
+02C8 B84EF4          585                                             cjne R0,#4Eh,M3  ;сравнение аккумулятора с констант
+                             ой и переход, если не =0
+02CB 22              586                                 ret                                 
+                     587     
+                     588     
+                     589     
+                     590                                             
+                     591     ;$include (e:\amper\sarifm3.asm) 
+                     592     
+*** ERROR #A318 IN 593 (amp_asm1.asm, LINE 357): can't open file 'e:\amper\sarifm3.asm'
+                     593                                                   
+                     594     END
+                                                                             
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE    11
+
+XREF SYMBOL TABLE LISTING
+---- ------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES / REFERENCES
+
+AA . . . . . . . .  B ADDR   00C0H.2 A      182#
+ABIN . . . . . . .  D ADDR   004FH   A      280# 438 440 442 445 460
+AC . . . . . . . .  B ADDR   00D0H.6 A      205#
+ACC. . . . . . . .  D ADDR   00E0H   A      106# 390 447 535
+AD0BUSY. . . . . .  B ADDR   00E8H.4 A      222#
+AD0EN. . . . . . .  B ADDR   00E8H.7 A      225#
+AD0INT . . . . . .  B ADDR   00E8H.5 A      223#
+AD0LJST. . . . . .  B ADDR   00E8H.0 A      218#
+AD0STM0. . . . . .  B ADDR   00E8H.2 A      220#
+AD0STM1. . . . . .  B ADDR   00E8H.3 A      221#
+AD0TM. . . . . . .  B ADDR   00E8H.6 A      224#
+AD0WINT. . . . . .  B ADDR   00E8H.1 A      219#
+ADC0CF . . . . . .  D ADDR   00BCH   A      72#
+ADC0CN . . . . . .  D ADDR   00E8H   A      114# 218 219 220 221 222 223 224 225
+ADC0GTH. . . . . .  D ADDR   00C5H   A      81#
+ADC0GTL. . . . . .  D ADDR   00C4H   A      80#
+ADC0H. . . . . . .  D ADDR   00BFH   A      75#
+ADC0L. . . . . . .  D ADDR   00BEH   A      74#
+ADC0LTH. . . . . .  D ADDR   00C7H   A      83#
+ADC0LTL. . . . . .  D ADDR   00C6H   A      82#
+ADC1 . . . . . . .  D ADDR   009CH   A      43#
+ADC1CF . . . . . .  D ADDR   00ABH   A      57#
+ADC1CN . . . . . .  D ADDR   00AAH   A      56#
+ADEC . . . . . . .  D ADDR   0053H   A      281# 459
+AGE1 . . . . . . .  C ADDR   01B2H   R   SEG=MAIN   394# 397
+AGE2 . . . . . . .  C ADDR   01B8H   R   SEG=MAIN   399# 476
+AMX0CF . . . . . .  D ADDR   00BAH   A      70#
+AMX0SL . . . . . .  D ADDR   00BBH   A      71#
+AMX1SL . . . . . .  D ADDR   00ACH   A      58#
+B. . . . . . . . .  D ADDR   00F0H   A      122#
+BEGIN. . . . . . .  C ADDR   0100H   R   SEG=MAIN   241 298#
+BITZNAK. . . . . .  B ADDR   0020H.0 A      287# 448
+BUFIND . . . . . .  D ADDR   002EH   A      279# 393
+CCF0 . . . . . . .  B ADDR   00D8H.0 A      209#
+CCF1 . . . . . . .  B ADDR   00D8H.1 A      210#
+CCF2 . . . . . . .  B ADDR   00D8H.2 A      211#
+CCF3 . . . . . . .  B ADDR   00D8H.3 A      212#
+CCF4 . . . . . . .  B ADDR   00D8H.4 A      213#
+CELLBIT. . . . . .  D ADDR   0020H   A      286# 287
+CF . . . . . . . .  B ADDR   00D8H.7 A      215#
+CHTADC . . . . . .  C ADDR   0243H   R   SEG=MAIN   437 439 441 493#
+CKCON. . . . . . .  D ADDR   008EH   A      30# 316
+COUNT. . . . . . .  C ADDR   028CH   R   SEG=MAIN   544# 544
+CPRL2. . . . . . .  B ADDR   00C8H.0 A      189#
+CPT0CN . . . . . .  D ADDR   009EH   A      45#
+CPT1CN . . . . . .  D ADDR   009FH   A      46#
+CR . . . . . . . .  B ADDR   00D8H.6 A      214#
+CT . . . . . . . .  C ADDR   0293H   R   SEG=MAIN   550# 550
+CT2. . . . . . . .  B ADDR   00C8H.1 A      190#
+CY . . . . . . . .  B ADDR   00D0H.7 A      206#
+DAC0CN . . . . . .  D ADDR   00D4H   A      95# 321
+DAC0H. . . . . . .  D ADDR   00D3H   A      94#
+DAC0L. . . . . . .  D ADDR   00D2H   A      93#
+DAC1CN . . . . . .  D ADDR   00D7H   A      98# 322
+DAC1H. . . . . . .  D ADDR   00D6H   A      97# 424
+DAC1L. . . . . . .  D ADDR   00D5H   A      96# 423
+DPH. . . . . . . .  D ADDR   0083H   A      19#
+DPL. . . . . . . .  D ADDR   0082H   A      18#
+EA . . . . . . . .  B ADDR   00A8H.7 A      169#
+EIE1 . . . . . . .  D ADDR   00E6H   A      112# 319
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE    12
+
+EIE2 . . . . . . .  D ADDR   00E7H   A      113#
+EIP1 . . . . . . .  D ADDR   00F6H   A      128#
+EIP2 . . . . . . .  D ADDR   00F7H   A      129#
+EMI0CF . . . . . .  D ADDR   00A3H   A      49#
+EMI0CN . . . . . .  D ADDR   00AFH   A      61#
+EMI0TC . . . . . .  D ADDR   00A1H   A      48#
+ENSMB. . . . . . .  B ADDR   00C0H.6 A      186#
+ES . . . . . . . .  B ADDR   00A8H.4 A      167#
+ET0. . . . . . . .  B ADDR   00A8H.1 A      164#
+ET1. . . . . . . .  B ADDR   00A8H.3 A      166#
+ET2. . . . . . . .  B ADDR   00A8H.5 A      168#
+EX0. . . . . . . .  B ADDR   00A8H.0 A      163#
+EX1. . . . . . . .  B ADDR   00A8H.2 A      165#
+EXEN2. . . . . . .  B ADDR   00C8H.3 A      192#
+EXF2 . . . . . . .  B ADDR   00C8H.6 A      195#
+F0 . . . . . . . .  B ADDR   00D0H.5 A      204#
+F1 . . . . . . . .  B ADDR   00D0H.1 A      200#
+F5 . . . . . . . .  C ADDR   02B5H   R   SEG=MAIN   574#
+FLACL. . . . . . .  D ADDR   00B7H   A      67#
+FLSCL. . . . . . .  D ADDR   00B6H   A      66#
+GENER. . . . . . .  C ADDR   013FH   R   SEG=MAIN   326# 327
+GOZNAK . . . . . .  C ADDR   0229H   R   SEG=MAIN   456 459#
+IE . . . . . . . .  D ADDR   00A8H   A      54# 163 164 165 166 167 168 169
+IE0. . . . . . . .  B ADDR   0088H.1 A      144#
+IE1. . . . . . . .  B ADDR   0088H.3 A      146#
+IND. . . . . . . .  C ADDR   029FH   R   SEG=MAIN   399 561#
+INVERS . . . . . .  C ADDR   021EH   R   SEG=MAIN   451# 455
+IP . . . . . . . .  D ADDR   00B8H   A      68# 172 173 174 175 176 177
+IT0. . . . . . . .  B ADDR   0088H.0 A      143#
+IT1. . . . . . . .  B ADDR   0088H.2 A      145#
+LOOP . . . . . . .  C ADDR   0280H   R   SEG=MAIN   375 378 382 386 389 534# 535 562 566 574 579
+M2 . . . . . . . .  C ADDR   02A9H   R   SEG=MAIN   566# 572
+M3 . . . . . . . .  C ADDR   02BFH   R   SEG=MAIN   579# 585
+MAIN . . . . . . .  C SEG    02CCH       REL=UNIT   237 275# 291
+MECLE. . . . . . .  C ADDR   015CH   R   SEG=MAIN   345# 347
+MEFF . . . . . . .  C ADDR   0163H   R   SEG=MAIN   349# 351
+MODF . . . . . . .  B ADDR   00F8H.5 A      233#
+MSTEN. . . . . . .  B ADDR   00F8H.1 A      229#
+OSCICN . . . . . .  D ADDR   00B2H   A      64# 329
+OSCXCN . . . . . .  D ADDR   00B1H   A      63# 323 326
+OV . . . . . . . .  B ADDR   00D0H.2 A      201#
+P. . . . . . . . .  B ADDR   00D0H.0 A      199#
+P0 . . . . . . . .  D ADDR   0080H   A      16#
+P0MDOUT. . . . . .  D ADDR   00A4H   A      50# 301
+P1 . . . . . . . .  D ADDR   0090H   A      32# 405 406 427 428 483 485 487 490 494 496 497
+P1MDIN . . . . . .  D ADDR   00BDH   A      73#
+P1MDOUT. . . . . .  D ADDR   00A5H   A      51# 302
+P2 . . . . . . . .  D ADDR   00A0H   A      47# 515 519 528
+P2MDOUT. . . . . .  D ADDR   00A6H   A      52# 303
+P3 . . . . . . . .  D ADDR   00B0H   A      62# 361 363 364 365 514 516 518 524 525 526 529 530
+P3IF . . . . . . .  D ADDR   00ADH   A      59#
+P3MDOUT. . . . . .  D ADDR   00A7H   A      53#
+P4 . . . . . . . .  D ADDR   0084H   A      20#
+P5 . . . . . . . .  D ADDR   0085H   A      21#
+P6 . . . . . . . .  D ADDR   0086H   A      22#
+P7 . . . . . . . .  D ADDR   0096H   A      38#
+P74OUT . . . . . .  D ADDR   00B5H   A      65# 306
+PCA0CN . . . . . .  D ADDR   00D8H   A      99# 209 210 211 212 213 214 215
+PCA0CPH0 . . . . .  D ADDR   00FAH   A      132#
+PCA0CPH1 . . . . .  D ADDR   00FBH   A      133#
+PCA0CPH2 . . . . .  D ADDR   00FCH   A      134#
+PCA0CPH3 . . . . .  D ADDR   00FDH   A      135#
+PCA0CPH4 . . . . .  D ADDR   00FEH   A      136#
+PCA0CPL0 . . . . .  D ADDR   00EAH   A      116#
+PCA0CPL1 . . . . .  D ADDR   00EBH   A      117#
+PCA0CPL2 . . . . .  D ADDR   00ECH   A      118#
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE    13
+
+PCA0CPL3 . . . . .  D ADDR   00EDH   A      119#
+PCA0CPL4 . . . . .  D ADDR   00EEH   A      120#
+PCA0CPM0 . . . . .  D ADDR   00DAH   A      101#
+PCA0CPM1 . . . . .  D ADDR   00DBH   A      102#
+PCA0CPM2 . . . . .  D ADDR   00DCH   A      103#
+PCA0CPM3 . . . . .  D ADDR   00DDH   A      104#
+PCA0CPM4 . . . . .  D ADDR   00DEH   A      105#
+PCA0H. . . . . . .  D ADDR   00F9H   A      131#
+PCA0L. . . . . . .  D ADDR   00E9H   A      115# 299
+PCA0MD . . . . . .  D ADDR   00D9H   A      100# 300
+PCON . . . . . . .  D ADDR   0087H   A      23#
+PS . . . . . . . .  B ADDR   00B8H.4 A      176#
+PSCTL. . . . . . .  D ADDR   008FH   A      31#
+PSW. . . . . . . .  D ADDR   00D0H   A      91# 199 200 201 202 203 204 205 206 343
+PT0. . . . . . . .  B ADDR   00B8H.1 A      173#
+PT1. . . . . . . .  B ADDR   00B8H.3 A      175#
+PT2. . . . . . . .  B ADDR   00B8H.5 A      177#
+PX0. . . . . . . .  B ADDR   00B8H.0 A      172#
+PX1. . . . . . . .  B ADDR   00B8H.2 A      174#
+RB8. . . . . . . .  B ADDR   0098H.2 A      155#
+RCAP2H . . . . . .  D ADDR   00CBH   A      87#
+RCAP2L . . . . . .  D ADDR   00CAH   A      86#
+RCAP4H . . . . . .  D ADDR   00E5H   A      111#
+RCAP4L . . . . . .  D ADDR   00E4H   A      110#
+RCLK . . . . . . .  B ADDR   00C8H.5 A      194#
+READ_X2. . . . . .  C ADDR   026FH   R   SEG=MAIN   523# 534
+REF0CN . . . . . .  D ADDR   00D1H   A      92# 307
+REN. . . . . . . .  B ADDR   0098H.4 A      157#
+RI . . . . . . . .  B ADDR   0098H.0 A      153#
+RS0. . . . . . . .  B ADDR   00D0H.3 A      202#
+RS1. . . . . . . .  B ADDR   00D0H.4 A      203#
+RSTSRC . . . . . .  D ADDR   00EFH   A      121# 336
+RXOVRN . . . . . .  B ADDR   00F8H.4 A      232#
+SADDR0 . . . . . .  D ADDR   00A9H   A      55#
+SADDR1 . . . . . .  D ADDR   00F3H   A      125#
+SADEN0 . . . . . .  D ADDR   00B9H   A      69#
+SADEN1 . . . . . .  D ADDR   00AEH   A      60#
+SBUF0. . . . . . .  D ADDR   0099H   A      40#
+SBUF1. . . . . . .  D ADDR   00F2H   A      124#
+SCON0. . . . . . .  D ADDR   0098H   A      39# 153 154 155 156 157 158 159 160
+SCON1. . . . . . .  D ADDR   00F1H   A      123#
+SDV. . . . . . . .  C ADDR   0231H   R   SEG=MAIN   483# 489
+SDV1 . . . . . . .  C ADDR   0245H   R   SEG=MAIN   494# 500
+SI . . . . . . . .  B ADDR   00C0H.3 A      183#
+SLVSEL . . . . . .  B ADDR   00F8H.2 A      230#
+SM0. . . . . . . .  B ADDR   0098H.7 A      160#
+SM1. . . . . . . .  B ADDR   0098H.6 A      159#
+SM2. . . . . . . .  B ADDR   0098H.5 A      158#
+SMB0ADR. . . . . .  D ADDR   00C3H   A      79#
+SMB0CN . . . . . .  D ADDR   00C0H   A      76# 180 181 182 183 184 185 186
+SMB0CR . . . . . .  D ADDR   00CFH   A      90#
+SMB0DAT. . . . . .  D ADDR   00C2H   A      78#
+SMB0STA. . . . . .  D ADDR   00C1H   A      77#
+SMBFTE . . . . . .  B ADDR   00C0H.1 A      181#
+SMBTOE . . . . . .  B ADDR   00C0H.0 A      180#
+SP . . . . . . . .  D ADDR   0081H   A      17# 298
+SPI0CFG. . . . . .  D ADDR   009AH   A      41#
+SPI0CKR. . . . . .  D ADDR   009DH   A      44#
+SPI0CN . . . . . .  D ADDR   00F8H   A      130# 228 229 230 231 232 233 234 235
+SPI0DAT. . . . . .  D ADDR   009BH   A      42#
+SPIEN. . . . . . .  B ADDR   00F8H.0 A      228#
+SPIF . . . . . . .  B ADDR   00F8H.7 A      235#
+STA. . . . . . . .  B ADDR   00C0H.5 A      185#
+STO. . . . . . . .  B ADDR   00C0H.4 A      184#
+T2CON. . . . . . .  D ADDR   00C8H   A      84# 189 190 191 192 193 194 195 196
+T4CON. . . . . . .  D ADDR   00C9H   A      85#
+A51 MACRO ASSEMBLER  AMP_ASM1                                                             03/22/2006 11:01:56 PAGE    14
+
+TB8. . . . . . . .  B ADDR   0098H.3 A      156#
+TCLK . . . . . . .  B ADDR   00C8H.4 A      193#
+TCON . . . . . . .  D ADDR   0088H   A      24# 143 144 145 146 147 148 149 150 333 334
+TF0. . . . . . . .  B ADDR   0088H.5 A      148#
+TF1. . . . . . . .  B ADDR   0088H.7 A      150#
+TF2. . . . . . . .  B ADDR   00C8H.7 A      196#
+TH0. . . . . . . .  D ADDR   008CH   A      28# 317
+TH1. . . . . . . .  D ADDR   008DH   A      29#
+TH2. . . . . . . .  D ADDR   00CDH   A      89#
+TH4. . . . . . . .  D ADDR   00F5H   A      127#
+TI . . . . . . . .  B ADDR   0098H.1 A      154#
+TIM. . . . . . . .  C ADDR   0255H   R   SEG=MAIN   409 414 431 436 503#
+TIM1 . . . . . . .  C ADDR   0257H   R   SEG=MAIN   504# 504
+TIM2 . . . . . . .  C ADDR   025AH   R   SEG=MAIN   486 488 495 499 507#
+TIM3 . . . . . . .  C ADDR   025CH   R   SEG=MAIN   508# 508
+TL0. . . . . . . .  D ADDR   008AH   A      26# 318
+TL1. . . . . . . .  D ADDR   008BH   A      27#
+TL2. . . . . . . .  D ADDR   00CCH   A      88#
+TL4. . . . . . . .  D ADDR   00F4H   A      126#
+TMOD . . . . . . .  D ADDR   0089H   A      25# 315
+TMR2RLH. . . . . .  D ADDR   00CBH   A      284# 331
+TMR2RLL. . . . . .  D ADDR   00CAH   A      283# 330
+TMR3CN . . . . . .  D ADDR   0091H   A      33#
+TMR3H. . . . . . .  D ADDR   0095H   A      37#
+TMR3L. . . . . . .  D ADDR   0094H   A      36#
+TMR3RLH. . . . . .  D ADDR   0093H   A      35#
+TMR3RLL. . . . . .  D ADDR   0092H   A      34#
+TR0. . . . . . . .  B ADDR   0088H.4 A      147#
+TR1. . . . . . . .  B ADDR   0088H.6 A      149#
+TR2. . . . . . . .  B ADDR   00C8H.2 A      191#
+TXBSY. . . . . . .  B ADDR   00F8H.3 A      231#
+WCOL . . . . . . .  B ADDR   00F8H.6 A      234#
+WDTCN. . . . . . .  D ADDR   00FFH   A      137# 313 314
+WRITED_X1. . . . .  C ADDR   0260H   R   SEG=MAIN   513# 570 582
+WRITE_X1 . . . . .  C ADDR   025FH   R   SEG=MAIN   369 371 374 377 381 385 388 391 512# 564 576
+XBR0 . . . . . . .  D ADDR   00E1H   A      107# 309
+XBR1 . . . . . . .  D ADDR   00E2H   A      108# 310
+XBR2 . . . . . . .  D ADDR   00E3H   A      109# 311 339
+Z100 . . . . . . .  C ADDR   028AH   R   SEG=MAIN   543# 545
+Z15. . . . . . . .  C ADDR   0298H   R   SEG=MAIN   555# 557
+ZAPADC . . . . . .  C ADDR   022FH   R   SEG=MAIN   411 416 418 420 422 433 482#
+ZNPLUS . . . . . .  C ADDR   0226H   R   SEG=MAIN   447 457#
+ZZ . . . . . . . .  C ADDR   029AH   R   SEG=MAIN   556# 556
+Z_100. . . . . . .  C ADDR   0288H   R   SEG=MAIN   362 372 542#
+Z_15 . . . . . . .  C ADDR   0296H   R   SEG=MAIN   366 370 554#
+Z_5. . . . . . . .  C ADDR   0291H   R   SEG=MAIN   517 527 549#
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 1 ERROR(S)

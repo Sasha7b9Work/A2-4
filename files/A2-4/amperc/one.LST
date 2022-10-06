@@ -1,0 +1,430 @@
+C51 COMPILER V6.14  ONE                                                                    01/19/2007 10:31:55 PAGE 1   
+
+
+C51 COMPILER V6.14, COMPILATION OF MODULE ONE
+OBJECT MODULE PLACED IN one.OBJ
+COMPILER INVOKED BY: D:\PROGRAM FILES\CYGNAL\IDEFILES\C51\BIN\C51.EXE one.c DB OE
+
+stmt level    source
+
+   1          #include <stdio.h>
+   2          #include <math.h>
+   3          #include <c8051f020.h>
+   4          
+   5          //------------------------------------------------------------------------------------
+   6          // 16-bit SFR Definitions for 'F02x
+   7          //------------------------------------------------------------------------------------
+   8          
+   9          
+  10          sfr P2MDIN   = 0xF3;    // PORT 2 INPUT MODE REGISTER   
+  11          sfr TMR2CN   = 0xC8;    // TIMER 2 CONTROL               
+  12          sfr P0MDIN   = 0xF1;    // PORT 0 INPUT MODE REGISTER  
+  13          sfr P3MDIN   = 0xF4;    // PORT 3 INPUT MODE REGISTER  
+  14          sfr P0SKIP   = 0xD4;    // PORT 0 CROSSBAR SKIP
+  15          sfr P1SKIP   = 0xD5;    // PORT 1 CROSSBAR SKIP                                     */
+  16          sfr IT01CF   = 0xE4;    // INT0/INT1 CONFIGURATION                                         */
+  17          sfr AMX0N    = 0xBA;    // ADC0 MUX NEGATIVE CHANNEL SELECTION                      */
+  18          sfr AMX0P    = 0xBB;    // ADC0 MUX POSITIVE CHANNEL SELECTION
+  19          sfr TMR2RLL  = 0xCA;    // TIMER 2 RELOAD LOW                                       */
+  20          sfr TMR2RLH  = 0xCB;    // TIMER 2 RELOAD HIGH                                      */
+  21          sfr TMR2L    = 0xCC;    // TIMER 2 LOW BYTE                                         */
+  22          sfr TMR2H    = 0xCD;    // TIMER 2 HIGH BYTE 
+  23          sfr SMB0CF   = 0xC1;    // SMBUS CONFIGURATION        
+  24          sfr CLKSEL   = 0xA9;    // CLOCK SOURCE SELECT 
+  25            
+  26          sbit TF2L    = TMR2CN ^ 6; // TIMER 2 LOW BYTE OVERFLOW FLAG                        */
+  27          sbit TF2H    = TMR2CN ^ 7; // TIMER 2 HIGH BYTE OVERFLOW FLAG        
+  28                        
+  29          /////////////
+  30          //-----------------------------------------------------------------------------
+  31          // Global CONSTANTS
+  32          //-----------------------------------------------------------------------------
+  33          #define TIMER2_RATE     1000           // Timer 2 overflow rate in Hz
+  34          
+  35          #define SOAK_TIME          15          // Soak Time in Seconds
+  36          
+  37          //sbit	P3.1=P3^1;
+  38          
+  39          //void main (void)
+  40          //{
+  41          	char data dj;
+  42          	int  data dk;
+  43          	int	 data tdelay;
+  44          	int	 data acc;
+  45          
+  46          	char data 	marbuf;
+  47          	//char data	bufind=0x4e;
+  48          	int	 data  bufind [32]=0x2e;
+  49          	char data 	marbuf;
+  50          
+  51          
+  52          
+  53          
+  54          
+  55          
+C51 COMPILER V6.14  ONE                                                                    01/19/2007 10:31:55 PAGE 2   
+
+  56          //-----------------------------------------------------------------------------
+  57          // Function PROTOTYPES
+  58          //-----------------------------------------------------------------------------
+  59          void wait_one_second (void);
+  60          //void del_second(void);	
+  61          void del_second (unsigned int tdelay);
+  62          void wait_soak_time (unsigned char soak_time);
+  63          void write (int acc);
+  64          void read (int acc);
+  65          void loop ();
+  66          void ind();
+  67          void wwind();
+  68          
+  69          
+  70          
+  71          main ()
+  72          {
+  73   1       	SP=0x0e0;
+  74   1      	PCA0L=0;
+  75   1      	PCA0MD= 00000000;
+  76   1      	P0MDOUT=00000000;
+  77   1      	P1MDOUT=0xbf;//10111111;
+  78   1      	P2MDOUT=0x3f;//00111111;
+  79   1      	P2MDIN=0xff;//11111111;
+  80   1      	P3MDOUT =0x17;//00010111;
+  81   1      	P0MDIN=0xf2;//11110010;
+  82   1      	P3MDIN=0xff;//11111111;
+  83   1          P0SKIP=0x8d;//10001101;
+  84   1      	/////////////////////
+  85   1      	P1SKIP=0x0f;//00001111;
+  86   1          P1MDIN=0xf0;//11110000;
+  87   1      	XBR0= 0x05;//00000101;
+  88   1      	XBR1 =0x42;//01000010;
+  89   1      	IT01CF=00000000;
+  90   1       
+  91   1      	SMB0CF=0xc2;//11000010; 
+  92   1      	SCON0=0x10;                                   
+  93   1      	TMOD=0x42;//00100010;	//регистр режимов
+  94   1      	CKCON=0x30;//00110000;    //сист частота/12                 ; Установка таймера
+  95   1      	TH0=0x0f9;
+  96   1      	TL0=0x0f9; 
+  97   1      	EIE1=0x80;//10000000;
+  98   1      
+  99   1      	AMX0P=0x13;//00010011;
+ 100   1      	AMX0N=0x1f;//00011111;
+ 101   1      	ADC0CF=0xf8;//11111000;
+ 102   1      	ADC0CN=0x80;//10000000;
+ 103   1      	OSCXCN=0xe7;//11100111;
+ 104   1      //
+ 105   1      
+ 106   1      
+ 107   1      
+ 108   1      
+ 109   1      
+ 110   1      //gener:     mov a, oscxcn
+ 111   1      //           cjne a,#11100111b,gener
+ 112   1      
+ 113   1      	marbuf=OSCXCN;
+ 114   1      	while    (marbuf!=11100111){
+ 115   2      		marbuf=OSCXCN;
+ 116   2      }
+ 117   1         //CLKSEL=00000001;                    
+C51 COMPILER V6.14  ONE                                                                    01/19/2007 10:31:55 PAGE 3   
+
+ 118   1         //OSCICN=01000011; 
+ 119   1         TMR2RLL=0;
+ 120   1         TMR2RLH=0xd1;
+ 121   1         TMR2CN=00001100;
+ 122   1      	TMR2CN=TMR2CN&0xbf;  //tmr2cn.6=0
+ 123   1      	TMR3L=0xcc;
+ 124   1      	TMR3H=0x0f8;
+ 125   1      	TMR3RLL=0xcc;
+ 126   1      	TMR3RLH=0xf8;
+ 127   1      	TMR3CN=00000100;
+ 128   1          TCON=TCON|01000000;  //TCON.6=1 регистр управления
+ 129   1      	TCON=TCON|00010000;//	 tcon.4=1
+ 130   1      
+ 131   1      //	VDM0CN=0x80;//упр монитором питания
+ 132   1      	RSTSRC=02	;//источники сброса 
+ 133   1      
+ 134   1      	IE=10000000	;//Снятие блокировки всех прерываний
+ 135   1           
+ 136   1      	 SP=  0xe0;    
+ 137   1          IP=IP|00010000;//IP.4=1
+ 138   1      	TL1=0;//Занесение константы в младший байт таймера 1
+ 139   1          TH1=0xd0;//Занесение константы в старший байт таймера 1
+ 140   1      	PCA0CPH2=0x80;
+ 141   1      	PCA0CPL2=0x80;
+ 142   1          PCA0MD=00000101;
+ 143   1      	PCA0CPM0=00100000;
+ 144   1      	PCA0CPM1=00100000;
+ 145   1      	PCA0CPM2=00000011;
+ 146   1      	CPT1CN=10000000;
+ 147   1      	CPT0CN=10000000;
+ 148   1      	REF0CN=00000010;
+ 149   1      	ADC0H=0;
+ 150   1      	ADC0L=0;
+ 151   1      
+ 152   1      ;;;;;;;;;;;;;;;;;
+ 153   1      //start: 
+ 154   1           
+ 155   1      	//////////////////////
+ 156   1      //инициализация индикатора
+ 157   1      	P3=P3&0x10;//	  clr P3.4
+ 158   1      	//				call z_100         ;строб
+ 159   1      	P3=P3|0x10;//	setb P3.4
+ 160   1      
+ 161   1      	P3=P3&0xF7;//   clr P3.3
+ 162   1      
+ 163   1      	 del_second ();//(unsigned 0x40);//          call z_15         ;задержка 15 мс
+*** WARNING C209 IN LINE 163 OF ONE.C: '_del_second': too few actual parameters
+ 164   1      //          clr c          ;установка регистра команд
+ 165   1          acc=0x30;//     mov A,#30h     ;устанавливаем разрядность шины
+ 166   1      	write();//		call x1              ;переход к записи
+*** WARNING C209 IN LINE 166 OF ONE.C: '_write': too few actual parameters
+ 167   1      //					call z_15         ;задержка 15 мс
+ 168   1      	write();//		call x1               ;переход к записи
+*** WARNING C209 IN LINE 168 OF ONE.C: '_write': too few actual parameters
+ 169   1      //					call z_100        ;задержка 100 мкс
+ 170   1               
+ 171   1      	write();//		call x1               ;запись
+*** WARNING C209 IN LINE 171 OF ONE.C: '_write': too few actual parameters
+ 172   1               
+ 173   1      	loop();//		call loop            ;проверка флага BF
+ 174   1      
+ 175   1          acc=0x38;//      mov A,#38h     ;устанавливаем режим развертки изображения в две строки
+C51 COMPILER V6.14  ONE                                                                    01/19/2007 10:31:55 PAGE 4   
+
+ 176   1           write();//   	call x1               ;запись
+*** WARNING C209 IN LINE 176 OF ONE.C: '_write': too few actual parameters
+ 177   1           loop();//   	call loop                     ;проверка флага BF
+ 178   1      
+ 179   1           acc=0x06;//   	mov A,#06h     ;устанавливаем режим автоматического перемещения курсора слева-направо 
+             -после вывода каждого символа 
+ 180   1           write();//    	call x1               ;запись
+*** WARNING C209 IN LINE 180 OF ONE.C: '_write': too few actual parameters
+ 181   1      	 loop();//		call loop                     ;проверка флага BF 
+ 182   1      
+ 183   1           acc=0x02;//     mov A,#02h     ;начало строки адресуется в начале DDRAM
+ 184   1      	write();//				call x1               ;запись
+*** WARNING C209 IN LINE 184 OF ONE.C: '_write': too few actual parameters
+ 185   1      	loop();//				call loop                     ;проверка флага BF
+ 186   1      
+ 187   1            acc=0x0c;//    mov A,#0Ch     ;включаем отбражение на экране ЖКИ-модуля, без отображения курсоров
+ 188   1      	write();//				call x1               ;запись
+*** WARNING C209 IN LINE 188 OF ONE.C: '_write': too few actual parameters
+ 189   1      	loop();//				call loop                     ;проверка флага BF
+ 190   1      
+ 191   1      
+ 192   1      
+ 193   1      
+ 194   1      /////////          
+ 195   1      	ind();		
+ 196   1      ////////////////////////////////	  
+ 197   1        				
+ 198   1      
+ 199   1      /////////
+ 200   1      	printf("hello\n");
+ 201   1      
+ 202   1      	P0=0x20;
+ 203   1      	tdelay=2;
+ 204   1      	del_second();
+*** WARNING C209 IN LINE 204 OF ONE.C: '_del_second': too few actual parameters
+ 205   1      	acc=0x20;
+ 206   1      	write ();
+*** WARNING C209 IN LINE 206 OF ONE.C: '_write': too few actual parameters
+ 207   1      	read();
+*** WARNING C209 IN LINE 207 OF ONE.C: '_read': too few actual parameters
+ 208   1      
+ 209   1      
+ 210   1      	bufind[0]=0x66;
+ 211   1      	marbuf=0x0a;
+ 212   1      //	loop();
+ 213   1      }
+ 214          
+ 215          //-----------------------------------------------------------------------------
+ 216          // Support Subroutines
+ 217          //-----------------------------------------------------------------------------
+ 218          
+ 219          //-----------------------------------------------------------------------------
+ 220          // wait_soak_time
+ 221          //-----------------------------------------------------------------------------
+ 222          //
+ 223          // This routine waits for the number of seconds indicated in the constant
+ 224          // <SOAK_TIME>.
+ 225          // 
+ 226          void wait_soak_time (unsigned char soak_time)
+ 227          {
+ 228   1         unsigned char i;
+ 229   1      
+C51 COMPILER V6.14  ONE                                                                    01/19/2007 10:31:55 PAGE 5   
+
+ 230   1         for( i = soak_time; i != 0; i--) {
+ 231   2            wait_one_second();
+ 232   2            printf ("Soaking...%d\n", (int) i);
+ 233   2         }
+ 234   1      }
+ 235           //-----------------------------------------------------------------------------
+ 236          // wait_one_second
+ 237          //-----------------------------------------------------------------------------
+ 238          //
+ 239          // This routine uses timer 2 to insert a delay of approximately one second.
+ 240          // Timer 2 overflows <TIMER2_RATE> times per second
+ 241          //
+ 242          void wait_one_second (void)
+ 243          {
+ 244   1         unsigned int count;
+ 245   1         TF2H = 0;                           // Clear Timer2 overflow flag
+ 246   1         TR2 = 1;                            // Start Timer2
+ 247   1         
+ 248   1         for (count = TIMER2_RATE; count != 0; count--) {
+ 249   2            while (!TF2H);                   // wait for overflow
+ 250   2            TF2H = 0;                        // clear overflow indicator
+ 251   2         }
+ 252   1      
+ 253   1         TR2 = 0;                            // Stop Timer2
+ 254   1      }
+ 255          //задержка 2 мкс
+ 256          void del_2mks_second (void)
+ 257          {
+ 258   1      	unsigned int count;
+ 259   1      	for (count = 4; count != 0; count--) {
+ 260   2      	}
+ 261   1      }
+ 262          
+ 263          //задержка 34 мкс(z_5)
+ 264          void del_34mks_second (void)
+ 265          {
+ 266   1      	unsigned int count;
+ 267   1      	for (count = 0x8b; count != 0; count--) {
+ 268   2      	}
+ 269   1      }
+ 270          //пп записи
+ 271          void write (int acc)	//запись(X1)
+ 272          {
+ 273   1          P3= P3|0x02; //p3.1=0   mov P3.1,c        
+ 274   1          P2=acc;
+ 275   1      	P3=P3|0x08;	  //P3.3=1
+ 276   1      				
+ 277   1      	del_34mks_second();// задержка   call z_5
+ 278   1      					
+ 279   1      	P3=P3&0xf7;//  P3.3=0
+ 280   1      	P2=0xFF;
+ 281   1      }
+ 282          
+ 283          // пп чтение     x2  
+ 284          void read (int acc)
+ 285          {
+ 286   1                P3= P3&0xfd; //p3.1=0  mov P3.1,c        
+ 287   1                P3=P3|0x0c;	//setb P3.2,	  setb P3.3
+ 288   1      		  del_2mks_second();//			call z_2
+ 289   1      		  acc=P2;    //  mov A,P2
+ 290   1      		  P3=P3&0xf3; // clr P3.3  clr P3.2
+ 291   1      		  
+C51 COMPILER V6.14  ONE                                                                    01/19/2007 10:31:55 PAGE 6   
+
+ 292   1      }
+ 293          
+ 294          void loop(void)
+ 295          {     read();	//call x2       ;ожидание флага готовности
+*** WARNING C209 IN LINE 295 OF ONE.C: '_read': too few actual parameters
+ 296   1      	  acc=acc|0x80; // jb ACC.7,loop     ;переход на чтение, если бит А(7)=1
+ 297   1      			     //        ;возврат, если бит А(7)<>1
+ 298   1      		
+ 299   1      while	 (acc=0x80){
+*** WARNING C276 IN LINE 299 OF ONE.C: constant in condition expression
+ 300   2      		acc=acc|0x80;
+ 301   2      		 }				 
+ 302   1      }
+ 303          
+ 304          //задержка 100 мкс
+ 305          void del_second (unsigned int tdelay)
+ 306          {
+ 307   1      	unsigned int count;
+ 308   1      	for (count = tdelay; count != 0; count--) {
+ 309   2      	}
+ 310   1      }
+ 311          
+ 312          void ind()
+ 313          {	
+ 314   1      	
+ 315   1      				
+ 316   1      //      		mov R0,#2Eh       ;загрузка счетчика
+ 317   1      
+ 318   1      //M2:
+ 319   1      	    	loop();//call	loop
+ 320   1      //					setb c         ;установка регистра данных
+ 321   1                
+ 322   1      //					mov A,@R0      ;пересылаем содержимое R0 в аккумулятор
+ 323   1      			write();//          call x1               ;запись
+*** WARNING C209 IN LINE 323 OF ONE.C: '_write': too few actual parameters
+ 324   1      //          inc R0          ;инкремент счетчика
+ 325   1      		
+ 326   1      //				  cjne R0,#3Eh,M2  ;сравнение аккумулятора с константой и переход, если не =0  
+ 327   1      
+ 328   1               	
+ 329   1      
+ 330   1      //f5:		   
+ 331   1      //          clr c          ;установка регистра команд
+ 332   1      			loop();//		  	  call loop                     ;проверка флага BF
+ 333   1      //  			  mov A,#0C0h 
+ 334   1      			write();//        	call x1               ;запись
+*** WARNING C209 IN LINE 334 OF ONE.C: '_write': too few actual parameters
+ 335   1      			loop();//					call loop                     ;проверка флага BF
+ 336   1      
+ 337   1      //  				mov R0,#3Eh      ;загрузка счетчика
+ 338   1      
+ 339   1      //M3:
+ 340   1      			loop();//	  	call	loop                    ;проверка флага BF
+ 341   1      //        	setb c        ;установка регистра данных
+ 342   1      //        	mov A,@R0     ;пересылаем содержимое R0 в аккумулятор
+ 343   1      			write();//         	call x1               ;запись
+*** WARNING C209 IN LINE 343 OF ONE.C: '_write': too few actual parameters
+ 344   1      //         	inc R0          ;инкремент счетчика
+ 345   1      			
+ 346   1      //					cjne R0,#4Eh,M3  ;сравнение аккумулятора с константой и переход, если не =0
+ 347   1      			
+ 348   1      }//					ret
+C51 COMPILER V6.14  ONE                                                                    01/19/2007 10:31:55 PAGE 7   
+
+ 349          
+ 350          
+ 351          
+ 352          //-----------------------------------------------------------------------------
+ 353          // Initialization Subroutines
+ 354          //-----------------------------------------------------------------------------
+ 355          
+ 356          //-----------------------------------------------------------------------------
+ 357          // SYSCLK_Init
+ 358          //-----------------------------------------------------------------------------
+ 359          //
+ 360          // This routine initializes the system clock to use an 22.1184MHz crystal
+ 361          // as its clock source.
+ 362          //
+ 363          void SYSCLK_Init (void)
+ 364          {
+ 365   1         int i;                              // delay counter
+ 366   1      
+ 367   1         OSCXCN = 0x67;                      // start external oscillator with
+ 368   1                                             // 22.1184MHz crystal
+ 369   1      
+ 370   1         for (i=0; i < 256; i++) ;           // XTLVLD blanking interval (>1ms)
+ 371   1      
+ 372   1         while (!(OSCXCN & 0x80)) ;          // Wait for crystal osc. to settle
+ 373   1      
+ 374   1         OSCICN = 0x88;                      // select external oscillator as SYSCLK
+ 375   1                                             // source and enable missing clock
+ 376   1                                             // detector
+ 377   1      }
+ 378          			 
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    518    ----
+   CONSTANT SIZE    =     21    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     72       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  16 WARNING(S),  0 ERROR(S)

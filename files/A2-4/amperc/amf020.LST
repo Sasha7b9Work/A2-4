@@ -1,0 +1,816 @@
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 1   
+
+
+C51 COMPILER V6.03, COMPILATION OF MODULE AMF020
+OBJECT MODULE PLACED IN amf020.OBJ
+COMPILER INVOKED BY: D:\KEIL\C51\BIN\C51.EXE amf020.c DB OE
+
+stmt level    source
+
+   1          #include <stdio.h>
+   2          #include <math.h>
+   3          #include <c8051f020.h>
+   4          #include<stdlib.h>
+   5          
+   6          //------------------------------------------------------------------------------------
+   7          // 16-bit SFR Definitions for 'F02x
+   8          //------------------------------------------------------------------------------------
+   9          
+  10          
+  11          sfr P2MDIN   = 0xf3;    // PORT 2 INPUT MODE REGISTER   
+  12          sfr TMR2CN   = 0xc8;    // TIMER 2 CONTROL               
+  13          sfr P0MDIN   = 0xF1;    // PORT 0 INPUT MODE REGISTER  
+  14          sfr P3MDIN   = 0xF4;    // PORT 3 INPUT MODE REGISTER  
+  15          sfr P0SKIP   = 0xD4;    // PORT 0 CROSSBAR SKIP
+  16          sfr P1SKIP   = 0xD5;    // PORT 1 CROSSBAR SKIP                                     */
+  17          sfr IT01CF   = 0xE4;    // INT0/INT1 CONFIGURATION                                         */
+  18          sfr AMX0N    = 0xBA;    // ADC0 MUX NEGATIVE CHANNEL SELECTION                      */
+  19          sfr AMX0P    = 0xBB;    // ADC0 MUX POSITIVE CHANNEL SELECTION
+  20          sfr TMR2RLL  = 0xCA;    // TIMER 2 RELOAD LOW                                       */
+  21          sfr TMR2RLH  = 0xCB;    // TIMER 2 RELOAD HIGH                                      */
+  22          sfr TMR2L    = 0xCC;    // TIMER 2 LOW BYTE                                         */
+  23          sfr TMR2H    = 0xCD;    // TIMER 2 HIGH BYTE 
+  24          sfr SMB0CF   = 0xC1;    // SMBUS CONFIGURATION        
+  25          sfr CLKSEL   = 0xA9;    // CLOCK SOURCE SELECT 
+  26            
+  27          sbit TF2L    = TMR2CN ^ 6; // TIMER 2 LOW BYTE OVERFLOW FLAG                        */
+  28          sbit TF2H    = TMR2CN ^ 7; // TIMER 2 HIGH BYTE OVERFLOW FLAG        
+  29          sfr VDM0CN   = 0xFF;    // VDD MONITOR CONTROL                   
+  30          /////////////
+  31           sbit  BIT6p1=P1^6;
+  32           sbit  BIT7p1=P1^7;
+  33           sbit  BITacp=P1^6	;//бит acp
+  34           sbit  BIT5p1=P1^5;
+  35           sbit  Rdat=P1^6;//
+  36          
+  37          
+  38          bit  BITzn;		//бит знака	
+  39          
+  40          //-----------------------------------------------------------------------------
+  41          // Global CONSTANTS
+  42          //-----------------------------------------------------------------------------
+  43          #define TIMER2_RATE     1000           // Timer 2 overflow rate in Hz
+  44          
+  45          #define SOAK_TIME          15          // Soak Time in Seconds
+  46          //	char data lated[]_at_ 0x7f;
+  47          //	char idata firsti[]_at_ 0x80;
+  48          // 	char idata latei[]_at_ 0xff;
+  49          
+  50          	int		j;
+  51          	int		a;
+  52          	unsigned char     save;
+  53          	char portread;
+  54          	float rez;//double rez;
+  55          	char data dj;
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 2   
+
+  56          	char  data dk;
+  57          	int	 data tdelay;
+  58          	int	 data acc;
+  59          	char data PP;
+  60          	char data 	marbuf;
+  61          	char data	address;
+  62          	
+  63          	char data 	marbuf;
+  64          
+  65          	char data  bufind [32]_at_ 0x2e;
+  66          	unsigned data	wriacp;
+  67          	unsigned char	rezacp;
+  68          	char data R3R4R5[3];//3байта
+  69          	unsigned  long ccc;//3байта
+  70          	int ddd;
+  71          
+  72          //	char data late[]_at_ 0x7f;
+  73          
+  74           char buffer [10];
+  75            int n, a=0xfe, b=3;
+  76            unsigned long  k;
+  77          //XRAM внешнее озу
+  78          	 float   xdata SUMM;//_at_ 0x0000;	
+  79          	 float   xdata MASS[2];//[2]//_at_ 0x0003;
+  80          	 float  xdata MAS1[3]_at_ 0x0009;
+  81          	 float   xdata MAS2[4]_at_ 0x000f;
+  82          ////////////////////////////
+  83            data int begin _at_ 0x00;
+  84            char data dass _at_ 0x4b;
+  85          
+  86           char idata begi _at_ 0x80;
+  87           char idata iasse _at_ 0xfe;
+  88          
+  89          char pdata pass _at_ 0x80;
+  90          char pdata ppass _at_ 0xff;
+  91          char pdata pass1 _at_ 0x00;
+  92          
+  93           unsigned char xdata rr[11]_at_ 0x80;
+  94           unsigned short xdata meagement[10]_at_ 0x8000;
+  95           //char xdata mass[1]_at_ 0x000b;
+  96          // char xdata bass[1]_at_ 0x000c;
+  97          // xdata int begx[1]_at_ 0x0000;
+  98          //
+  99          //-----------------------------------------------------------------------------
+ 100          // Function PROTOTYPES
+ 101          //-----------------------------------------------------------------------------
+ 102          void wait_one_second (void);
+ 103          //void del_second(void);	
+ 104          void del_second (int tdelay);
+ 105          //void wait_soak_time (unsigned char soak_time);
+ 106          void write ();
+ 107          void read ();
+ 108          void loop ();
+ 109          void ind();
+ 110          void wwind();
+ 111          void d100mk_second();
+ 112          void d15ms_second();
+ 113          void del_2mks_second();
+ 114          void del_34mks_second();
+ 115          void tim2();
+ 116          void tim();
+ 117          void  chtadc();	
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 3   
+
+ 118          void  zapadc();
+ 119          void real();
+ 120          void zreal();
+ 121          void rrr();
+ 122          
+ 123          
+ 124          
+ 125          main ()
+ 126          {
+ 127   1       	SP=0x0e0;
+ 128   1      	PCA0L=0x00;
+ 129   1      	PCA0MD= 0x00;
+ 130   1      	P0MDOUT=0x1f;
+ 131   1      	P1MDOUT=0x8f;
+ 132   1      	P2MDOUT=0x00;
+ 133   1      	//P2MDIN=0xff;//11111111;
+ 134   1      	//P3MDOUT =0xff;
+ 135   1      	P74OUT =0xff;
+ 136   1      	REF0CN=0x03;
+ 137   1      	
+ 138   1      	XBR0= 0x14;
+ 139   1      	XBR1 =0x00;
+ 140   1      	XBR2=0x00;
+ 141   1       
+ 142   1      	WDTCN=0xde;	 //запрет работы WDT
+ 143   1      	WDTCN=0xad;                                   
+ 144   1      	TMOD=0x22;	//регистр режимов
+ 145   1      	CKCON=0x30; //сист частота/12     
+ 146   1      	TH0=0xf9;//	; Установка таймера
+ 147   1      	TL0=0xf9; 
+ 148   1      	EIE1=0x80;
+ 149   1      
+ 150   1      	DAC0CN=0x80;
+ 151   1      	OSCXCN=0x67;
+ 152   1      
+ 153   1      	if    (OSCXCN!=0xe7){
+ 154   2      			;
+ 155   2      }
+ 156   1                             
+ 157   1        	OSCICN=0x84;
+ 158   1          TMR2RLL=0;
+ 159   1          TMR2RLH=0xd1;
+ 160   1          TCON=TCON|0x40;  //TCON.6=1 регистр управления
+ 161   1      	TCON=TCON|0x10;//	 tcon.4=1
+ 162   1      
+ 163   1      	RSTSRC=00	;//источники сброса 
+ 164   1      
+ 165   1      	//IE=0x00;//10000000	;//Снятие блокировки всех прерываний
+ 166   1           XBR2=0x40;
+ 167   1      //обнулить озу	
+ 168   1      	 for (j=0;j<=255;j++){
+ 169   2      	 begin=0;
+ 170   2      	 a=&begin;
+ 171   2      	 a=a++;
+ 172   2         	 }
+ 173   1      	 for(j=0;j<=1;j++){
+ 174   2      	 //	SUMM[j]=0;
+ 175   2      	 }
+ 176   1      ;;;;;;;;;;;;;;;;;
+ 177   1      //start:
+ 178   1      //	MAS0[0]=0; 
+ 179   1      //    MAS0[1]=0;
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 4   
+
+ 180   1      //	SUMM[0]=0;
+ 181   1      	//////////////////////
+ 182   1      //инициализация индикатора
+ 183   1      
+ 184   1      //start:
+ 185   1      	P3=P3&0xef;//	  clr P3.4
+ 186   1      	
+ 187   1      	d100mk_second();	//		call z_100         ;строб
+ 188   1      	P3=P3|0x10;//	setb P3.4
+ 189   1      
+ 190   1      	P3=P3&0xF3;//   clr P3.3,p3.2
+ 191   1      
+ 192   1      	 d15ms_second();//  call z_15         ;задержка 15 мс
+ 193   1      //          clr c          ;установка регистра команд
+ 194   1          acc=0x30;//     mov A,#30h     ;устанавливаем разрядность шины
+ 195   1      	write();//		call x1              ;переход к записи
+ 196   1      	d15ms_second();//	call z_15         ;задержка 15 мс
+ 197   1      	write();//		call x1               ;переход к записи
+ 198   1      	d100mk_second();//	call z_100        ;задержка 100 мкс
+ 199   1               
+ 200   1      	write();//		call x1               ;запись
+ 201   1           //////////////
+ 202   1      	// goto start ;   
+ 203   1      	loop();//		call loop            ;проверка флага BF
+ 204   1      	//goto start
+ 205   1          acc=0x38;//      mov A,#38h     ;устанавливаем режим развертки изображения в две строки
+ 206   1           write();//   	call x1               ;запись
+ 207   1           loop();//   	call loop                     ;проверка флага BF
+ 208   1      
+ 209   1           acc=0x06;//   	mov A,#06h     ;устанавливаем режим автоматического перемещения курсора слева-направо 
+             -после вывода каждого символа 
+ 210   1           write();//    	call x1               ;запись
+ 211   1      	 loop();//		call loop                     ;проверка флага BF 
+ 212   1      
+ 213   1           acc=0x02;//     mov A,#02h     ;начало строки адресуется в начале DDRAM
+ 214   1      	write();//				call x1               ;запись
+ 215   1      	loop();//				call loop                     ;проверка флага BF
+ 216   1      
+ 217   1            acc=0x0c;//    mov A,#0Ch     ;включаем отбражение на экране ЖКИ-модуля, без отображения курсоров
+ 218   1      	write();//				call x1               ;запись
+ 219   1      	loop();//				call loop                     ;проверка флага BF
+ 220   1      	acc=0x01;
+ 221   1      	write();//
+ 222   1      
+ 223   1      	for (j=0;j<33;j++){
+ 224   2      		bufind[j]=0x21;		
+ 225   2      	}
+ 226   1      
+ 227   1      	ind();
+ 228   1      	wait_one_second ();
+ 229   1      	wait_one_second ();
+ 230   1      
+ 231   1      	/////////////////////////////
+ 232   1      eee:
+ 233   1      	for (j=0;j<=5;j++){
+ 234   2      		bufind[j]=0x2a;//2d;		
+ 235   2      	}	
+ 236   1      	for (j=6;j<12;j++){
+ 237   2      		bufind[j]=0x30;		
+ 238   2      	}
+ 239   1      
+ 240   1      	for (j=12;j<33;j++){
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 5   
+
+ 241   2      		bufind[j]=0x2a;//2d;		
+ 242   2      	}
+ 243   1      	ind();
+ 244   1      	///////////
+ 245   1      wriacp=0x67;
+ 246   1      for (dj=0;dj<8;dj++){
+ 247   2      	wriacp=wriacp>>1;
+ 248   2      }
+ 249   1      /////////////////////////////////
+ 250   1      ////////////////////////////////
+ 251   1      //инициализация ACP
+ 252   1      	for (j=0;j<0xff;j++){
+ 253   2      			;		
+ 254   2      	}
+ 255   1      
+ 256   1      	while	(BIT5p1!=1){
+ 257   2      	;
+ 258   2      	}
+ 259   1      
+ 260   1      	while	(BIT5p1!=0){
+ 261   2      	;
+ 262   2      	}
+ 263   1      	tim();
+ 264   1      
+ 265   1      	wriacp=0x64;//запись INSR
+ 266   1      	zreal();
+ 267   1      	tim();
+ 268   1      	wriacp=0x60;
+ 269   1      	zreal();	//старший байт УС
+ 270   1      	wriacp=0x20;
+ 271   1      	zreal();	//второй байт УС
+ 272   1      	wriacp=0x0f;//07;//03;//00;
+ 273   1      	zreal();	//первый байт УС
+ 274   1      	wriacp=0x3c;//a0;//0c;//4d;
+ 275   1      	zreal();	//младший байт УС
+ 276   1      
+ 277   1      //////////////////////////////////
+ 278   1      //измерение ACP
+ 279   1      
+ 280   1      hhh:
+ 281   1      	while	(BIT5p1!=1){
+ 282   2      	;
+ 283   2      	}
+ 284   1      
+ 285   1      	while	(BIT5p1!=0){
+ 286   2      	;
+ 287   2      	}
+ 288   1      	tim();
+ 289   1      	wriacp=0xc0;//запись INSR
+ 290   1      	zreal();
+ 291   1      	tim();
+ 292   1      	
+ 293   1      	rrr();//real();//чтение acp
+ 294   1      	R3R4R5[0]=rezacp;
+ 295   1      	rrr();//чтение acp
+ 296   1      	R3R4R5[1]=rezacp;
+ 297   1      	rrr();//чтение acp
+ 298   1      	R3R4R5[2]=rezacp;
+ 299   1      ///////////////////////////////////
+ 300   1      	dj=R3R4R5[0];//&0x80;
+ 301   1      	dj=dj&0x80;
+ 302   1      	if (dj!=0x00){
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 6   
+
+ 303   2      		R3R4R5[0]=R3R4R5[0]&0x7f;//bit7=1 знак "+"
+ 304   2      		bufind[6]=0x2b;//bufind[5]=0x2b;//bufind[4]=0x2b;	
+ 305   2      	}
+ 306   1      	else
+ 307   1      		{
+ 308   2      		
+ 309   2      		R3R4R5[0]=~R3R4R5[0];//bit7=0 знак "-"
+ 310   2      		R3R4R5[1]=~R3R4R5[1];
+ 311   2      		R3R4R5[2]=~R3R4R5[2];
+ 312   2      		R3R4R5[0]=R3R4R5[0]&0x7f;
+ 313   2      		bufind[6]=0x2d;//bufind[5]=0x2d;//bufind[4]=0x2d;
+ 314   2      	}
+ 315   1      ///////////////////////////////////
+ 316   1      //преобразование и выдача на индикатор
+ 317   1      
+ 318   1       
+ 319   1      	k=0;
+ 320   1      	ccc=0x00;
+ 321   1       
+ 322   1       	ccc=R3R4R5[0];
+ 323   1      	ccc=ccc&0x0000ff;
+ 324   1       	ccc=ccc<<16;
+ 325   1       	k=ccc;
+ 326   1      
+ 327   1      	ccc=0x00;
+ 328   1       	ccc=ccc+R3R4R5[1];
+ 329   1      	ccc=ccc&0x0000ff;
+ 330   1       	ccc=ccc<<8;
+ 331   1      	k=k|ccc;
+ 332   1      
+ 333   1      	ccc=0x00;
+ 334   1      	ccc=ccc+R3R4R5[2];
+ 335   1      	ccc=ccc&0x0000ff;
+ 336   1      	k=k|ccc;
+ 337   1      	////////////////
+ 338   1      	k=k>>4;//убираем 4 мл разряда
+ 339   1      
+ 340   1      
+ 341   1      	
+ 342   1      	n=sprintf(buffer,"%ld",k);	//k->buffer
+ 343   1      //	n=sprintf(fbuffer,"%8.2f",k);
+ 344   1      
+ 345   1      	//dj=10;
+ 346   1      	
+ 347   1      	rez=atof(buffer);
+ 348   1      //	rez=rez/3;
+ 349   1      //	rez=rez*3;
+ 350   1      //	rez=rez*0.1;
+ 351   1      // скользящий массив из 2х значений
+ 352   1      //	MASS[1]=MASS[0];  //MASS[0]->MASS[1]
+ 353   1      //	MASS[0]=rez;	  //рез -> MAS0[0]
+ 354   1      
+ 355   1      //	SUMM=MASS[0]+ MASS[1] ;
+ 356   1      //	SUMM=SUMM/2.0;
+ 357   1      
+ 358   1      //buffer->bufind
+ 359   1      //преобр рез ACP в коды индикатора
+ 360   1      //в послед ячейке буфера всегда в конце 0
+ 361   1          	a=0;
+ 362   1      	while (buffer[a]!=0){
+ 363   2      		a++;
+ 364   2      		//ddd=buffer[a];
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 7   
+
+ 365   2      	}
+ 366   1      	a--;
+ 367   1      	for (j=12;j>6;j--){//5;j--){//4;j--){
+ 368   2      		bufind[j]=buffer[a];
+ 369   2      		a--;
+ 370   2      	
+ 371   2      	}
+ 372   1      ////////////////
+ 373   1      		for (j=7;j<12;j++){//j=6//j=5
+ 374   2      			if 	(bufind[j]<0x30)
+ 375   2      				bufind[j]=0x30;
+ 376   2      				//////////
+ 377   2      				if 	(bufind[j]>0x39)
+ 378   2      					bufind[j]=0x30;
+ 379   2      	}
+ 380   1      
+ 381   1      	ind();
+ 382   1      goto hhh;
+ 383   1      ////////
+ 384   1      
+ 385   1      	goto eee;
+ 386   1      	
+ 387   1      	
+ 388   1      	
+ 389   1      	
+ 390   1      	
+ 391   1      	
+ 392   1      	
+ 393   1      	
+ 394   1      		
+ 395   1      
+ 396   1      }
+ 397          
+ 398          //-----------------------------------------------------------------------------
+ 399          // Support Subroutines
+ 400          //-----------------------------------------------------------------------------
+ 401          //пп записи
+ 402          void write ()	//запись команд (X1)
+ 403          {
+ 404   1          P3= P3&0xfd; //p3.1=0   mov P3.1,c        
+ 405   1          P2=acc;
+ 406   1      	P3=P3|0x08;	  //P3.3=1
+ 407   1      				
+ 408   1      	del_34mks_second();// задержка   call z_5
+ 409   1      					
+ 410   1      	P3=P3&0xf7;//  P3.3=0
+ 411   1      	P2=0xFF;
+ 412   1      }
+ 413          
+ 414          //пп записи данных 
+ 415          void writeD ()	//запись(X1)
+ 416          {
+ 417   1          P3= P3|0x02; //p3.1=1   mov P3.1,c        
+ 418   1          P2=acc;
+ 419   1      	P3=P3|0x08;	  //P3.3=1
+ 420   1      				
+ 421   1      	del_34mks_second();// задержка   call z_5
+ 422   1      					
+ 423   1      	P3=P3&0xf7;//  P3.3=0
+ 424   1      	P2=0xFF;
+ 425   1      }
+ 426          
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 8   
+
+ 427          
+ 428          
+ 429          
+ 430          // пп чтение     x2  
+ 431          void read ()
+ 432          {
+ 433   1                P3= P3&0xfd; //p3.1=0  mov P3.1,c        
+ 434   1                P3=P3|0x0c;	//setb P3.2,	  setb P3.3
+ 435   1      		  del_2mks_second();//			call z_2
+ 436   1      		  acc=P2;    //  mov A,P2
+ 437   1      		  P3=P3&0xf3; // clr P3.3  clr P3.2
+ 438   1      		  
+ 439   1      		  
+ 440   1      }
+ 441          
+ 442           //-----------------------------------------------------------------------------
+ 443          // wait_one_second
+ 444          //-----------------------------------------------------------------------------
+ 445          //
+ 446          // This routine uses timer 2 to insert a delay of approximately one second.
+ 447          // Timer 2 overflows <TIMER2_RATE> times per second
+ 448          //
+ 449          void wait_one_second (void)
+ 450          {
+ 451   1         unsigned int count;
+ 452   1         TF2H = 0;                           // Clear Timer2 overflow flag
+ 453   1         TR2 = 1;                            // Start Timer2
+ 454   1         
+ 455   1         for (count = TIMER2_RATE; count != 0; count--) {
+ 456   2            while (!TF2H);                   // wait for overflow
+ 457   2            TF2H = 0;                        // clear overflow indicator
+ 458   2         }
+ 459   1      
+ 460   1         TR2 = 0;                            // Stop Timer2
+ 461   1      }
+ 462          //задержка 2 мкс
+ 463          void del_2mks_second (void)
+ 464          {
+ 465   1      	unsigned int count;
+ 466   1      	for (count = 4; count != 0; count--) {
+ 467   2      	;
+ 468   2      	}
+ 469   1      }
+ 470          
+ 471          //задержка 34 мкс(z_5)!!!!!!!!!!!!!
+ 472          void del_34mks_second (void)
+ 473          {
+ 474   1      	unsigned int count;
+ 475   1      	for (count = 0x2e; count != 0; count--) {
+ 476   2      	;
+ 477   2      	}
+ 478   1      }
+ 479          
+ 480          //задержка 15 мс(z_15)!!!!!!!!!!!!!1
+ 481          void d15ms_second (void)
+ 482          {
+ 483   1      	 int count;
+ 484   1      	int hcount;
+ 485   1      
+ 486   1      	for (count = 0xed; count != 0; count--) 
+ 487   1      		for (hcount=0x50;hcount!=0;hcount--)
+ 488   1      			;
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 9   
+
+ 489   1      }
+ 490          
+ 491          //задержка 100mkc !!!!!!!!!!!!!!!!!
+ 492          void d100mk_second (void)
+ 493          {
+ 494   1      	 int chee;
+ 495   1      	int cheet;
+ 496   1      
+ 497   1      	for (chee = 0x24; chee != 0; chee--) 
+ 498   1      		for (cheet=0x02;cheet!=0;cheet--)
+ 499   1      			;
+ 500   1      }
+ 501          
+ 502          
+ 503          
+ 504          
+ 505          //проверка флага BF
+ 506          void loop(void)
+ 507          {     read();	//call x2       ;ожидание флага готовности
+ 508   1      	   // jb ACC.7,loop     ;переход на чтение, если бит А(7)=1
+ 509   1      			     //        ;возврат, если бит А(7)<>1
+ 510   1      		
+ 511   1      while	 (acc!=0){
+ 512   2      		read();	//call x2       ;ожидание флага готовности
+ 513   2      		acc=acc &0x80;
+ 514   2      		 }				 
+ 515   1      }
+ 516          
+ 517          
+ 518          
+ 519          //пп выдачи на индикатор буфера 2e..4e
+ 520          void ind()
+ 521          {	
+ 522   1      	int		i;
+ 523   1      
+ 524   1      	loop();//call	loop
+ 525   1      	acc=0x80;//установка адреса
+ 526   1          write();
+ 527   1      
+ 528   1      	for (i=0;i<17;i++){
+ 529   2      		loop();
+ 530   2      		acc=bufind[i];//	mov A,@R0      ;пересылаем содержимое R0 в аккумулятор
+ 531   2      		writeD();//          call x1               ;запись
+ 532   2      
+ 533   2      	}
+ 534   1           
+ 535   1      	loop();//		  	  call loop                     ;проверка флага BF
+ 536   1      	acc=0xc0;//    mov A,#0C0h 
+ 537   1      	write();//        	call x1               ;запись
+ 538   1      			    	
+ 539   1      
+ 540   1      	for (i=17;i<33;i++){
+ 541   2      		   
+ 542   2      //          clr c          ;установка регистра команд
+ 543   2      		loop();//			call loop                     ;проверка флага BF
+ 544   2      
+ 545   2      		acc=bufind[i];// 	mov A,@R0     ;пересылаем содержимое R0 в аккумулятор
+ 546   2      		writeD();//         	call x1               ;запись
+ 547   2      
+ 548   2      
+ 549   2      	}		
+ 550   1      }
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 10  
+
+ 551          
+ 552          
+ 553          //запись ACP
+ 554          //wriacp->p1.6
+ 555          void zreal()
+ 556          {
+ 557   1      	int	i;
+ 558   1      	int portwri,save;
+ 559   1      
+ 560   1      	dk=0;
+ 561   1      //d7
+ 562   1      	portwri=0;
+ 563   1      	BIT7p1=1;
+ 564   1      	portwri=portwri|wriacp;
+ 565   1      	portwri=portwri>>1;
+ 566   1      	portwri=portwri&0x40;//выделить бит p1.6
+ 567   1      	P1=P1&0xbf;
+ 568   1      	P1=P1|portwri;//P1=portwri;//7й бит байта
+ 569   1      	tim2();
+ 570   1      	BIT7p1=0;
+ 571   1      	tim2();
+ 572   1      //d6
+ 573   1      	portwri=0;
+ 574   1      	BIT7p1=1;
+ 575   1      	portwri=portwri|wriacp;
+ 576   1      	portwri=portwri&0x40;//выделить бит p1.6
+ 577   1      	P1=P1&0xbf;
+ 578   1      	P1=P1|portwri;//P1=portwri;//6й бит байта
+ 579   1      	tim2();
+ 580   1      	BIT7p1=0;
+ 581   1      	tim2();
+ 582   1      //d5..d0
+ 583   1      	portwri=0;
+ 584   1      	BIT7p1=1;
+ 585   1      	portwri=portwri|wriacp;
+ 586   1      	for (i=0;i<6;i++){
+ 587   2      		BIT7p1=1;
+ 588   2      		//portwri=portwri|wriacp;
+ 589   2      		portwri=portwri<<1;
+ 590   2      		save=portwri;
+ 591   2      		save=save&0x40;//portwri=portwri&0x40;//выделить бит p1.6
+ 592   2      		P1=P1&0xbf;
+ 593   2      		P1=P1|save;//dk=portwri;//P1=portwri;
+ 594   2      		tim2();
+ 595   2      		BIT7p1=0;
+ 596   2      
+ 597   2      		tim2();
+ 598   2      	}
+ 599   1      	BITacp=1;//p1.6=1
+ 600   1      
+ 601   1      }
+ 602          
+ 603          
+ 604          //пп чтения acp в rezacp
+ 605          void rrr()
+ 606          
+ 607          {
+ 608   1      	
+ 609   1      	save=0;
+ 610   1      	rezacp=0;
+ 611   1      	portread=0;
+ 612   1      	
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 11  
+
+ 613   1      	for	(j=0;j<=6;j++){
+ 614   2      		
+ 615   2      		BIT7p1=1;
+ 616   2      		tim2();
+ 617   2      		BIT7p1=0;
+ 618   2      
+ 619   2      			
+ 620   2      		portread=portread|Rdat;
+ 621   2      		portread=portread<<1;
+ 622   2      		tim2();
+ 623   2      	}
+ 624   1      		rezacp=portread;//+
+ 625   1      //d0
+ 626   1      		BIT7p1=1;
+ 627   1      		tim2();
+ 628   1      		BIT7p1=0;
+ 629   1      		rezacp=rezacp|Rdat;//d0
+ 630   1      		tim2();
+ 631   1      
+ 632   1      }
+ 633          
+ 634          void www()
+ 635          
+ 636          {
+ 637   1      	
+ 638   1      	
+ 639   1      	save=0;
+ 640   1      
+ 641   1      
+ 642   1      	for	(j=0;j<=7;j++){
+ 643   2      		
+ 644   2      		BIT7p1=1;
+ 645   2      		Rdat=wriacp;
+ 646   2      		BIT7p1=0;
+ 647   2      		wriacp=wriacp>>1;
+ 648   2      	
+ 649   2      		tim2();
+ 650   2      	}
+ 651   1      	BITacp=1;//p1.6=1
+ 652   1      }
+ 653          
+ 654          
+ 655          
+ 656          
+ 657          
+ 658          
+ 659          
+ 660          void real()
+ 661          {
+ 662   1      	int	i;
+ 663   1      	int portread;
+ 664   1      
+ 665   1      		rezacp=0;
+ 666   1      
+ 667   1      //d7
+ 668   1      			BIT7p1=1;
+ 669   1      		tim2();
+ 670   1      		BIT7p1=0;
+ 671   1      
+ 672   1      		portread=P1;
+ 673   1      		portread=portread&0x40;//выделить бит p1.6
+ 674   1      		portread=portread<<1;
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 12  
+
+ 675   1      	
+ 676   1      		rezacp=rezacp|portread;//+
+ 677   1      		
+ 678   1      
+ 679   1      		tim2();
+ 680   1      		
+ 681   1      //d6
+ 682   1      		BIT7p1=1;
+ 683   1      		tim2();
+ 684   1      		BIT7p1=0;
+ 685   1      
+ 686   1      		portread=P1;
+ 687   1      		portread=portread&0x40;//выделить бит p1.6
+ 688   1      		
+ 689   1      	
+ 690   1      		rezacp=rezacp|portread;//+
+ 691   1      		
+ 692   1      		tim2();
+ 693   1      
+ 694   1      
+ 695   1      		save=0;//rezacp;
+ 696   1      
+ 697   1      	for (i=0;i<6;i++){
+ 698   2      
+ 699   2      			BIT7p1=1;
+ 700   2      		tim2();
+ 701   2      		BIT7p1=0;
+ 702   2      
+ 703   2      		portread=P1;
+ 704   2      		portread=portread&0x40;//выделить бит p1.6
+ 705   2      	//	portread=portread<<1;
+ 706   2      	
+ 707   2      		//rezacp=rezacp|portread;//+
+ 708   2      		//rezacp=rezacp>>1;
+ 709   2      		save=save|portread;
+ 710   2      		save=save>>1;
+ 711   2      		//rezacp=rezacp<<5;
+ 712   2      		//rezacp=rezacp|save;
+ 713   2      
+ 714   2      		tim2();
+ 715   2      		}
+ 716   1      		save=save<<5;
+ 717   1      		rezacp=rezacp|save;
+ 718   1      }
+ 719          
+ 720          
+ 721          
+ 722          
+ 723          //~5mks
+ 724          void tim2()
+ 725          {
+ 726   1      	unsigned int count;
+ 727   1      	for (count = 0x05; count != 0; count--) {
+ 728   2      	;
+ 729   2      	}
+ 730   1      }
+ 731          
+ 732          //~14mks
+ 733          void tim()
+ 734          {
+ 735   1      	unsigned int count;
+ 736   1      	for (count = 0x0e; count != 0; count--) {
+C51 COMPILER V6.03  AMF020                                                                 02/28/2006 13:34:13 PAGE 13  
+
+ 737   2      	;
+ 738   2      	}
+ 739   1      }
+ 740          
+ 741          
+ 742          //-----------------------------------------------------------------------------
+ 743          // Initialization Subroutines
+ 744          //-----------------------------------------------------------------------------
+ 745          
+ 746          //-----------------------------------------------------------------------------
+ 747          // SYSCLK_Init
+ 748          //-----------------------------------------------------------------------------
+ 749          //
+ 750          // This routine initializes the system clock to use an 22.1184MHz crystal
+ 751          // as its clock source.
+ 752          //
+ 753          void SYSCLK_Init (void)
+ 754          {
+ 755   1         int i;                              // delay counter
+ 756   1      
+ 757   1         OSCXCN = 0x67;                      // start external oscillator with
+ 758   1                                             // 22.1184MHz crystal
+ 759   1      
+ 760   1         for (i=0; i < 256; i++) ;           // XTLVLD blanking interval (>1ms)
+ 761   1      
+ 762   1         while (!(OSCXCN & 0x80)) ;          // Wait for crystal osc. to settle
+ 763   1      
+ 764   1         OSCICN = 0x88;                      // select external oscillator as SYSCLK
+ 765   1                                             // source and enable missing clock
+ 766   1                                             // detector
+ 767   1      }
+ 768          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1712    ----
+   CONSTANT SIZE    =      4    ----
+   XDATA SIZE       =     12    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     49      12
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

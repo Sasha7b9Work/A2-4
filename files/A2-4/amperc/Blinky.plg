@@ -1,0 +1,27 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: Blinky - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\BAZIS\TEMP\RSP32D2.TMP" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/Blinky.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\amperc\Blinky.c"
+]
+Creating command line "cl.exe @C:\BAZIS\TEMP\RSP32D2.TMP" 
+<h3>Output Window</h3>
+Compiling...
+Blinky.c
+d:\amperc\blinky.c(19) : fatal error C1083: Cannot open include file: 'c8051f020.h': No such file or directory
+Error executing cl.exe.
+
+
+
+<h3>Results</h3>
+Blinky.obj - 1 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

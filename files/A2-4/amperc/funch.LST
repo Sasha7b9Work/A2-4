@@ -1,0 +1,22 @@
+C51 COMPILER V6.14  FUNCH                                                                  02/03/2006 10:33:50 PAGE 1   
+
+
+C51 COMPILER V6.14, COMPILATION OF MODULE FUNCH
+OBJECT MODULE PLACED IN funch.OBJ
+COMPILER INVOKED BY: D:\PROGRAM FILES\CYGNAL\IDEFILES\C51\BIN\C51.EXE funch.c DB OE
+
+stmt level    source
+
+   1          stmt level sourse
+*** ERROR C129 IN LINE 1 OF FUNCH.C: missing ';' before 'level'
+   2          void wwind()
+   3          {
+   4          #pragma asm
+   5          
+   6          jmp $;
+   7          
+   8          #pragma endasm
+   9          
+  10          }
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  1 ERROR(S)

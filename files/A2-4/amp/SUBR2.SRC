@@ -1,0 +1,144 @@
+ ;задержка 100 мкс
+z_100:    mov R1,#78h     ;загрузка первого числа
+z100:     mov R2,#2h     ;загрузка второго числа
+count:    djnz R2, count;декремент R2 и внутренний цикл, если R2<>0 	
+          djnz R1, z100 ;декремент R1 и внутренний цикл, если R1<>0
+          ret           
+
+;задержка 34 мкс
+z_5:      mov R3,#8Bh      ;загрузка числа
+ct:       djnz R3,ct
+          ret
+
+;задержка 15 мс
+z_15:     mov R1,#0FAh    ;загрузка первого числа
+z15:      mov R2,#0EDh   ;загрузка второго числа
+zz:       djnz R2, zz 	;декремент R2 и внутренний цикл, если R2<>0
+          djnz R1, z15  ;декремент R1 и внутренний цикл, если R1<>0
+          ret   
+					  
+ ;задержка 1 мс
+z_1ms:     mov R1,#10h     
+ss1:       mov R2,#0EDh    
+      	   djnz R2, $ 	 
+           djnz R1, ss1   
+           ret   
+
+ ;????????
+;задержка 1с
+z_1s:   mov		r5,#01fh 
+co2s:	mov 	R6,#0ffh     
+z1s:     mov 	R7,#0ffh     
+co1s:   djnz 	R7, co1s	
+        djnz 	R6, z1s 
+		djnz	r5,co2s
+          ret
+;задержка 0,1с
+z_01s:  	 mov		r5,#03h 
+co02s:		mov 	R6,#0ffh     
+z01s:     	mov 	R7,#0ffh     
+		  	djnz 	R7, $	
+        	djnz 	R6, z01s 
+			djnz	r5,co02s
+         	 ret 		  
+chzap:	db	00,00,07h,0ffh		   
+ch0:	db	00,00,00,00
+ch10:	db	00,00,00,0ah		        	;10
+ch5:	db	00,00,00,05						;5
+ch954:	db 00,00,03,0b9h						;954
+ch10000:	db 00,00,03h,0e8h						;10000
+ch100:	db 00,00,00,64h	;100
+ch2:	db	00,00,00,02						
+;CH_953:	db 3fh,74h,37h,72h;0,953971
+;CH_953:	db 3fh,74h,1ch,71h;0,953558
+;CH_953:	db 3fh,74h,02,0d2h;0.953168
+ch1:	db  00,00,00,01
+ch_1:	db	3fh,80h,00,00			
+CH_953:	db 3fh,74h,1eh,0dfh		;0,953596
+CHtho:	db	47h,0c3h,50h,00;48h,43h,50h,00;30d40 h	-000
+KD:		db	3fh,80h,03h,47h;1,0001
+	
+ch_220:	db  48h,56h,0d8h,00;220000 -035b60 h
+ch_200:	db  48h,56h,0d8h,00;200000 -030d40 h
+ch_10th:db  46h,1ch,40h,00;10000-2710h
+
+;r1- мл байт 2х байтного числа
+tenmin:		;-10
+			clr		c
+    		mov		a,@r1
+			subb	a,#10
+			mov		@r1,a
+			dec		r1
+			mov		a,@r1
+			subb	a,#0
+			mov		@r1,a
+			ret
+  ;r0-обнуление ячеек памяти  
+  clear4:	 mov	r7,#4
+  			clr		a
+  cl4:		mov		@r0,a
+			inc		r0
+			djnz	r7,cl4
+			ret	
+
+ ;r0-обнуление ячеек памяти 
+ ;R7- 
+  clearN:	 
+  			clr		a
+  cl4N:		mov		@r0,a
+			inc		r0
+			djnz	r7,cl4N
+			ret	
+
+  ;чтение номера байта с индикатора(2байта)
+;bufind+8..bufind+9
+;-  - - -
+;- - - - - - - - - -
+;adec..adec+9
+;ст            мл
+upak2:	mov		r0,#bufind+8;
+		mov		r1,#adec+9
+		mov		r7,#2;2bait
+upa2:	clr		c
+		mov		a,@r0
+		subb	a,#30h
+		mov		@r1,a
+		dec		r0
+		dec		r1
+		djnz	r7,upa2
+		ret  
+    
+ ;bufind+4..bufind+9
+;-  - - -
+;- - - - - - - - - -
+;adec..adec+9
+;ст            мл
+upak:	mov		r0,#bufind+9;
+		mov		r1,#adec+9
+		mov		r7,#6
+upa:	clr		c
+		mov		a,@r0
+		subb	a,#30h
+		mov		@r1,a
+		dec		r0
+		dec		r1
+		djnz	r7,upa
+		ret
+
+ ;чтение номера байта с индикатора(3байта)
+;bufind+3..bufind+9
+;-  - - -
+;- - - - - - - - - -
+;adec..adec+9
+;ст            мл
+upak3:	mov		r0,#bufind+9;
+		mov		r1,#adec+9
+		mov		r7,#3;3bait
+upa1:	clr		c
+		mov		a,@r0
+		subb	a,#30h
+		mov		@r1,a
+		dec		r0
+		dec		r1
+		djnz	r7,upa1
+		ret

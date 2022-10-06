@@ -1,0 +1,539 @@
+C51 COMPILER V6.14  LCD_4BIT_CYGNAL                                                        03/10/2008 20:02:11 PAGE 1   
+
+
+C51 COMPILER V6.14, COMPILATION OF MODULE LCD_4BIT_CYGNAL
+OBJECT MODULE PLACED IN LCD_4bit_cygnal.OBJ
+COMPILER INVOKED BY: D:\PROGRAM FILES\CYGNAL\IDEFILES\C51\BIN\C51.EXE LCD_4bit_cygnal.C DB OE
+
+stmt level    source
+
+   1          #include "c8051f000.h"
+   2          #include "MyDef005.h"
+*** WARNING 317 IN LINE 281 OF MyDef005.h: redefinition of macro 'AD'
+*** WARNING 317 IN LINE 284 OF MyDef005.h: redefinition of macro 'AD'
+   3          
+   4          /****************************************************************/
+   5          /* ∆ » дисплей 4bita                                                  */
+   6          /****************************************************************/
+   7          
+   8          /*************************************************************************/
+   9          /*          макрокоманды  управлени€ дисплеем                            */
+  10          /*************************************************************************/
+  11          /* индикатор       E       A8
+  12                             RS      A0
+  13                            R/W     A1
+  14          
+  15                       E    -  синхро : 0 - нет операции
+  16                               дл€ чтени€/записи  ≈=1(0),
+  17                               при записи - переход из 1 в 0ю   (0-1)
+  18                       R\W  -  0 - запись в LCD  ; 1 - чтение
+  19                       RS   -  0 - команды ; 1 данные
+  20          */
+  21          sbit  LCD_E =  P1^4;
+  22          sbit  LCD_RW = P2^0;
+  23          sbit  LCD_RS = P1^5;
+  24          char bdata DB;
+  25          sbit DB0 = DB^0;
+  26          sbit DB1 = DB^1;
+  27          sbit DB2 = DB^2;
+  28          sbit DB3 = DB^3;
+  29          sbit DB4 = DB^4;
+  30          sbit DB5 = DB^5;
+  31          sbit DB6 = DB^6;
+  32          sbit DB7 = DB^7;
+  33          /*
+  34          unsigned char LCD_rr()   //чтение данных диспле€
+  35          {
+  36          //DB0=P12;
+  37          //DB1=P11;
+  38          //DB2=P10;
+  39          //DB3=P06;
+  40          DB4=P12;
+  41          DB5=P13;
+  42          DB6=P10;
+  43          DB7=P11;
+  44          return DB;
+  45          }
+  46          */
+  47          void LCD_ww(unsigned char dd)   //запись данных диспле€
+  48          {
+  49   1      DB=dd<<4;
+  50   1      //P12=DB0;
+  51   1      //P11=DB1;
+  52   1      //P10=DB2;
+  53   1      //P06=DB3;
+C51 COMPILER V6.14  LCD_4BIT_CYGNAL                                                        03/10/2008 20:02:11 PAGE 2   
+
+  54   1      P12=DB4;
+  55   1      P13=DB5;
+  56   1      P11=DB7;
+  57   1      P10=DB6;
+  58   1      }
+  59          
+  60          //sbit  LCD_E =  0xb3;  /*P3.3*/
+  61          //sbit  LCD_RW = 0xb4;  /*P3.4*/
+  62          //sbit  LCD_RS = 0xb5;  /*P3.5*/
+  63          
+  64          // DATA - Port1
+  65          // DB7  P1.3
+  66          // DB6  P1.2
+  67          // DB5  P1.1
+  68          // DB4  P1.0
+  69          
+  70          //sbit  LCD_E =  0xa7;  /*P2.7*/
+  71          //sbit  LCD_RW = 0xa6;  /*P2.6*/ 
+  72          //sbit  LCD_RS = 0xa5;  /*P2.5*/
+  73          
+  74          /***********************************************************************/
+  75          /*   функции управлени€ дисплеем                                       */
+  76          /***********************************************************************/
+  77          void DELY( unsigned int i);
+  78          /**/
+  79          #if 0
+              unsigned char LCD_ir(void)  /*   чтение готовности и адреса из диспле€ */
+              {
+              unsigned char a;
+              /*
+              F0 = EA;
+              EA=0;
+              
+              LCD_ww(0xff);	//P1=0xff;
+              LCD_E=0;LCD_RS=0;LCD_RW=1;
+              LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;
+              LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;
+              
+              LCD_E=1;
+              a=LCD_rr();	//a=P1;
+              LCD_E=0;
+              
+              EA = F0;
+              
+              return a;
+              */
+              return 0x80;
+              }
+              
+              #endif
+ 104          /**/
+ 105          unsigned char idata LCD_WITE;
+ 106          
+ 107          unsigned char LCD_w(void) /* ожидание готовности диспле€ */
+ 108          {                         /* 1 - готов */
+ 109   1      unsigned char i,g;
+ 110   1      
+ 111   1      
+ 112   1      g=0;
+ 113   1      
+ 114   1      WDTreset;       /********/
+ 115   1      LCD_WITE=0;
+C51 COMPILER V6.14  LCD_4BIT_CYGNAL                                                        03/10/2008 20:02:11 PAGE 3   
+
+ 116   1      //for(i=0;i<160;i++)
+ 117   1      //{
+ 118   1      //if( (LCD_ir() & 0x80) == 0) { LCD_WITE = i; g=1;break;}
+ 119   1      //}
+ 120   1      DELY(8000);
+ 121   1      //DELY(15000);
+ 122   1      g=1;
+ 123   1      return g;
+ 124   1      }
+*** WARNING C280 IN LINE 109 OF LCD_4BIT_CYGNAL.C: 'i': unreferenced local variable
+ 125          /**/
+ 126          void LCD_dw(char a)  /* запись данных в дисплей */
+ 127          {
+ 128   1      
+ 129   1      if(LCD_w() == 0)  /*      return*/;
+ 130   1      
+ 131   1      F0 = EA;
+ 132   1      EA=0;
+ 133   1      
+ 134   1      LCD_ww(a>>4);		///P1=a>>4;    // hi-4bit
+ 135   1      LCD_E=0;LCD_RS=1;LCD_RW=0;LCD_RW=0;LCD_RW=0;LCD_RW=0;
+ 136   1      LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;
+ 137   1      LCD_E=1;LCD_E=1;
+ 138   1      LCD_E=0;
+ 139   1      
+ 140   1      LCD_ww(a);	///P1=a;    // lo-4bit
+ 141   1      LCD_E=0;LCD_RS=1;LCD_RW=0;LCD_RW=0;LCD_RW=0;LCD_RW=0;
+ 142   1      LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;
+ 143   1      LCD_E=1;LCD_E=1;
+ 144   1      LCD_E=0;
+ 145   1      
+ 146   1      
+ 147   1      EA = F0;
+ 148   1      
+ 149   1      }
+ 150          /**/
+ 151          void LCD_iw(unsigned char a) /*   запись команды в дисплей */
+ 152          {
+ 153   1      
+ 154   1      if(LCD_w() == 0) /*return*/;
+ 155   1      
+ 156   1      F0 = EA;
+ 157   1      EA=0;
+ 158   1      
+ 159   1      LCD_ww(a>>4);	///P1=a>>4;    // hi-4bit
+ 160   1      LCD_E=0;LCD_RS=0;LCD_RW=0;LCD_RW=0;LCD_RW=0;LCD_RW=0;
+ 161   1      LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;
+ 162   1      LCD_E=1;LCD_E=1;
+ 163   1      LCD_E=0;
+ 164   1      
+ 165   1      LCD_ww(a);	///P1=a;   // lo-4bit
+ 166   1      LCD_E=0;LCD_RS=0;LCD_RW=0;LCD_RW=0;LCD_RW=0;LCD_RW=0;
+ 167   1      LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;
+ 168   1      LCD_E=1;LCD_E=1;
+ 169   1      LCD_E=0;
+ 170   1      
+ 171   1      EA = F0;
+ 172   1      
+ 173   1      }
+ 174          
+ 175          void LCD_iw4bit(unsigned char a) /*   запись 4 bit команды в дисплей дл€ init */
+ 176          {
+C51 COMPILER V6.14  LCD_4BIT_CYGNAL                                                        03/10/2008 20:02:11 PAGE 4   
+
+ 177   1      
+ 178   1      if(LCD_w() == 0) /*return*/;
+ 179   1      
+ 180   1      F0 = EA;
+ 181   1      EA=0;
+ 182   1      
+ 183   1      LCD_ww(a);	///P1=a;    // hi-4bit
+ 184   1      LCD_E=0;LCD_RS=0;LCD_RW=0;LCD_RW=0;LCD_RW=0;LCD_RW=0;
+ 185   1      LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;LCD_E=1;
+ 186   1      LCD_E=1;LCD_E=1;
+ 187   1      LCD_E=0;
+ 188   1      
+ 189   1      EA = F0;
+ 190   1      
+ 191   1      }
+ 192          
+ 193          # if 0
+              /*
+              unsigned char LCD_dr(void)   // чтение данных из диспле€
+              {
+              unsigned char a;
+              
+              if(LCD_w() == 0) //return
+              
+              F0 = EA;
+              EA=0;
+              
+              P0 = 0xff;
+              LCD_E=0;LCD_RS=1;LCD_RW=1;
+              LCD_E=1;
+              a=P0;
+              LCD_E=0;
+              
+              EA = F0;
+              
+              return a;
+              
+              }
+              */
+              #endif
+ 217          void DELY( unsigned int i)    /* программна€ задержка */
+ 218          {
+ 219   1      unsigned char j;
+ 220   1      
+ 221   1      //   for(i;i>0;i--)
+ 222   1      	for (j=0;j<150;j++) 
+ 223   1         for(;i!=0;i--)i=i;
+ 224   1      
+ 225   1      }
+ 226          /*****/
+ 227          /********************************************************/
+ 228          /* процедура инициализации диспле€                      */
+ 229          void LCD_init(void)
+ 230          {
+ 231   1      unsigned char q;
+ 232   1           /* начальна€ инициализаци€ */
+ 233   1      
+ 234   1      LCD_E=0;LCD_E=0;LCD_E=0;LCD_E=0;
+ 235   1      WDTreset;
+ 236   1      DELY(15000);
+ 237   1      LCD_iw4bit(0x3);
+ 238   1      WDTreset;
+C51 COMPILER V6.14  LCD_4BIT_CYGNAL                                                        03/10/2008 20:02:11 PAGE 5   
+
+ 239   1      DELY(15000);
+ 240   1      LCD_iw4bit(0x3);
+ 241   1      WDTreset;
+ 242   1      DELY(11000);
+ 243   1      LCD_iw4bit(0x3);
+ 244   1      WDTreset;
+ 245   1      DELY(1200);
+ 246   1      LCD_iw4bit(0x2);    // длина 4 бита
+ 247   1      WDTreset;
+ 248   1      LCD_iw(0x28);       /* две строки по  5х7 */
+ 249   1      WDTreset;
+ 250   1      q=LCD_w();
+ 251   1      LCD_iw(0x08);       /* disply=off,cursor=off,blink=off*/
+ 252   1      WDTreset;
+ 253   1      q=LCD_w();
+ 254   1      LCD_iw(0x01);       /* clear disply */
+ 255   1      WDTreset;
+ 256   1      q=LCD_w();
+ 257   1      LCD_iw(0x06);       /* I/D=1 курсор движетс€ S=0 диспл - нет */
+ 258   1      
+ 259   1      q=LCD_w();
+ 260   1      
+ 261   1      q=LCD_w();
+ 262   1      DELY(100);          /* установлено опытным путем !!!!!!*/
+ 263   1      //LCD_iw(0x0e);       /* D=1-disply on,c=1 cursor on,B=0 blink off */
+ 264   1      LCD_iw(0x0c);       /* D=1-disply on,c=1 cursor off,B=0 blink off */
+ 265   1      q=LCD_w();
+ 266   1      /*    спец символы  **************/
+ 267   1      
+ 268   1      {
+ 269   2      unsigned char q,qq;
+ 270   2      const unsigned char code CD[8]={1,2,4,8,0x10,8,4,2};
+ 271   2      for(q=0;q<8;q++)
+ 272   2       {
+ 273   3         for(qq=0;qq<8;qq++)
+ 274   3         {
+ 275   4         LCD_iw(0x40 + q*8+qq);
+ 276   4         if(q==qq)
+ 277   4             {
+ 278   5             LCD_dw(0xff);
+ 279   5             }
+ 280   4         else
+ 281   4            LCD_dw(CD[q]);
+ 282   4         }
+ 283   3      
+ 284   3       }
+ 285   2      LCD_iw(0x80);
+ 286   2      }
+ 287   1      # if 0
+              LCD_iw(0x40 +   0);
+              LCD_dw(0x1f);
+              LCD_iw(0x40 +   1);
+              LCD_dw(0x15);
+              LCD_iw(0x40 +   2);
+              LCD_dw(0x04);
+              LCD_iw(0x40 +   3);
+              LCD_dw(0x04);
+              LCD_iw(0x40 +   4);
+              LCD_dw(0x00);
+              LCD_iw(0x40 +   5);
+              LCD_dw(0x00);
+              LCD_iw(0x40 +   6);
+C51 COMPILER V6.14  LCD_4BIT_CYGNAL                                                        03/10/2008 20:02:11 PAGE 6   
+
+              LCD_dw(0x00);
+              LCD_iw(0x40 +   7);
+              LCD_dw(0x00);
+              LCD_iw(0x40 +   8);
+              LCD_dw(0x00);
+              LCD_iw(0x40 +   9);
+              LCD_dw(0x00);
+              LCD_iw(0x40 +  10);
+              LCD_dw(0x00);
+              LCD_iw(0x40 +  11);
+              LCD_dw(0x11);
+              LCD_iw(0x40 +  12);
+              LCD_dw(0x11);
+              LCD_iw(0x40 +  13);
+              LCD_dw(0x1f);
+              LCD_iw(0x40 +  14);
+              LCD_dw(0x1f);
+              LCD_iw(0x40 +  15);
+              LCD_dw(0x00);
+              LCD_iw(0x40 +  16);
+              LCD_dw(0x1f);
+              LCD_iw(0x40 +  17);
+              LCD_dw(0x13);
+              LCD_iw(0x40 +  18);
+              LCD_dw(0x04);
+              LCD_iw(0x40 +  19);
+              LCD_dw(0x15);
+              LCD_iw(0x40 +  20);
+              LCD_dw(0x11);
+              LCD_iw(0x40 +  21);
+              LCD_dw(0x1f);
+              LCD_iw(0x40 +  22);
+              LCD_dw(0x1f);
+              LCD_iw(0x40 +  23);
+              LCD_dw(0x00);
+              LCD_iw(0x40 +  24);
+              LCD_dw(0x00);
+              # endif
+ 339   1      
+ 340   1      }
+ 341          /*****************************************************/
+ 342          /* выдача строки в дисплей с текущей позиции курсора */
+ 343          /*****************************************************/
+ 344          void LCD_string(unsigned char *s)
+ 345          {
+ 346   1      while(*s != 0)
+ 347   1        {
+ 348   2        LCD_dw(*s);
+ 349   2        s++;
+ 350   2        }
+ 351   1      }
+ 352          /******************************************************/
+ 353          /* поместить курсор x-позици€ в строке, y-номер строки*/
+ 354          /* x,y от 0                             */
+ 355          /******************************************************/
+ 356          void  LCD_xy(char x,char y)
+ 357          {
+ 358   1      if (x<=0x4f)
+ 359   1         {
+ 360   2         if (y==0)   LCD_iw(0x80 + x);
+ 361   2         if (y==1)   LCD_iw(0xc0 + x);
+ 362   2         }
+C51 COMPILER V6.14  LCD_4BIT_CYGNAL                                                        03/10/2008 20:02:11 PAGE 7   
+
+ 363   1      }
+ 364          /*******************************************************/
+ 365          /* вывод с текущей позиции экрана 5 дес€тичных символов*/
+ 366          /* беззнакового целого параметра "а"                   */
+ 367          /*******************************************************/
+ 368          #include <stdio.h>
+ 369          # if 0
+              /*void LCD_Dint(unsigned int a)
+              {
+                                                           
+              unsigned char c[7];
+              
+                sprintf(c,"%5u",a);
+                LCD_string(c);
+              }
+              void LCD_Dint4(unsigned int a)
+              {
+              unsigned char c[7];
+              
+                sprintf(c,"%4u",a);
+                LCD_string(c);
+              
+              }
+              */
+              # endif
+ 388          /*******************************************************/
+ 389          /* вывод с текущей позиции экрана 4 шестнадцатеричных  */
+ 390          /* символов                                            */
+ 391          /* беззнакового целого параметра "а"                   */
+ 392          /*******************************************************/
+ 393          const
+ 394          unsigned char code H_sim[17]={"0123456789ABCDEF"};
+ 395          # if 0
+              void  LCD_Hint(unsigned int a)
+              {
+              unsigned char c[7];
+              
+                sprintf(c,"%4x",a);
+                LCD_string(c);
+              }
+              /*******************************************************/
+              /* вывод с текущей позиции экрана 3 дес€тичных         */
+              /* символа   char   "а"                                */
+              /*******************************************************/
+              /*
+              void LCD_Dchar(unsigned char a)
+              {
+              
+              unsigned char c[7];
+              
+                sprintf(c,"%3bd",a);
+                LCD_string(c);
+              }*/
+              
+              /*******************************************************/
+              /* вывод с текущей позиции экрана 2 шестнадцатеричных  */
+              /* символа   char   "а"                                */
+              /*******************************************************/
+              void  LCD_Hchar(unsigned char a)
+              {
+              LCD_dw(H_sim[a>>4]);
+              LCD_dw(H_sim[a&0x0f]);
+C51 COMPILER V6.14  LCD_4BIT_CYGNAL                                                        03/10/2008 20:02:11 PAGE 8   
+
+              }
+              
+              #endif
+ 428          /*
+ 429          void LCD_Dchar2(unsigned char a)
+ 430          {
+ 431            LCD_dw((a / 10) | 0x30);
+ 432            LCD_dw((a % 10) | 0x30);
+ 433          }
+ 434          */
+ 435          
+ 436          
+ 437          
+ 438          # include "lcd_tRUW.c"
+ 439          #if 0
+              unsigned char LCD_rus_char(unsigned char c)
+              {
+                if(c>=128)
+                 {
+                 c=RUS_tab[(unsigned char)(c-(unsigned char)128)];
+                 }
+              return c;
+              }
+              #endif
+ 449          /**/
+ 450          void LCD_rus_string(unsigned char *s)
+ 451          {
+ 452   1      unsigned char c;
+ 453   1      
+ 454   1      while(*s != 0)
+ 455   1        {
+ 456   2        c=*s;
+ 457   2      
+ 458   2        if(c>=128)
+ 459   2         {
+ 460   3         c=RUS_tab[(unsigned char)(c-(unsigned char)128)];
+ 461   3         }
+ 462   2      
+ 463   2        LCD_dw(c);
+ 464   2        s++;
+ 465   2        }
+ 466   1      }
+ 467          
+ 468          
+ 469          /**********************************************/
+ 470          void  LCD_clear(void)
+ 471              {
+ 472   1           unsigned char s[17]="                ";
+ 473   1      
+ 474   1              LCD_xy(0,0);
+ 475   1              LCD_string(s);
+ 476   1      
+ 477   1              LCD_xy(0,1);
+ 478   1              LCD_string(s);
+ 479   1           }
+ 480          //////////////////////////////////
+ 481          
+ 482          #if 0
+              void  LCD_xy_rus_str(char x,char y,unsigned char *s)
+                  {
+                      LCD_xy(x,y);
+                      LCD_rus_string(s);
+C51 COMPILER V6.14  LCD_4BIT_CYGNAL                                                        03/10/2008 20:02:11 PAGE 9   
+
+                  }
+              
+              
+              
+              void  LCD_xy_str(char x,char y,unsigned char *s)
+                  {
+                      LCD_xy(x,y);
+                      LCD_string(s);
+                  }
+              
+              #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    623    ----
+   CONSTANT SIZE    =    170    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1      34
+   IDATA SIZE       =      1    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  3 WARNING(S),  0 ERROR(S)

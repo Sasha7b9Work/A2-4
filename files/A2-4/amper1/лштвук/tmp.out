@@ -1,0 +1,15 @@
+
+BL51 BANKED LINKER/LOCATER V4.16a - SN: Cygnal_8051Fxxx
+COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2001
+G:\amper\ëøòâóê\LCD_4bit_cygnal.obj,
+G:\amper\ëøòâóê\Malyshka_6.obj,
+G:\amper\ëøòâóê\T0_sys.obj  TO G:\amper\ëøòâóê\w5 RS(256) PL(68) PW(78) 
+
+******************************************************************************
+* RESTRICTED VERSION WITH 1000H BYTE CODE SIZE LIMIT; USED: 0F77H BYTE (96%) *
+******************************************************************************
+
+>> 
+>> 
+>> 
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

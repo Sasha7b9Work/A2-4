@@ -1,0 +1,806 @@
+;   $include (c8051f020.inc)               ; Include register definition file.
+	
+NAME	MAIN
+		 	EXTRN CODE (eee)
+			PUBLIC gener,bitmas//,rez_A, rez_A0	!!!!!!!!!!!!!
+
+			org 0h;    cseg AT 0
+
+            jmp begin;;;;Main               ; Locate a jump to the start of code at 
+					
+						org 3
+						reti
+						org 0bh
+						reti
+						org 13h
+						reti
+						org 1bh
+						reti
+						org 23h
+						reti
+						org 2bh
+						reti
+						org 33h
+						reti
+						org 3bh
+						reti
+						org 43h
+						reti
+						org 4bh
+						reti
+						org 53h
+						reti
+						org 5bh
+						
+						reti
+						org 63h
+						reti
+						org 6bh
+						reti
+						 org 73h
+						reti
+PCA0L    DATA  0E9H   ; PCA 0 TIMER - LOW BYTE
+ P0MDOUT  DATA  0A4H   ; PORT 0 OUTPUT MODE CONFIGURATION
+P1MDOUT  DATA  0A5H   ; PORT 1 OUTPUT MODE CONFIGURATION
+P2MDOUT  DATA  0A6H   ; PORT 2 OUTPUT MODE CONFIGURATION
+P3MDOUT  DATA  0A7H   ; PORT 3 OUTPUT MODE CONFIGURATION
+PCA0MD   DATA  0D9H   ; PCA 0 COUNTER MODE
+XBR0     DATA  0E1H   ; DIGITAL CROSSBAR CONFIGURATION REGISTER 0
+XBR1     DATA  0E2H   ; DIGITAL CROSSBAR CONFIGURATION REGISTER 1
+XBR2     DATA  0E3H   ; DIGITAL CROSSBAR CONFIGURATION REGISTER 2
+
+REF0CN   DATA  0D1H   ; VOLTAGE REFERENCE 0 CONTROL
+DAC0L    DATA  0D2H   ; DAC 0 REGISTER - LOW BYTE
+DAC0H    DATA  0D3H   ; DAC 0 REGISTER - HIGH BYTE
+DAC0CN   DATA  0D4H   ; DAC 0 CONTROL
+DAC1L    DATA  0D5H   ; DAC 1 REGISTER - LOW BYTE
+DAC1H    DATA  0D6H   ; DAC 1 REGISTER - HIGH BYTE
+DAC1CN   DATA  0D7H   ; DAC 1 CONTROL
+PCA0CN   DATA  0D8H   ; PCA 0 COUNTER CONTROL
+OSCXCN   DATA  0B1H   ; EXTERNAL OSCILLATOR CONTROL
+ EIE1     DATA  0E6H   ; EXTERNAL INTERRUPT ENABLE 1
+EIE2     DATA  0E7H   ; EXTERNAL INTERRUPT ENABLE 2
+ADC0CN   DATA  0E8H   ; ADC 0 CONTROL
+RSTSRC   DATA  0EFH   ; RESET SOURCE
+EIP1     DATA  0F6H   ; EXTERNAL INTERRUPT PRIORITY REGISTER 1
+OSCICN   DATA  0B2H   ; INTERNAL OSCILLATOR CONTROL 
+P74OUT   DATA  0B5H   ; PORTS 4 - 7 OUTPUT MODE
+  
+EMI0TC   DATA  0A1H   ; EMIF TIMING CONTROL
+EMI0CF   DATA  0A3H   ; EXTERNAL MEMORY INTERFACE (EMIF) CONFIGURATION
+WDTCN    DATA  0FFH   ; WATCHDOG TIMER CONTROL 
+CKCON    DATA  08EH   ; CLOCK CONTROL
+PSCTL    DATA  08FH   ; PROGRAM STORE R/W CONTROL
+TMR2RLL  DATA 0cah;    // TIMER 2 RELOAD LOW                                       */
+TMR2RLH  DATA 0cbh;    // TIMER 2 RELOAD HIGH 
+ SPI0DAT  DATA  09BH   ; SERIAL PERIPHERAL INTERFACE 0 DATA
+ EMI0CN   DATA  0AFH   ; EXTERNAL MEMORY INTERFACE CONTROL
+SPI0CN   DATA  0F8H   ; SERIAL PERIPHERAL INTERFACE 0 CONTROL 
+SPI0CKR  DATA  09DH   ; SERIAL PERIPHERAL INTERFACE 0 CLOCK RATE CONTROL
+
+
+ sbit TXBSY    =   SPI0CN ^ 3;       /* SPI 0 TX BUSY FLAG			*/
+
+  
+
+						
+Main         SEGMENT  CODE
+
+				DSEG
+  
+bufind	DATA	40h;буффер индикации 12byte
+;DATA 4ch
+abin		DATA	4fh;4byte
+adec		DATA	53h;10byte
+chmas		DATA	6eh;
+mabin		DATA	6fh
+reacp		DATA	77h;4byte
+;DATA	7fh;
+;TMR2RLL  DATA 0cah;    // TIMER 2 RELOAD LOW                                       */
+;TMR2RLH  DATA 0cbh;    // TIMER 2 RELOAD HIGH 
+;PSCTL    DATA 0x8F;	/* PROGRAM STORE R/W CONTROL  
+                          
+		
+cellbit		DATA	20h
+bitznak		BIT 	cellbit.0	;20.0		 фл вкл режима измерения сопротивления изоляции
+bitmas		BIT 	cellbit.1	;20.1		
+znmat			BIT		cellbit.2	;20.2
+
+
+SUMM   data 5eh;	
+rez_A	  data 62h;
+rez_Ahi4  data 66h;
+rez_A0  data 6ah;
+rez_Af	 data 7bh;
+  
+;внешнее ОЗУ 64K 
+;		XSEG AT 100h
+	PUBLIC 	  MASS0
+MASS0  xdata 0080h;
+MASS1  xdata 0084h;
+MASS2  xdata 0088h;
+MASS3  xdata 008ch;
+MASS4  xdata 0090h;
+MASS5  xdata 0094h;
+MASS6  xdata 0098h;
+MASS7  xdata 009ch;
+MASS8  xdata 00a0h;
+MASS9  xdata 00a4h;
+;xdata 0038h;
+
+ 			rr0		EQU 00
+		rr1	  equ	01
+		rr6   equ 06
+		rr2	  equ	02
+		rr3	  equ	03
+		rr7   equ 07
+
+		r8   equ 08
+		r9	  equ	09
+		r10	  equ	10
+		r11   equ 11
+
+		
+   
+             rseg     Main          ; Switch to this code segment.
+
+             using    0              ; Specify register bank for the following
+
+org 100h
+;$EJECT
+
+begin:	   mov  sp, #0e0h
+					mov		PCA0L,#00;=0x00;
+					mov	PCA0MD,#00;= 0x00;
+					mov	P0MDOUT,#1fh;=0x1f;
+					mov	P1MDOUT,#86h;8fh;=0x8f;
+					mov	P2MDOUT,#00;=0x00;
+	//P2MDIN=0xff;//11111111;
+	//P3MDOUT =0xff;
+	mov	P74OUT ,#0ffh;=0xff;
+	mov	REF0CN,#03h;=0x03;
+	
+	mov	XBR0,#14h;= 0x14;
+	mov	XBR1,#00; =0x00;
+	mov XBR2,#00;=0x00;
+ 
+	mov	WDTCN,#0deh;=0xde;	 //запрет работы WDT
+	mov	WDTCN,#0adh;=0xad;                                   
+	mov	TMOD,#22h;=0x22;	//регистр режимов
+	mov	CKCON,#30h;=0x30; //сист частота/12     
+	mov	TH0,#0f9h;=0xf9;//	; Установка таймера
+	mov	TL0,#0f9h;=0xf9; 
+	mov	EIE1,#80h;=0x80;
+
+	mov	DAC0CN,#80h;=0x80;
+	mov	DAC1CN,#80h;=0x80;
+	mov	OSCXCN,#67h;=0x67;
+
+ 	;;;;anl	PSCTL,#0feh
+
+gener:     mov a, oscxcn
+           cjne a,#11100111b,gener
+                       
+  	mov	OSCICN,#88h;=0x84;
+    mov TMR2RLL,#0;=0;
+    mov	TMR2RLH,#0d1h;=0xd1;
+  
+		setb  TCON.6			;регистр управления
+		 setb tcon.4
+
+	mov	RSTSRC,#0;=00	;//источники сброса 
+
+	mov	IE,#80h;//10000000	;//Снятие блокировки всех прерываний
+     mov	XBR2,#40h
+	 mov	XBR0,#06h;16h
+	mov		SPI0CN,#03
+	mov		spi0ckr,#31H;;;;;;;;#04
+;ozu
+							clr	a
+						
+							mov	r0,#00h	
+mecle:				mov	@r0,a 			;обнулить озу 256 байт
+							inc	r0
+							cjne	r0,#7fh,mecle
+							mov	r0,#80h
+meff:					mov	@r0,a 
+						movx @r0,a
+							inc	r0
+							cjne	r0,#0dfh,meff
+							call	clmassix
+;START
+;					rez_A0=0;
+;	 SUMM=0; //обнуление скользящего массива
+;	 over_mas=0;
+;	 count_mas=0;
+
+
+
+			mov		r0,#bufind
+age1:
+			mov		@r0,#30h
+			inc		r0
+			cjne	r0,#bufind+11,age1		
+			call	ind
+;;;;;;;;;;;;;;;;;;;         
+;управление AD7731
+			mov		a,#03
+			call	write
+			mov		a,#80h
+			call	write
+	  		mov		a,#02;04
+			call	write
+			mov		a,#02
+			call	write
+			mov		a,#0b1h;81h;0a1h
+			call	write
+			mov		a,#74h
+			call	write
+			jb		p1.3,$
+			mov		a,#02
+			call	write
+			mov		a,#91h;0a1h;81h
+			call	write
+			mov		a,#74h
+			call	write
+			jb		p1.3,$
+			mov		a,#02
+			call	write
+			mov		a,#21h
+			call	write
+			mov		a,#74h
+			call	write
+rebyte:		jb		p1.3,$
+			mov		a,#11h
+			call	write
+			call	read	
+		;	mov 	reacp+1,A	;старший байт 
+			mov 	reacp+2,A		;ст байт 		
+			call	read	
+		;	mov 	reacp+2,A	;средний байт 
+			mov 	reacp+3,A		;мл байт
+			call	read		
+				mov		r0,#reacp+2
+					mov		a,@r0
+					jb		acc.7,znplus;
+					setb	bitznak
+					;mov		r0,#reacp+1
+					mov		r0,#reacp+2
+					orl		a,#80h;anl		a,#7fh	;ост содерж яч 
+					mov		@r0,a
+				
+mmm:			mov		r0,#reacp
+					mov		@r0,#0ffh
+					inc		r0
+					mov		@r0,#0ffh
+					jmp		goznak
+znplus:		clr	bitznak
+					anl		a,#7fh			;+
+					mov		@r0,a
+					mov		r0,#reacp
+					mov		@r0,#00h
+					inc		r0
+					mov		@r0,#00h
+goznak:	
+
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;
+;загрузить А в массив из 5 значений
+;;;;;;;;;;;;;;;
+klmas:;;		mov			dptr,#MASS8
+	  ;;      ;mov			r1,#MASS9
+	  ;;      CALL		xCIKLWR	  	;MASS8->MASS9
+	;;		mov			dptr,#MASS7
+	  ;;     ; mov			r1,#MASS8
+	 ;;       CALL		xCIKLWR	  	;MASS7->MASS8
+     ;;  		MOV	  dptr,#MASS6
+	 ;;       ;MOV	   R1,#MASS7
+	 ;;       CALL	   xCIKLWR 	   ; MASS6 --> MASS7
+	 ;;       MOV	   dptr,#MASS5
+	 ;;      ; MOV	   R1,#MASS6
+	 ;;      CALL	   xCIKLWR   	  ; MASS5 --> MASS6
+	 ;;      MOV	   dptr,#MASS4
+	 ;;      ;MOV	   R1,#MASS5
+	 ;;      CALL	   xCIKLWR   	  ; MASS4 --> MASS5
+			mov			dptr,#MASS3
+	       ; mov			r1,#MASS4
+	        CALL		xCIKLWR	  	;MASS3->MASS4
+       		MOV	   dptr,#MASS2
+	       ; MOV	   R1,#MASS3
+	        CALL	   xCIKLWR 	   ; MASS2 --> MASS3
+	        MOV	   dptr,#MASS1
+	        ;MOV	   R1,#MASS2
+	       CALL	   xCIKLWR   	  ; MASS1 --> MASS2
+	       MOV	   dptr,#MASS0
+	      ; MOV	   R1,#MASS1
+	       CALL	   xCIKLWR   	  ; MASS0 --> MASS1
+
+				mov		a,reacp		;r2..r5
+				mov		r2,a
+				mov		a,reacp+1
+				mov		r3,a
+				mov		a,reacp+2
+				mov		r4,a
+				mov		a,reacp+3
+				mov		r5,a
+				;call	aform
+				mov			dptr,#MASS0
+	      call		saveIr2        		; R2-R5 --> MAS0
+	 
+	      MOV	   dptr,#MASS1+3
+	      CALL	 addx
+	      MOV	   dptr,#MASS2+3
+	      CALL	 addx
+	      MOV	   dptr,#MASS3+3
+	      CALL	 addx
+	      MOV	dptr,#MASS4+3
+	      call	 addx
+;;				MOV	   dptr,#MASS5+3
+;;	      CALL	 addx
+;;	      MOV	   dptr,#MASS6+3
+;;	      CALL	 addx
+;;	      MOV	   dptr,#MASS7+3
+;;	      CALL	 addx
+;;	      MOV	dptr,#MASS8+3
+;;	      call	 addx
+;;		MOV			dptr,#MASS9+3
+;;	      call	 addx
+	;23.03			
+				jb	bitmas,masfull		;массив заполнен 5/10 значениями
+				mov	r0,#chmas
+				inc	@r0
+	
+				cjne	@r0,#5,masx5
+				setb	bitmas			;массив заполнен
+	
+masfull	:	MOV	   DPTR,#ch5;ch10 
+				CALL	   ldc_ltemp		 ; ltemp <-- 5
+				jmp	mas5div
+
+masx5:		mov	ltemp+3,chmas;;;
+				clr	a
+				mov	ltemp+2,a
+				mov	ltemp+1,a
+  			mov	ltemp,a
+
+mas5div:
+				CALL	   zdiv;divide   			 ; R2-R5 =
+			    		 ; = (MAS0+MAS1+MAS2+MAS3+MAS4)/5
+
+			
+
+				clr		P3.4
+				nop
+				nop
+				setb	P3.4
+;;;;;;;;;;;;;;
+				call	altof			;r2..r5->float
+				mov	dptr,#ch_1;CH_953
+				call	ldc_ltemp			;r8..r11=8
+				call	flmul
+				mov		r0,#rez_Af;r2..r5->rez_A
+				call	saver2
+				call	ftol			;float->int
+				mov		r0,#rez_A
+				call	saver2
+						
+				;;;;;;
+			
+				clr		P3.4
+				nop
+				nop
+				setb	P3.4
+				jb		P3.0,nop3_0
+				mov		r0,#rez_A0		;r2..r5->rez_A0
+				call	saver2			;ЗАПОМНИТЬ СМЕЩЕНИЕ НУЛЯ
+				jmp		rebyte		;age2
+nop3_0:		;rez_A-rez_A0
+					mov		r0,#rez_A0
+					call	resar8
+					call	lsub
+					mov		r0,#rez_A
+					call	saver2
+					mov		dptr,#ch100		 
+					call	ldc_ltemp	 
+					call	zdiv		;rez_A/100=r2..r5
+				;	call	aform
+				;;	mov		a,r5
+					;;mov		r2,rr4			;;вход-r2  a
+					;;mov	r0,#mabin 
+
+					;;call	cond		;2byte-dec
+				;;	mov		r0,#mabin+1  ;ст байт
+					mov		a,r4
+					jb		acc.7,aless0
+					orl		a,#08			;rez_A>0 d11=1
+					mov		DAC0H,a
+									;мл байт
+					mov		a,r5
+					mov		DAC0L,a
+					jmp		goonind
+
+aless0:		cpl		a
+					anl		a,#0f7h		;d11=0
+					mov		DAC0H,a
+									;мл байт
+					mov		a,r5
+					cpl		a
+					mov		DAC0L,a
+goonind:	mov		r0,#rez_A;->r2..r5
+					call	resar2
+				
+					call	maform
+					mov		r0,#abin
+					call	saver2
+;;;;;;;;
+					
+					mov		r0,#adec
+					mov		r1,#abin+3	;hex->10
+					call	bindec
+				
+					mov		r0,#adec+9;разместить в буфер индикации
+					mov		r1,#bufind+6
+					mov		r7,#7
+bufdec:		mov		a,@r0
+					add		a,#30h
+					mov		@r1,a
+					dec		r1
+					dec		r0
+					djnz	r7,bufdec
+					mov		r0,#bufind+7
+					mov		@r0,#2dh
+					mov		r0,#bufind
+					mov		@r0,#2bh
+					jnb		bitznak,nozzmi
+					mov		@r0,#2dh
+			
+
+nozzmi:				mov		bufind+10,#00h
+					mov		bufind+11,#0c0h
+					call	ind
+				
+				     ;;;;;
+					 ;jmp	eee             
+         
+					jmp rebyte
+
+;пп выдачи на индикатор 12 байт   bufind..bufind+11
+ ind:	 mov		r0,#bufind+11
+		 mov		r7,#12
+ nexin:	clr		p0.6
+		mov		a,@r0
+		mov		SPI0DAT,a
+		jb		TXBSY,$
+		setb	p0.6
+		call	z_9
+		dec		r0
+		djnz	r7,nexin
+	   ret
+
+zapadc:   mov R2,#8
+sdv:      setb P1.7
+          rlc A
+					mov P1.6,C
+					call tim2
+				
+					clr P1.7
+					call tim2
+					
+					djnz R2,sdv
+					setb P1.6
+					ret
+
+chtadc:   mov R2,#8
+sdv1:     setb P1.7
+          call tim2
+				
+					clr P1.7
+					mov C,P1.6
+					rlc A
+					call tim2
+					
+					djnz R2,sdv1
+					ret
+
+tim:      mov R6,#30h;38h
+tim1:     djnz R6,tim1
+          ret
+          
+tim2:     mov R6,#10h;14h
+tim3:     djnz R6,tim3
+          ret
+
+;запись из acc
+write_x1: clr	c
+writeD_x1:
+				  mov P3.1,c        ;запись
+          mov P2,A
+			 	  setb P3.3
+				  call z_5
+				  clr P3.3
+				  mov P2,#0FFh
+				  ret
+
+;чтение в acc
+read_x2:  clr	c  
+          mov P3.1,c        ;чтение
+          setb P3.2
+				  setb P3.3
+					call z_5
+				  mov A,P2
+				  clr P3.3
+				  clr P3.2
+				  ret
+
+
+loop:     call read_x2;x2    ;ожидание флага готовности
+				  jb ACC.7,loop     ;переход на чтение, если бит А(7)=1
+			    ret           ;возврат, если бит А(7)<>1
+				 
+				   
+ret
+
+;задержка 100 мкс
+z_100:    mov R1,#78h     ;загрузка первого числа
+z100:     mov R2,#2h     ;загрузка второго числа
+count:    djnz R2, count;декремент R2 и внутренний цикл, если R2<>0 	
+          djnz R1, z100 ;декремент R1 и внутренний цикл, если R1<>0
+          ret           
+
+;задержка 34 мкс
+z_5:      mov R3,#8Bh      ;загрузка числа
+ct:       djnz R3,ct
+          ret
+
+;задержка 15 мс
+z_15:     mov R1,#0FAh    ;загрузка первого числа
+z15:      mov R2,#0EDh   ;загрузка второго числа
+zz:       djnz R2, zz 	;декремент R2 и внутренний цикл, если R2<>0
+          djnz R1, z15  ;декремент R1 и внутренний цикл, если R1<>0
+          ret   
+					  
+
+
+
+
+;dptr+4-приемник
+;dptr-источник
+;r7-кол байт  
+xCIKLWR:
+			mov		r7,#4	
+lwrx:	movx	a,@dptr
+			push	dph
+			push	dpl
+			inc		dptr
+			inc		dptr
+			inc		dptr
+			inc		dptr
+			movx	@dptr,a
+			pop		dpl
+			pop		dph
+			
+			inc		dptr
+			djnz	r7,lwrx
+			ret
+;r2..r5->@dptr..@dptr+3				
+saveIr2:		mov	a,r2
+					movx	@dptr,a
+					inc	dptr
+					mov	a,r3
+					movx	@dptr,a
+					inc	dptr
+					mov	a,r4
+					movx	@dptr,a
+					inc	dptr
+					mov	a,r5
+					movx	@dptr,a
+					ret
+;r2..r5-> @r0..@r0+3
+
+saver2:		mov	a,r2
+					mov	@r0,a
+					inc	r0
+					mov	a,r3
+					mov	@r0,a
+					inc	r0
+					mov	a,r4
+					mov	@r0,a
+					inc	r0
+					mov	a,r5
+					mov	@r0,a
+					ret 
+clmassix:		mov			r7,#28h
+						mov     dptr,#MASS0        ;забить массив A нулями
+clmax:  		mov	     a,#00h
+             movx    @dptr,a
+             inc     dptr
+            djnz		r7,clmax                
+             mov     chmas,a
+             clr     bitmas
+            ret
+
+;r1-яЁшхьэшъ
+;r0-шёЄюўэшъ
+;r7-ъюы срщЄ  
+CIKLWR:
+			mov		r7,#4	
+lwr:	mov	a,@r0
+			mov	@r1,a
+			inc		r1
+			inc		r0
+			djnz	r7,lwr
+			ret	
+;r2..r5-> @dptr..@dptr+3
+
+zmul:			call	maform
+					call	lmul
+					call	bform
+					ret
+
+zdiv:			call	maform
+					call	divide
+					call	bform
+					ret
+
+maform:	 	mov a,r2
+    			rlc a
+    			jnc 		fo1m
+					setb		znmat
+					call   form4
+					ret
+fo1m:			clr		znmat
+					ret
+
+bform:		jnb		znmat,fo2m
+					call	form4
+fo2m:			ret
+  
+;r2..r5 яхЁхтхёЄш т фюя ъюф
+form4:  	mov a,r5
+    	cpl a
+    	add a,#1
+    	mov r5,a
+    	mov a,r4
+    	cpl a
+    	addc    a,#0
+    	mov r4,a
+    	mov a,r3
+	    cpl a
+    	addc    a,#0
+    	mov r3,a
+    	mov a,r2
+    	cpl a
+    	addc    a,#0
+    	mov r2,a
+    	ret
+zcmp:		call		maform
+				call		lcmp
+				push		psw
+				call	bform
+				pop		psw
+				ret
+
+
+;@r0..@r0+3->r8..r11
+
+resar8:		mov	a,@r0
+					mov	ltemp,a
+					inc	r0
+					mov	a,@r0
+					mov	ltemp+1,a
+					inc	r0
+					mov	a,@r0
+					mov	ltemp+2,a
+					inc	r0
+					mov	a,@r0
+					mov	ltemp+3,a
+					ret
+
+;
+;r0- рфЁхё _ўхщъш єяръютрээюую фтюшўэюую ўшёыр  
+;r2,a фтюшўэюх ўшёыю 2 срщЄр 
+;т_ї- @r0 єяръютрээюх фхё_Єшўэюх ўшёыю BCD 3 срщЄр 
+;r2 a    ўшёыю 180
+;00 b4
+;т_ї- mabin..mabin+2
+;     80 01 00
+ 
+cond:				xch	a,r0	
+						mov	r1,a
+						xch	a,r0
+						mov	r4,#03
+dcoa:				mov	@r1,#00
+						inc	r1
+						djnz	r4,dcoa
+						mov	r3,#10h
+dcob:				clr	c
+						rlc	a
+						xch	a,r2
+						rlc	a
+						xch	a,r2
+						xch	a,r0
+						mov	r1,a
+						xch	a,r0
+						mov	r4,#03
+						mov	r5,a
+dcoc:				mov	a,@r1 
+						addc	a,@r1
+						da	a
+						mov	@r1,a
+						inc	r1
+						djnz	r4,dcoc
+						mov	a,r5
+						jc	dcod
+						djnz	r3,dcob
+						clr	c
+dcod:				nop
+						ret
+
+move28:		mov	ltemp,r2			;r2..r5->ltemp
+					mov	ltemp+1,3
+					mov	ltemp+2,4
+					mov	ltemp+3,5
+					ret
+
+;@r0..@r0+3->r2..r5
+
+resar2:		mov	a,@r0
+					mov	r2,a
+					inc	r0
+					mov	a,@r0
+					mov	r3,a
+					inc	r0
+					mov	a,@r0
+					mov	r4,a
+					inc	r0
+					mov	a,@r0
+					mov	r5,a
+					ret
+
+;25mkc !!!!!!!!!!!!!!!1
+z_9:      mov R3,#4Bh      ;загрузка числа
+	       djnz R3,$
+          ret
+
+;запись   передаваемый байт в acc
+;передача байта послед кодом старшими разрядами  вперед
+write:	   mov R2,#8
+			clr  c	
+wr1:    	clr		P1.2
+		    nop 
+			rlc A
+			mov P1.1,C
+		   call tim2
+		   setb P1.2
+           call tim2
+		  djnz R2,wr1
+		  clr P1.1
+		 ret
+
+;принимаемый байт в acc
+;прием байта последовательным кодом старшими разрядами вперед
+read:    mov R2,#8
+re1:     clr P1.2
+         call tim2	  ;5mks
+		mov C,P1.0
+		rlc A		
+		setb P1.2
+		call tim2
+		djnz R2,re1
+		ret
+
+ch10:	db	00,00,00,0ah		        	;10
+ch5:	db	00,00,00,05						;5
+ch954:	db 00,00,03,0b9h						;954
+ch10000:	db 00,00,03h,0e8h						;10000
+ch100:	db 00,00,00,64h							;100
+;CH_953:	db 3fh,74h,37h,72h;0,953971
+;CH_953:	db 3fh,74h,1ch,71h;0,953558
+;CH_953:	db 3fh,74h,02,0d2h;0.953168
+ch_1:	db	3fh,80h,00,00			
+CH_953:	db 3fh,74h,1eh,0dfh		;0,953596			
+$include (e:\amper\sarifm3.asm) 					
+$include (e:\amper\arif2.asm) 
+$include (e:\amper\floatm.asm)
+					      
+END
+						

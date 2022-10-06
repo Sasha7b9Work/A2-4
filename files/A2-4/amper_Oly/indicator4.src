@@ -1,0 +1,464 @@
+NAME 	STRING_IO
+
+		org 0
+		jmp	BEGIN
+		org 3
+		reti
+
+		org 33h
+		jmp		intSPI;
+
+; 
+;EXTRN	BIT    (TXTBIT)
+;
+;PUBLIC	PUT_CRLF, PUTSTRING
+ PCA0L    DATA  0E9H   ; PCA 0 TIMER - LOW BYTE
+ P0MDOUT  DATA  0A4H   ; PORT 0 OUTPUT MODE CONFIGURATION
+P1MDOUT  DATA  0A5H   ; PORT 1 OUTPUT MODE CONFIGURATION
+P2MDOUT  DATA  0A6H   ; PORT 2 OUTPUT MODE CONFIGURATION
+P3MDOUT  DATA  0A7H   ; PORT 3 OUTPUT MODE CONFIGURATION
+PCA0MD   DATA  0D9H   ; PCA 0 COUNTER MODE
+XBR0     DATA  0E1H   ; DIGITAL CROSSBAR CONFIGURATION REGISTER 0
+XBR1     DATA  0E2H   ; DIGITAL CROSSBAR CONFIGURATION REGISTER 1
+XBR2     DATA  0E3H   ; DIGITAL CROSSBAR CONFIGURATION REGISTER 2
+
+REF0CN   DATA  0D1H   ; VOLTAGE REFERENCE 0 CONTROL
+DAC0L    DATA  0D2H   ; DAC 0 REGISTER - LOW BYTE
+DAC0H    DATA  0D3H   ; DAC 0 REGISTER - HIGH BYTE
+DAC0CN   DATA  0D4H   ; DAC 0 CONTROL
+DAC1L    DATA  0D5H   ; DAC 1 REGISTER - LOW BYTE
+DAC1H    DATA  0D6H   ; DAC 1 REGISTER - HIGH BYTE
+DAC1CN   DATA  0D7H   ; DAC 1 CONTROL
+PCA0CN   DATA  0D8H   ; PCA 0 COUNTER CONTROL
+OSCXCN   DATA  0B1H   ; EXTERNAL OSCILLATOR CONTROL
+ EIE1     DATA  0E6H   ; EXTERNAL INTERRUPT ENABLE 1
+EIE2     DATA  0E7H   ; EXTERNAL INTERRUPT ENABLE 2
+ADC0CN   DATA  0E8H   ; ADC 0 CONTROL
+RSTSRC   DATA  0EFH   ; RESET SOURCE
+EIP1     DATA  0F6H   ; EXTERNAL INTERRUPT PRIORITY REGISTER 1
+OSCICN   DATA  0B2H   ; INTERNAL OSCILLATOR CONTROL 
+P74OUT   DATA  0B5H   ; PORTS 4 - 7 OUTPUT MODE
+  
+EMI0TC   DATA  0A1H   ; EMIF TIMING CONTROL
+EMI0CF   DATA  0A3H   ; EXTERNAL MEMORY INTERFACE (EMIF) CONFIGURATION
+WDTCN    DATA  0FFH   ; WATCHDOG TIMER CONTROL 
+CKCON    DATA  08EH   ; CLOCK CONTROL
+PSCTL    DATA  08FH   ; PROGRAM STORE R/W CONTROL
+TMR2RLL  DATA 0cah;    // TIMER 2 RELOAD LOW                                       */
+TMR2RLH  DATA 0cbh;    // TIMER 2 RELOAD HIGH 
+ SPI0DAT  DATA  09BH   ; SERIAL PERIPHERAL INTERFACE 0 DATA
+ EMI0CN   DATA  0AFH   ; EXTERNAL MEMORY INTERFACE CONTROL
+SPI0CN   DATA  0F8H   ; SERIAL PERIPHERAL INTERFACE 0 CONTROL 
+SPI0CKR  DATA  09DH   ; SERIAL PERIPHERAL INTERFACE 0 CLOCK RATE CONTROL
+ sfr P4       =  0x84; 	/* PORT 4	
+
+
+
+bufind	DATA	40h;буфер кодированной индикации 10x2 byte
+numb   	DATA	54h;
+makoi 	DATA	55h;буфер некодированной информации 12 byte
+nbyte		DATA	62h
+cellbit		DATA	20h
+bitznak		BIT 	cellbit.0	;20.0	бит знака
+bitmas		BIT 	cellbit.1	;20.1		
+znmat		BIT		cellbit.2	;20.2
+bitport		BIT		cellbit.3	;20.3
+bready		BIT		cellbit.4	;20.4  флаг готовности строки
+
+		XSEG 
+one	XDATA		30h
+
+
+
+
+	  MASS0  xdata 0180h;
+	MASS1  xdata 0184h;
+
+STRING_ROUTINES  SEGMENT  CODE
+
+	RSEG  STRING_ROUTINES
+
+
+
+; This routine outputs a CR and a LF
+
+LF equ  0AH                ; line feed 
+CR	equ 0dh
+
+ rr0		EQU 00
+		rr1	  equ	01
+		rr6   equ 06
+		rr2	  equ	02
+		rr3	  equ	03
+		rr7   equ 07
+
+		r8   equ 08
+		r9	  equ	09
+		r10	  equ	10
+		r11   equ 11
+
+
+org 100h
+
+BEGIN:	  mov  sp, #0e0h
+					mov		PCA0L,#00;=0x00;
+					mov	PCA0MD,#00;= 0x00;
+					mov	P0MDOUT,#1fh;=0x1f;
+					mov	P1MDOUT,#00;8fh;=0x8f;
+					mov	P2MDOUT,#00;=0x00;
+	//P2MDIN=0xff;//11111111;
+	mov		P3MDOUT,#00; =0xff;
+				mov		P74OUT ,#0ffh;=0xff;
+				mov		REF0CN,#03h;=0x03;
+	
+				mov		XBR0,#14h;= 0x14;
+				mov		XBR1,#00; =0x00;
+				mov 	XBR2,#00;=0x00;
+ 
+				mov		WDTCN,#0deh;=0xde;	 //чряЁхЄ ЁрсюЄ_ WDT
+				mov		WDTCN,#0adh;=0xad;                                   
+				mov		TMOD,#22h;=0x22;	//ЁхушёЄЁ Ёхцшьют
+				mov		CKCON,#30h;=0x30; //ёшёЄ ўрёЄюЄр/12     
+				mov		TH0,#0f9h;=0xf9;//	; +ёЄрэютър ЄрщьхЁр
+				mov		TL0,#0f9h;=0xf9; 
+				mov		EIE1,#80h;=0x80;
+
+				mov		DAC0CN,#80h;=0x80;
+				mov		DAC1CN,#80h;=0x80;
+				
+				mov		OSCXCN,#67h;=0x67;
+
+ 	
+
+gener:     mov a, oscxcn
+           cjne a,#11100111b,gener
+                       
+  				mov		OSCICN,#88h;=0x84;
+    			mov 	TMR2RLL,#0;=0;
+    			mov		TMR2RLH,#0d1h;=0xd1;
+  
+				 setb  TCON.6			;ЁхушёЄЁ єяЁртыхэш_
+		 		 setb tcon.4
+
+				mov	RSTSRC,#0;=00	;//шёЄюўэшъш ёсЁюёр 
+;;;;;;;;;;
+			
+				mov	EMI0CF,#00;03;02;01;
+				mov	EMI0TC,#0FFh;
+				mov	EMI0CN,#03;FFH;12H
+			
+;;;;;;;;;;
+		  
+    	    mov		XBR2,#40h;=0x40;
+;ЁрчЁх°шЄ№ яЁхЁ_трэшх SPI
+			mov		XBR0,#06;2;;;;;6
+					
+			mov		SPI0CN,#01
+			mov		SPI0CKR,#04
+			mov		EIE1,#01
+			mov		EIP1,#01
+		;;	mov		IE,#80h;//-э_Єшх сыюъшЁютъш тёхї яЁхЁ_трэшщ
+;ozu
+							clr	a
+							mov	psw,a
+							mov	r0,#00h	
+mecle:				mov	@r0,a 			;обнуление озу 256 байт
+							inc	r0
+							cjne	r0,#7fh,mecle
+							mov	r0,#80h
+meff:					mov	@r0,a 
+							inc	r0
+							cjne	r0,#0dfh,meff
+					mov		nbyte,#11;;;;;;;;;;;;;;;;;
+					mov		IE,#80h;;;;;;;;;;;;;;;;;
+	mov		r0,#bufind
+pp:	mov		@r0,#0ffh
+	inc		r0
+	mov		@r0,#03Fh
+	inc		r0
+	cjne	r0,#bufind+20,pp
+
+start:
+			mov		dptr,#Tabpro0
+			mov		r0,#bufind
+			mov		r1,#numb
+			mov		@r1,#0
+again:
+			mov		dptr,#Tabpro0
+			clr		c
+			mov		a,#1
+			subb	a,@r1
+			jc		oupp1
+			call	outp0			;numb=0,1
+			jmp		outgo
+oupp1:call	outp1			;numb=2..9
+outgo:inc		@r1
+			inc		r0				;следующий байт
+			cjne	@r1,#10,again
+			;;;;;;;
+			jnb		bready ,start
+			;обработка строки
+				; call	adrbufi		;r1-bufind+n
+				mov		r6,#0
+				mov		r0,#makoi
+www:			mov		r1,#bufind
+				mov		a,r6
+			mov		b,#2
+			mul		ab
+			add		a,r1
+			mov		r1,a	;bufind+..
+
+			mov		a,@r0	  ;makoi+..
+			;;;;;
+			cjne	a,#2bh,no2b
+		;	mov		r1,#bufind
+			mov		@r1,#0edh
+			inc		r1
+			mov		@r1,#3fh
+			jmp		 next
+no2b:		cjne	a,#2dh,no2d
+		;	mov		r1,#bufind
+			mov		@r1,#0ffh
+			inc		r1
+			mov		@r1,#3fh
+			jmp		 next
+			;;;;;;
+no2d:	 	mov		dptr,#Tabma;
+					
+					mov		b,#2
+					mul		ab
+					mov		r7,a				;
+					movc	a,@a+dptr		;1-
+					mov		@r1,a
+					inc		r1
+					inc		r7
+					mov		a,r7
+					movc	a,@a+dptr		;2-
+					mov		@r1,a
+
+	next:			inc		r0
+					inc		r6
+					cjne	r6,#13,www
+
+			 clr	bready		;сбросить бит готовности строки
+			jmp		start
+
+
+;выдать строку(bufind) с номером в(numb) в Р2,Р3 
+;загрузить 0 в порт p0  в соотв с n 		
+outp0:
+			mov		a,@r0
+			mov		p3,a			;high byte
+			inc		r0
+			mov		a,@r0
+			mov		p2,a			;low byte
+
+			mov		a,@r1			;Tabpro+number
+			movc	a,@a+dptr
+			anl		p0,a			;clr p0.6,p0,7..
+
+			call	z_1m			;1ms
+			mov		dptr,#Tabpro1
+			mov		a,@r1			;Tabpro+number
+			movc	a,@a+dptr
+			orl		p0,a
+			ret
+
+;выдать строку(bufind) с номером в(numb) в Р2,Р3 
+;загрузить 0 в порт p1 в соотв с n 		
+outp1:
+			mov		a,@r0
+			mov		p3,a			;high byte
+			inc		r0
+			mov		a,@r0
+			mov		p2,a			;low byte
+
+			mov		a,@r1			;Tabpro+number
+			movc	a,@a+dptr
+			anl		p1,a			;clr p1.0..p1,7
+
+			call	z_1m			;1ms
+			mov		dptr,#Tabpro1
+			mov		a,@r1			;Tabpro+number
+			movc	a,@a+dptr
+			orl		p1,a
+			ret
+
+
+		
+
+
+					;p0.6 p0.7 p1.0 p1.1 p1.2
+Tabpro0:		db 0bfh,7fh,0feh,0fdh,0fbh
+						;p1.3 p1.4 p1.5 p1.6 p1.7
+					db 0f7h,0efh,0dfh,0bfh,7fh	
+
+						;p0.6 p0.7 p1.0 p1.1 p1.2
+Tabpro1:		db 40h,80h,01h,02h,04h
+						;p1.3 p1.4 p1.5 p1.6 p1.7
+					db 08h,10h,20h,40h,80h
+					
+					
+					
+					
+						
+dkoi:			;	mov	r0,#makoi+4		;ъюфшЁютър яюф шэфшърЄюЁ
+						mov	r1,#bufind+3
+dko1:				mov	dptr,#Tabma
+						mov	a,@r0
+						movc	a,@a+dptr
+						mov	@r1,a
+						dec	r1
+						dec	r0
+					;	cjne	r0,#makoi,dko1
+						ret 
+
+
+Tabma:	dw	0ffc0h		;0
+				dw	0fff9h		;1
+				dw	0ff24h		;2
+				dw	0ff30h		;3
+				dw	0ff19h		;4
+				dw	0ff12h		;5
+				dw	0ff02h		;6
+				dw	0dbfeh		;7
+				dw	0ff00h		;8
+				dw	0ff10h		;9
+
+
+
+ ;interrupt SPI
+intSPI:			push 	rr0
+				push 	rr1
+				push 	rr2
+				push    rr7
+				push	dph
+				push	dpl
+				push  	acc
+				push    b
+				push   psw
+
+					mov		r0,#makoi
+					mov		r1,#bufind
+					mov		a,nbyte
+					
+					mov		r2,a			;
+					clr		c
+					subb	a,#10
+					jnc		byte10
+nextSPI:		;	call	adrbufi		;r1-bufind+n
+					call	adrmakoi	 ;r0-makoi+n
+					mov		a,SPI0DAT
+					cjne	a,#2bh,mmpp
+					;;;;;;;;;;;
+					mov		@r0,a
+					jmp		 outSPI1
+mmpp:				cjne	a,#2dh,mmpp1
+					mov		@r0,a
+					jmp		 outSPI1
+mmpp1:				subb	a,#30h		;;;;;;
+					mov		@r0,a		;сохранить принятый байт в makoi
+								
+outSPI1:			mov		r0,#nbyte
+					dec		@r0;inc		@r0
+					cjne	@r0,#0ffh,outSPI
+					mov		@r0,#11
+					setb	bready		;установить флаг готовности строки
+outSPI:				pop		psw
+					pop		b
+					pop		acc
+					pop		dpl
+					pop		dph
+					pop		rr7
+					pop		rr2
+					pop		rr1
+					pop		rr0
+					clr		SPI0CN.7
+				   reti
+
+byte10:		mov		a,nbyte
+					cjne	a,#10,byte11
+					call	adrmakoi	 	;r0-makoi+n
+					mov		a,SPI0DAT		;byte 10,11
+     				mov		@r0,a		;сохранить принятый байт в makoi
+		
+gobit:				mov		r0,#nbyte
+					dec		@r0
+					jmp		outSPI
+ 				
+byte11:			mov		a,SPI0DAT
+				anl		a,#0c0h
+				cjne	a,#0c0h,outSPI
+			
+					call	adrmakoi	 	;r0-makoi+n
+					mov		a,SPI0DAT		;byte 11
+					
+					mov		@r0,a		;сохранить принятый байт в makoi
+					
+					mov		a,@r0	;
+					anl		a,#04h
+					mov		r7,a		;сшЄ 6 ёюїЁ
+					mov		a,@r1
+					anl		a,#0bfh
+					orl		a,r7
+					mov		@r1,a	
+					mov		r0,#nbyte
+					dec		@r0
+					jmp		outSPI;reti
+
+;r1+nbyte
+adrbufi:
+			mov		r1,#bufind
+			mov		a,nbyte
+			mov		b,#2
+			mul		ab
+			add		a,r1
+			mov		r1,a
+			ret
+
+
+;r0+nbyte
+adrmakoi:
+			mov		r0,#makoi
+			mov		a,nbyte
+			add		a,r0
+			mov		r0,a
+			ret
+
+
+
+;r2-эюьхЁ срщЄр
+;dptr-рфЁхё ъюфр
+	;		mov		r1,
+			mov		a,nbyte
+			add		a,dpl
+			mov		dpl,a
+			mov		a,dph
+			addc	a,#0
+			mov		dph,a
+			ret
+						
+;задержка 15 ms 
+z_15:     mov R1,#0FAh     
+z15:      mov R2,#0EDh    
+zz:       djnz R2, zz 	 
+          djnz R1, z15   
+          ret   
+					  
+;задержка 1 ms
+z_1m:     mov r3,#16h    
+z1:	      mov R2,#0EDh   
+		      djnz R2,$ 
+          djnz r3, z1  
+          ret   
+
+
+
+
+; Routine outputs a null-terminated string whose
+; address is given in DPTR. The string can be
+; located in CODE or XDATA memory depending on
+; the value of TXTBIT.
+
+
+	END

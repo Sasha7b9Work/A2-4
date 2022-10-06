@@ -1,0 +1,3 @@
+G:\amper\лштвук\LCD_4bit_cygnal.obj,
+G:\amper\лштвук\Malyshka_6.obj,
+G:\amper\лштвук\T0_sys.obj  TO G:\amper\лштвук\w5 RS(256) PL(68) PW(78) 

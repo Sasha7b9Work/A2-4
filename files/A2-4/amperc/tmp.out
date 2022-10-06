@@ -1,0 +1,21 @@
+
+C51 COMPILER V6.14 - SN: Cygnal_8051Fxxx
+COPYRIGHT KEIL ELEKTRONIK GmbH 1987 - 2001
+*** WARNING C209 IN LINE 163 OF ONE.C: '_del_second': too few actual parameters
+*** WARNING C209 IN LINE 166 OF ONE.C: '_write': too few actual parameters
+*** WARNING C209 IN LINE 168 OF ONE.C: '_write': too few actual parameters
+*** WARNING C209 IN LINE 171 OF ONE.C: '_write': too few actual parameters
+*** WARNING C209 IN LINE 176 OF ONE.C: '_write': too few actual parameters
+*** WARNING C209 IN LINE 180 OF ONE.C: '_write': too few actual parameters
+*** WARNING C209 IN LINE 184 OF ONE.C: '_write': too few actual parameters
+*** WARNING C209 IN LINE 188 OF ONE.C: '_write': too few actual parameters
+*** WARNING C209 IN LINE 204 OF ONE.C: '_del_second': too few actual parameters
+*** WARNING C209 IN LINE 206 OF ONE.C: '_write': too few actual parameters
+*** WARNING C209 IN LINE 207 OF ONE.C: '_read': too few actual parameters
+*** WARNING C209 IN LINE 295 OF ONE.C: '_read': too few actual parameters
+*** WARNING C276 IN LINE 299 OF ONE.C: constant in condition expression
+*** WARNING C209 IN LINE 323 OF ONE.C: '_write': too few actual parameters
+*** WARNING C209 IN LINE 334 OF ONE.C: '_write': too few actual parameters
+*** WARNING C209 IN LINE 343 OF ONE.C: '_write': too few actual parameters
+
+C51 COMPILATION COMPLETE.  16 WARNING(S),  0 ERROR(S)

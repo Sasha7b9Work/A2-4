@@ -1,0 +1,870 @@
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE     1
+
+
+MACRO ASSEMBLER A51 V6.14a
+NO OBJECT MODULE REQUESTED
+ASSEMBLER INVOKED BY: D:\PROGRAM FILES\CYGNAL\IDEFILES\C51\BIN\A51.EXE Sarifm3.asm XR GEN DB EP NOMOD51
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ; Ф†©Ђ SARIFM.ASM 8.11.95               ;файл арифметики
+                       2     
+  0008                 3     ltemp   equ       8           ;long temporary
+  000C                 4     xtemp   equ       12          ;other temporaries
+  000A                 5     DECSIZE EQU       10
+  0004                 6     NUMSIZE EQU       4
+  0004                 7     RR4             EQU       4
+  0005                 8     RR5             EQU       5
+                       9     
+                      10     ; rseg     ARIF ; Switch to this code segment.
+                      11     ; using    0    ; Specify register bank for the following program code.                    
+                                            ; Arithmetics:  CLEARING string
+                      12     ; Input:
+                      13     ; R0 - pointer to string,
+                      14     ; NUMSIZE - byte count if CLRNUM used,
+                      15     ; DECSIZE - byte count if CLRDEC used,
+                      16     ; R2 - byte count if CLEAR used;
+                      17     ; Output:  none.
+                      18     
+0000                  19     CLRDEC:
+0000 7A0A             20                 MOV R2, #DECSIZE
+0002 8002             21                 SJMP    CLEAR
+0004                  22     CLRNUM:
+0004 7A04             23                 MOV R2, #NUMSIZE
+                      24                 ;JMP    CLEAR
+0006                  25     CLEAR:
+0006 E4               26                 CLR A
+0007 F6               27     CLR11:  MOV @R0, A
+0008 08               28                 INC R0
+0009 DAFC             29                 DJNZ    R2, CLR11
+000B 22               30                 RET
+                      31     
+                      32     ;**********************************
+                      33     ;mov    r1,#abin+3
+                      34     ;mov    r0,#adec
+                      35     ; _ _ _ _
+                      36     ;     03ff
+                      37     ;ст     мл   - вход
+                      38     ; _ _ _ _ _ _ _ _ _ _
+                      39     ;             1 0 2 3
+                      40     ;ст                мл 
+                      41     ;**********************************
+                      42     
+000C                  43     BINDEC:
+                      44     ; Arithmetics:  CONVERTING from binary into decimal "4->10"
+                      45     ; Input:
+                      46     ; R0 - pointer to destination (high digit is the first),
+                      47     ; R1 - pointer to source,
+                      48     ; NUMSIZE - byte count in binary number;
+                      49     ; DECSIZE - byte count in decimal number;
+                      50     ; Output:  none.
+                      51     ; Source saved
+                      52     
+                      53         ; 1. Clear result
+000C 7A05             54         MOV R2, #DECSIZE/2
+000E 1106             55         CALL   CLEAR  ; incrementing R0
+                      56     
+                      57         ; 2. Prepare convertion
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE     2
+
+0010 18               58         DEC R0
+0011 8804             59         MOV RR4, R0 ; R4 - pointer to low byte of packed decimal result
+0013 8905             60         MOV RR5, R1 ; R5 - pointer to low byte of binary number
+0015 7B20             61         MOV R3, #NUMSIZE*8  ; R3 - bit counter in binary number
+                      62     
+                      63         ; 3. Convert cyrcle
+0017                  64     BIN30:
+                      65                 ; 3.1. Rotate binary number one bit to left and prepare <Carry>
+0017 A905             66                 MOV R1, RR5
+0019 7A04             67                 MOV R2, #NUMSIZE
+001B E7               68     BIN31:  MOV A, @R1
+001C 33               69                 RLC A
+001D F7               70                 MOV @R1, A
+001E 19               71                 DEC R1
+001F DAFA             72                 DJNZ    R2, BIN31
+0021 A905             73                 MOV R1, RR5
+0023 E7               74                 MOV A, @R1
+0024                  75                 MOV ACC.0, C
+*** _________________________________________^
+*** ERROR #A17 IN 75 (Sarifm3.asm, LINE 75): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+0024 F7               76                 MOV @R1, A
+                      77      ; 3.2. Doubling decimal result with <Carry>
+0025 A804             78                 MOV R0, RR4
+0027 7A05             79                 MOV R2, #DECSIZE/2
+0029 E6               80     BIN32:  MOV A, @R0
+002A 36               81                 ADDC    A, @R0
+002B D4               82                 DA  A
+002C F6               83                 MOV @R0, A
+002D 18               84                 DEC R0
+002E DAF9             85                 DJNZ    R2, BIN32
+                      86     
+                      87       ; 3.3. End of convert cyrcle
+0030 DBE5             88               DJNZ    R3, BIN30
+                      89     
+                      90         ; 4. Make bytes from half-bytes
+0032 E8               91                MOV A, R0
+0033 240A             92                ADD A, #DECSIZE
+0035 F8               93                MOV R0, A   ; R0 - pointer to low byte of unpacked decimal result
+0036 A904             94                MOV R1, RR4 ; R1 - pointer to low byte of packed decimal result
+0038 7A05             95                MOV R2, #DECSIZE/2
+003A E7               96     BIN41:  MOV A, @R1
+003B 540F             97                 ANL A, #00FH
+003D F6               98                 MOV @R0, A
+003E 18               99                 DEC R0
+003F E7              100                 MOV A, @R1
+0040 C4              101                 SWAP    A
+0041 540F            102                 ANL A, #00FH
+0043 F6              103                 MOV @R0, A
+0044 18              104                 DEC R0
+0045 19              105                 DEC R1
+0046 DAF2            106                 DJNZ    R2, BIN41
+0048 22              107                 RET
+                     108     
+                     109     
+                     110     ;*********************************
+                     111     ;mov    r0,#abin
+                     112     ;mov    r1,#adec
+                     113     ; _ _ _ _       -выход
+                     114     ; ff0000
+                     115     ;0004
+                     116     ;мл      ст
+                     117     
+                     118     ;ст                       мл
+                     119     ;_ _ _ _ _ _ _ _ _ _     вход
+                     120     ;                       2 5 5
+                     121     ;                   1 0 2 4
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE     3
+
+                     122     
+0049                 123     DECBIN:
+                     124     ; Arithmetics:  CONVERTING from decimal into binary "10->4"
+                     125     ; Input:
+                     126     ; R0 - pointer to destination,
+                     127     ; R1 - pointer to source (high digit is the first),
+                     128     ; NUMSIZE - byte count in binary number;
+                     129     ; DECSIZE - byte count in decimal number;
+                     130     ; Output:  none
+                     131     ; Source cleared
+                     132     
+                     133         ; 1. Clear result
+0049 1104            134                 CALL    CLRNUM    ; + increment R0 by NUMSIZE
+                     135     
+                     136         ; 2. Prepare convertion
+004B 18              137                 DEC R0
+004C 8804            138                 MOV RR4, R0 ; R4 - pointer to high byte of binary result
+004E 8905            139                 MOV RR5, R1 ; R5 - pointer to high byte of packed decimal number
+0050 90006F          140                 MOV DPTR, #DECT2
+0053 7B20            141                 MOV R3, #NUMSIZE*8  ; R3 - bit counter in binary number
+                     142     
+                     143         ; 3. Convert cyrcle
+0055                 144     DEC30:
+                     145         ; 3.1. Divide decimal number by 2 and prepare <Carry>
+0055 C3              146                 CLR C
+0056 A905            147                 MOV R1, RR5
+0058 7A0A            148                 MOV R2, #DECSIZE
+005A E7              149     DEC31:  MOV A, @R1
+005B 540F            150                 ANL A, #00FH
+005D                 151                 MOV ACC.4, C
+*** _________________________________________^
+*** ERROR #A17 IN 151 (Sarifm3.asm, LINE 151): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+005D 93              152                 MOVC    A,@A+DPTR
+005E F7              153                 MOV @R1, A
+005F                 154                 MOV C, ACC.7
+*** ____________________________________________^
+*** ERROR #A17 IN 154 (Sarifm3.asm, LINE 154): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+005F 09              155                 INC R1
+0060 DAF8            156                 DJNZ    R2, DEC31
+                     157         ; 3.2. Rotate binary result one bit to right with <Carry>
+0062 A804            158                 MOV R0, RR4
+0064 7A04            159                 MOV R2, #NUMSIZE
+0066 E6              160     DEC32:  MOV A, @R0
+0067 13              161                 RRC A
+0068 F6              162                 MOV @R0, A
+0069 18              163                 DEC R0
+006A DAFA            164                 DJNZ    R2, DEC32
+                     165     
+                     166         ; 3.3. End of convert cyrcle
+006C DBE7            167                 DJNZ    R3, DEC30
+006E 22              168                 RET
+                     169     
+006F 00800181        170     DECT2:  DB  00,80H,001,81H,02,82H,03,83H,04,84H
+0073 02820383                
+0077 0484                    
+0079 00000000        171                     DB  00,00,00,00,00,00
+007D 0000                    
+007F 05850686        172                     DB  05,85H,06,86H,07,87H,08H,88H,09H,89H
+0083 07870888                
+0087 0989                    
+                     173     
+                     174     ;   Long comparison
+                     175     ;   Lcmp - called with arg1 in r2-r5 and arg2 in ltemp - returns with
+                     176     ;   flags and acc set as though a long subtraction was done.
+                     177     ;*******************************
+                     178     ;сравнить r2..r5 с (ltemp..ltemp+3)
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE     4
+
+                     179     ;c=1     r2..r5< ltemp..ltemp+3     a<b
+                     180     ;c=0       r2..r5> ltemp..ltemp+3   a>b
+                     181     ;*******************************
+0089                 182     lcmp:
+0089 C3              183         clr c
+008A EA              184         mov a,r2
+008B 9508            185         subb    a,8
+008D 700F            186         jnz done
+008F EB              187         mov a,r3
+0090 9509            188         subb    a,9
+0092 7008            189         jnz done1
+0094 EC              190         mov a,r4
+0095 950A            191         subb    a,10
+0097 7003            192         jnz done1
+0099 ED              193         mov a,r5
+009A 950B            194         subb    a,11
+009C                 195     done1:
+009C                 196         clr ov      ;overflow is significant only for top byte
+*** _________________________________^
+*** ERROR #A45 IN 196 (Sarifm3.asm, LINE 196): UNDEFINED SYMBOL (PASS-2)
+009E                 197     done:
+009E 22              198         ret
+                     199     
+                     200     ;   Load long into r2-5 from [dptr]
+                     201     
+009F                 202     ldc_long:
+009F                 203         mov a,dph       ;is it in on board memory
+*** ___________________________________^
+*** ERROR #A45 IN 203 (Sarifm3.asm, LINE 203): UNDEFINED SYMBOL (PASS-2)
+00A1 6010            204         jz  onboard     ;yes
+00A3 E4              205         clr a
+00A4 93              206         movc    a,@a+dptr
+00A5 FA              207         mov r2,a
+00A6 7401            208         mov a,#1
+00A8 93              209         movc    a,@a+dptr
+00A9 FB              210         mov r3,a
+00AA 7402            211         mov a,#2
+00AC 93              212         movc    a,@a+dptr
+00AD FC              213         mov r4,a
+00AE 7403            214         mov a,#3
+00B0 93              215         movc    a,@a+dptr
+00B1 FD              216         mov r5,a
+00B2 22              217         ret
+00B3                 218     onboard:
+00B3                 219         mov r0,dpl
+*** ____________________________________^
+*** ERROR #A45 IN 219 (Sarifm3.asm, LINE 219): UNDEFINED SYMBOL (PASS-2)
+00B5 E6              220         mov a,@r0
+00B6 FA              221         mov r2,a
+00B7 08              222         inc r0
+00B8 E6              223         mov a,@r0
+00B9 FB              224         mov r3,a
+00BA 08              225         inc r0
+00BB E6              226         mov a,@r0
+00BC FC              227         mov r4,a
+00BD 08              228         inc r0
+00BE E6              229         mov a,@r0
+00BF FD              230         mov r5,a
+00C0 22              231         ret
+                     232     
+                     233     ;**************************************
+                     234     ;загрузить ltemp...+3 из пам€ти программ
+                     235     ;mov    dptr,#CH5
+                     236     ;call   ldc_ltemp        ltemp <--5
+                     237     ;**************************************
+00C1                 238     ldc_ltemp:
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE     5
+
+00C1                 239         mov a,dph       ;is it in on board memory
+*** ___________________________________^
+*** ERROR #A45 IN 239 (Sarifm3.asm, LINE 239): UNDEFINED SYMBOL (PASS-2)
+00C3 6014            240         jz  oboard      ;yes
+00C5 E4              241         clr a
+00C6 93              242         movc    a,@a+dptr
+00C7 F508            243         mov 8,a
+00C9 7401            244         mov a,#1
+00CB 93              245         movc    a,@a+dptr
+00CC F509            246         mov 9,a
+00CE 7402            247         mov a,#2
+00D0 93              248         movc    a,@a+dptr
+00D1 F50A            249         mov 10,a
+00D3 7403            250         mov a,#3
+00D5 93              251         movc    a,@a+dptr
+00D6 F50B            252         mov 11,a
+00D8 22              253         ret
+00D9                 254     oboard:
+00D9                 255         mov r0,dpl
+*** ____________________________________^
+*** ERROR #A45 IN 255 (Sarifm3.asm, LINE 255): UNDEFINED SYMBOL (PASS-2)
+00DB 8608            256         mov 8,@r0
+00DD 08              257         inc r0
+00DE 8609            258         mov 9,@r0
+00E0 08              259         inc r0
+00E1 860A            260         mov 10,@r0
+00E3 08              261         inc r0
+00E4 860B            262         mov 11,@r0
+00E6 22              263         ret
+                     264     
+                     265     ;*****************************
+                     266     ;mov    dptr,#k1
+                     267     ;call   ldx_long
+                     268     ;k1->r2..r5
+                     269     ;*****************************
+                     270     ;   Load long into r2-5 from [dptr]
+                     271     ;
+                     272     ; 01/30/90 JLZ      Updated from new library; added save/restore DPH, DPL
+00E7                 273     ldx_long:
+00E7                 274         mov a,dph       ;is it in on board memory
+*** ___________________________________^
+*** ERROR #A45 IN 274 (Sarifm3.asm, LINE 274): UNDEFINED SYMBOL (PASS-2)
+00E9 6014            275         jz  onboar1        ;yes
+00EB                 276         push    dpl
+*** _____________________________________^
+*** ERROR #A45 IN 276 (Sarifm3.asm, LINE 276): UNDEFINED SYMBOL (PASS-2)
+00ED                 277         push    dph
+*** _____________________________________^
+*** ERROR #A45 IN 277 (Sarifm3.asm, LINE 277): UNDEFINED SYMBOL (PASS-2)
+00EF E0              278         movx    a,@dptr
+00F0 FA              279         mov r2,a
+00F1 A3              280         inc dptr
+00F2 E0              281         movx    a,@dptr
+00F3 FB              282         mov r3,a
+00F4 A3              283         inc dptr
+00F5 E0              284         movx    a,@dptr
+00F6 FC              285         mov r4,a
+00F7 A3              286         inc dptr
+00F8 E0              287         movx    a,@dptr
+00F9 FD              288         mov r5,a
+00FA                 289         pop dph
+*** _________________________________^
+*** ERROR #A45 IN 289 (Sarifm3.asm, LINE 289): UNDEFINED SYMBOL (PASS-2)
+00FC                 290         pop dpl
+*** _________________________________^
+*** ERROR #A45 IN 290 (Sarifm3.asm, LINE 290): UNDEFINED SYMBOL (PASS-2)
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE     6
+
+00FE 22              291         ret
+00FF                 292     onboar1:
+00FF                 293         mov r0,dpl
+*** ____________________________________^
+*** ERROR #A45 IN 293 (Sarifm3.asm, LINE 293): UNDEFINED SYMBOL (PASS-2)
+0101 E6              294         mov a,@r0
+0102 FA              295         mov r2,a
+0103 08              296         inc r0
+0104 E6              297         mov a,@r0
+0105 FB              298         mov r3,a
+0106 08              299         inc r0
+0107 E6              300         mov a,@r0
+0108 FC              301         mov r4,a
+0109 08              302         inc r0
+010A E6              303         mov a,@r0
+010B FD              304         mov r5,a
+010C 22              305         ret
+                     306     
+                     307     ;*********************************
+                     308     ;mov    dptr,#k2
+                     309     ;call   ldx_ltemp       ;k2->ltemp..ltemp+3
+                     310     ;**********************************
+010D                 311     ldx_ltemp:
+010D                 312         mov a,dph       ;is it in on board memory
+*** ___________________________________^
+*** ERROR #A45 IN 312 (Sarifm3.asm, LINE 312): UNDEFINED SYMBOL (PASS-2)
+010F 6010            313         jz  oboard1     ;yes
+0111 E0              314         movx    a,@dptr
+0112 F508            315         mov 8,a
+0114 A3              316         inc dptr
+0115 E0              317         movx    a,@dptr
+0116 F509            318         mov 9,a
+0118 A3              319         inc dptr
+0119 E0              320         movx    a,@dptr
+011A F50A            321         mov 10,a
+011C A3              322         inc dptr
+011D E0              323         movx    a,@dptr
+011E F50B            324         mov 11,a
+0120 22              325         ret
+0121                 326     oboard1:
+0121                 327         mov r0,dpl
+*** ____________________________________^
+*** ERROR #A45 IN 327 (Sarifm3.asm, LINE 327): UNDEFINED SYMBOL (PASS-2)
+0123 8608            328         mov 8,@r0
+0125 08              329         inc r0
+0126 8609            330         mov 9,@r0
+0128 08              331         inc r0
+0129 860A            332         mov 10,@r0
+012B 08              333         inc r0
+012C 860B            334         mov 11,@r0
+012E 22              335         ret
+                     336     ;   Long division routines for 8051
+                     337     ;   Divide is called with the divisor in ltemp, the dividend in r5-r2
+                     338     ;   It returns with the quotient in r5-r2 and the remainder in ltemp
+                     339     ;   The top of bank 1 (locations 12-15) are used as a long temporary
+                     340     ;   and registers r0 and r1 in bank 0 are used as temporaries. R0 and
+                     341     ;   r1 must be saved by the caller.
+                     342     ;   This is long unsigned division.
+                     343     
+                     344     
+                     345     ;   Register usage:
+                     346     ;       r0 loop counter
+                     347     ;       xtemp (12-15) accumulates quotient
+                     348     ;       r5-r2 holds dividend
+                     349     ;       ltemp holds divisor
+                     350     
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE     7
+
+                     351     ;************************************
+                     352     ;r2..r5-делимое
+                     353     ;ltemp..-делитель
+                     354     ;частное -r2..r5
+                     355     ;*************************************
+012F                 356     divide:
+012F E4              357         clr a
+0130 F8              358         mov r0,a        ;initialize count
+0131 F50C            359         mov xtemp,a     ;zero quotient
+0133 F50D            360         mov xtemp+1,a
+0135 F50E            361         mov xtemp+2,a
+0137 F50F            362         mov xtemp+3,a
+0139 ED              363         mov a,r5        ;check for zero dividend
+013A 4C              364         orl a,r4
+013B 4B              365         orl a,r3
+013C 4A              366         orl a,r2
+013D 600B            367         jz  jfinis
+013F E508            368         mov a,ltemp     ;check for zero divisor
+0141 4509            369         orl a,ltemp+1
+0143 450A            370         orl a,ltemp+2
+0145 450B            371         orl a,ltemp+3
+0147 7036            372         jnz midl
+0149 22              373         ret
+                     374     
+014A 21DF            375     jfinis: jmp finis
+                     376     
+014C                 377     loops:
+014C EA              378         mov a,r2
+014D C3              379         clr c
+014E 9508            380         subb    a,ltemp+0   ;is divisor greater than dividend yet
+0150 4030            381         jc  yes     ;yes, go no further
+0152 7013            382         jnz no
+0154 EB              383         mov a,r3
+0155 9509            384         subb    a,ltemp+1
+0157 4029            385         jc  yes
+0159 700C            386         jnz no
+015B EC              387         mov a,r4
+015C 950A            388         subb    a,ltemp+2
+015E 4022            389         jc  yes
+0160 7005            390         jnz no
+0162 ED              391         mov a,r5
+0163 950B            392         subb    a,ltemp+3
+0165 401B            393         jc  yes
+0167                 394     no:
+0167 E50B            395         mov a,ltemp+3   ;shift divisor up one bit
+0169 250B            396         add a,ltemp+3
+016B F50B            397         mov ltemp+3,a
+016D E50A            398         mov a,ltemp+2
+016F 350A            399         addc    a,ltemp+2
+0171 F50A            400         mov ltemp+2,a
+0173 E509            401         mov a,ltemp+1
+0175 3509            402         addc    a,ltemp+1
+0177 F509            403         mov ltemp+1,a
+0179 E508            404         mov a,ltemp+0
+017B 3508            405         addc    a,ltemp+0
+017D F508            406         mov ltemp+0,a
+017F                 407     midl:
+017F 08              408         inc r0      ;increment count
+0180 E508            409         mov a,ltemp+0   ;check for safe to shift some more
+0182                 410         jnb acc.7,loops  ;loop if top bit clear
+*** _________________________________^
+*** ERROR #A17 IN 410 (Sarifm3.asm, LINE 410): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+0182                 411     yes:
+0182 E508            412         mov a,ltemp+0
+0184 C3              413         clr c
+0185 9A              414         subb    a,r2        ;can we subtract now?
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE     8
+
+0186 401A            415         jc  dosub       ;yes, go and do it
+0188 7015            416         jnz nosub
+018A E509            417         mov a,ltemp+1
+018C 9B              418         subb    a,r3
+018D 4013            419         jc  dosub
+018F 700E            420         jnz nosub
+0191 E50A            421         mov a,ltemp+2
+0193 9C              422         subb    a,r4
+0194 400C            423         jc  dosub
+0196 7007            424         jnz nosub
+0198 E50B            425         mov a,ltemp+3
+019A 9D              426         subb    a,r5
+019B 4005            427         jc  dosub
+019D 6003            428         jz  dosub
+019F                 429     nosub:
+019F C3              430         clr c
+01A0 8012            431         sjmp    dosh
+01A2                 432     dosub:
+01A2 C3              433         clr c       ;subtract divisor from dividend
+01A3 ED              434         mov a,r5
+01A4 950B            435         subb    a,ltemp+3
+01A6 FD              436         mov r5,a
+01A7 EC              437         mov a,r4
+01A8 950A            438         subb    a,ltemp+2
+01AA FC              439         mov r4,a
+01AB EB              440         mov a,r3
+01AC 9509            441         subb    a,ltemp+1
+01AE FB              442         mov r3,a
+01AF EA              443         mov a,r2
+01B0 9508            444         subb    a,ltemp+0
+01B2 FA              445         mov r2,a
+01B3 D3              446         setb    c       ;now set bit for quotient
+01B4                 447     dosh:
+01B4 E50F            448         mov a,xtemp+3
+01B6 33              449         rlc a
+01B7 F50F            450         mov xtemp+3,a
+01B9 E50E            451         mov a,xtemp+2
+01BB 33              452         rlc a
+01BC F50E            453         mov xtemp+2,a
+01BE E50D            454         mov a,xtemp+1
+01C0 33              455         rlc a
+01C1 F50D            456         mov xtemp+1,a
+01C3 E50C            457         mov a,xtemp+0
+01C5 33              458         rlc a
+01C6 F50C            459         mov xtemp+0,a
+01C8 E508            460         mov a,ltemp+0       ;shift divisor down
+01CA C3              461         clr c
+01CB 13              462         rrc a
+01CC F508            463         mov ltemp+0,a
+01CE E509            464         mov a,ltemp+1
+01D0 13              465         rrc a
+01D1 F509            466         mov ltemp+1,a
+01D3 E50A            467         mov a,ltemp+2
+01D5 13              468         rrc a
+01D6 F50A            469         mov ltemp+2,a
+01D8 E50B            470         mov a,ltemp+3
+01DA 13              471         rrc a
+01DB F50B            472         mov ltemp+3,a
+                     473     
+01DD D8A3            474         djnz    r0,yes      ;and continue with the rest
+                     475     
+01DF                 476     finis:
+01DF 8D0B            477         mov ltemp+3,r5
+01E1 8C0A            478         mov ltemp+2,r4
+01E3 8B09            479         mov ltemp+1,r3
+01E5 8A08            480         mov ltemp+0,r2
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE     9
+
+01E7 AD0F            481         mov r5,xtemp+3
+01E9 AC0E            482         mov r4,xtemp+2
+01EB AB0D            483         mov r3,xtemp+1
+01ED AA0C            484         mov r2,xtemp+0
+01EF 22              485         ret         ;and return with the satisfaction of a job well done
+                     486     
+                     487     
+                     488     ;   Long multiplication
+                     489     ;   The main multiply thingo. Called with one operand in r5-r2 and the
+                     490     ;   other in ltemp. It really doesn't matter which one is where.
+                     491     
+                     492     ;**********************************
+                     493     ;(r2..r5)*(ltemp..ltemp+3)=r2..r5
+                     494     ;ст  мл
+                     495     ;**********************************
+01F0                 496     llmul:
+01F0                 497     almul:
+01F0                 498     lmul:
+01F0 ED              499         mov a,r5        ;low order byte
+01F1                 500         mov b,ltemp+3       ;times low order byte
+*** _________________________________^
+*** ERROR #A45 IN 500 (Sarifm3.asm, LINE 500): UNDEFINED SYMBOL (PASS-2)
+01F4 A4              501         mul ab
+01F5 F50F            502         mov xtemp+3,a       ;store low
+01F7                 503         mov xtemp+2,b   ;and high
+*** _________________________________________^
+*** ERROR #A45 IN 503 (Sarifm3.asm, LINE 503): UNDEFINED SYMBOL (PASS-2)
+01FA ED              504         mov a,r5        ;low order
+01FB                 505         mov b,ltemp+2   ;times next
+*** _________________________________^
+*** ERROR #A45 IN 505 (Sarifm3.asm, LINE 505): UNDEFINED SYMBOL (PASS-2)
+01FE A4              506         mul ab
+01FF 250E            507         add a,xtemp+2   ;add in
+0201 F50E            508         mov xtemp+2,a
+0203                 509         mov a,b
+*** ___________________________________^
+*** ERROR #A45 IN 509 (Sarifm3.asm, LINE 509): UNDEFINED SYMBOL (PASS-2)
+0205 3400            510         addc    a,#0
+0207 F50D            511         mov xtemp+1,a
+0209 ED              512         mov a,r5
+020A                 513         mov b,ltemp+1
+*** _________________________________^
+*** ERROR #A45 IN 513 (Sarifm3.asm, LINE 513): UNDEFINED SYMBOL (PASS-2)
+020D A4              514         mul ab
+020E 250D            515         add a,xtemp+1
+0210 F50D            516         mov xtemp+1,a
+0212                 517         mov a,b
+*** ___________________________________^
+*** ERROR #A45 IN 517 (Sarifm3.asm, LINE 517): UNDEFINED SYMBOL (PASS-2)
+0214 3400            518         addc    a,#0
+0216 F50C            519         mov xtemp+0,a
+0218 ED              520         mov a,r5
+0219                 521         mov b,ltemp+0
+*** _________________________________^
+*** ERROR #A45 IN 521 (Sarifm3.asm, LINE 521): UNDEFINED SYMBOL (PASS-2)
+021C A4              522         mul ab
+021D 250C            523         add a,xtemp+0
+021F F50C            524         mov xtemp+0,a
+0221 EC              525         mov a,r4
+0222                 526         mov b,ltemp+3
+*** _________________________________^
+*** ERROR #A45 IN 526 (Sarifm3.asm, LINE 526): UNDEFINED SYMBOL (PASS-2)
+0225 A4              527         mul ab
+0226 250E            528         add a,xtemp+2
+0228 F50E            529         mov xtemp+2,a
+022A                 530         mov a,b
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE    10
+
+*** ___________________________________^
+*** ERROR #A45 IN 530 (Sarifm3.asm, LINE 530): UNDEFINED SYMBOL (PASS-2)
+022C 350D            531         addc    a,xtemp+1
+022E F50D            532         mov xtemp+1,a
+0230 E50C            533         mov a,xtemp+0
+0232 3400            534         addc    a,#0
+0234 F50C            535         mov xtemp+0,a
+0236 EC              536         mov a,r4
+0237                 537         mov b,ltemp+2
+*** _________________________________^
+*** ERROR #A45 IN 537 (Sarifm3.asm, LINE 537): UNDEFINED SYMBOL (PASS-2)
+023A A4              538         mul ab
+023B 250D            539         add a,xtemp+1
+023D F50D            540         mov xtemp+1,a
+023F                 541         mov a,b
+*** ___________________________________^
+*** ERROR #A45 IN 541 (Sarifm3.asm, LINE 541): UNDEFINED SYMBOL (PASS-2)
+0241 350C            542         addc    a,xtemp+0
+0243 F50C            543         mov xtemp+0,a
+0245 EC              544         mov a,r4
+0246                 545         mov b,ltemp+1
+*** _________________________________^
+*** ERROR #A45 IN 545 (Sarifm3.asm, LINE 545): UNDEFINED SYMBOL (PASS-2)
+0249 A4              546         mul ab
+024A 250C            547         add a,xtemp+0
+024C F50C            548         mov xtemp+0,a
+                     549     
+024E EB              550         mov a,r3
+024F                 551         mov b,ltemp+3
+*** _________________________________^
+*** ERROR #A45 IN 551 (Sarifm3.asm, LINE 551): UNDEFINED SYMBOL (PASS-2)
+0252 A4              552         mul ab
+0253 250D            553         add a,xtemp+1
+0255 F50D            554         mov xtemp+1,a
+0257                 555         mov a,b
+*** ___________________________________^
+*** ERROR #A45 IN 555 (Sarifm3.asm, LINE 555): UNDEFINED SYMBOL (PASS-2)
+0259 350C            556         addc    a,xtemp+0
+025B F50C            557         mov xtemp+0,a
+025D EB              558         mov a,r3
+025E                 559         mov b,ltemp+2
+*** _________________________________^
+*** ERROR #A45 IN 559 (Sarifm3.asm, LINE 559): UNDEFINED SYMBOL (PASS-2)
+0261 A4              560         mul ab
+0262 250C            561         add a,xtemp+0
+0264 F50C            562         mov xtemp+0,a
+                     563     
+0266 EA              564         mov a,r2
+0267                 565         mov b,ltemp+3
+*** _________________________________^
+*** ERROR #A45 IN 565 (Sarifm3.asm, LINE 565): UNDEFINED SYMBOL (PASS-2)
+026A A4              566         mul ab
+026B 250C            567         add a,xtemp+0
+026D FA              568         mov r2,a
+026E AB0D            569         mov r3,xtemp+1
+0270 AC0E            570         mov r4,xtemp+2
+0272 AD0F            571         mov r5,xtemp+3
+                     572     
+0274 22              573         ret         ;all done
+                     574     ;******************************
+                     575     ;из содержимого  r2-r5  вычесть
+                     576     ;содержимое          ltemp..ltemp+3
+                     577     ;******************************
+0275                 578     llsub:
+0275                 579      lsub:
+0275 ED              580         mov a,r5
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE    11
+
+0276 C3              581         clr c
+0277 950B            582         subb    a,11
+0279 FD              583         mov r5,a
+027A EC              584         mov a,r4
+027B 950A            585         subb    a,10
+027D FC              586         mov r4,a
+027E EB              587         mov a,r3
+027F 9509            588         subb    a,9
+0281 FB              589         mov r3,a
+0282 EA              590         mov a,r2
+0283 9508            591         subb    a,8
+0285 FA              592         mov r2,a
+0286 22              593         ret
+                     594     
+                     595     ;***********************************************
+                     596     ;                                                      ст мл
+                     597     ; cложение содержимого  r2..r5 с числом по адресу
+                     598     ;  r0- адрес младшего байта !!!
+                     599     ;результат- r2..r5
+                     600     ;***********************************************
+                     601     
+0287 C3              602     ladd:    clr       c
+0288 ED              603          mov       a,r5
+0289 26              604          add       a,@r0
+028A FD              605          mov       r5,a
+028B 18              606          dec       r0
+028C EC              607          mov       a,r4
+028D 36              608          addc      a,@r0
+028E FC              609          mov       r4,a
+028F 18              610          dec       r0
+0290 EB              611          mov       a,r3
+0291 36              612          addc      a,@r0
+0292 FB              613          mov       r3,a
+0293 18              614          dec       r0
+0294 EA              615          mov       a,r2
+0295 36              616          addc      a,@r0
+0296 FA              617          mov       r2,a
+0297 22              618          ret
+                     619     ;***********************************************
+                     620     ;                                                      ст мл
+                     621     ; cложение содержимого  r2..r5 с числом по адресу
+                     622     ;  r0- адрес младшего байта !!!
+                     623     ;результат- r2..r5
+                     624     ;***********************************************
+                     625     
+0298 C3              626     laddx:    clr       c
+0299 E2              627                                             movx            a,@r0
+029A 2D              628                                             add                     a,r5
+029B FD              629               mov     r5,a
+029C 18              630                             dec     r0
+029D E2              631                             movx    a,@r0
+029E 3C              632                             addc    a,r4
+029F FC              633                             mov     r4,a
+02A0 18              634                             dec     r0
+02A1 E2              635                             movx    a,@r0
+02A2 3B              636                             addc    a,r3
+02A3 FB              637                             mov     r3,a
+02A4 18              638                             dec     r0
+02A5 E2              639                             movx    a,@r0
+02A6 3A              640                             addc    a,r2
+02A7 FA              641                             mov       r2,a
+02A8 22              642                             ret
+                     643     
+                     644     ;***********************************************
+                     645     ;                                                      ст мл
+                     646     ; cложение содержимого  r2..r5 с числом по адресу
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE    12
+
+                     647     ;  dptr- адрес младшего байта !!!
+                     648     ;результат- r2..r5
+                     649     ;***********************************************
+                     650     
+02A9 C3              651     addx:    clr       c
+02AA E0              652                                             movx            a,@dptr
+02AB 2D              653                                             add                     a,r5
+02AC FD              654               mov     r5,a
+02AD 51BD            655                             call            dedptr;dec     dptr
+02AF E0              656                             movx    a,@dptr
+02B0 3C              657                             addc    a,r4
+02B1 FC              658                             mov     r4,a
+02B2 51BD            659                             call            dedptr;dec     dptr
+02B4 E0              660                             movx    a,@dptr
+02B5 3B              661                             addc    a,r3
+02B6 FB              662                             mov     r3,a
+02B7 51BD            663                             call            dedptr;dec     dptr
+02B9 E0              664                             movx    a,@dptr
+02BA 3A              665                             addc    a,r2
+02BB FA              666                             mov       r2,a
+02BC 22              667                             ret
+                     668     
+02BD                 669     dedptr:         push    psw
+*** _________________________________________________^
+*** ERROR #A45 IN 669 (Sarifm3.asm, LINE 669): UNDEFINED SYMBOL (PASS-2)
+02BF C3              670                                             clr             c
+02C0                 671                                             mov             a,dpl
+*** ___________________________________________________________________________________^
+*** ERROR #A45 IN 671 (Sarifm3.asm, LINE 671): UNDEFINED SYMBOL (PASS-2)
+02C2 9401            672                                             subb    a,#1
+02C4                 673                                             mov             dpl,a
+*** _________________________________________________________________________________^
+*** ERROR #A45 IN 673 (Sarifm3.asm, LINE 673): UNDEFINED SYMBOL (PASS-2)
+02C6                 674                                             mov             a,dph
+*** ___________________________________________________________________________________^
+*** ERROR #A45 IN 674 (Sarifm3.asm, LINE 674): UNDEFINED SYMBOL (PASS-2)
+02C8 9400            675                                             subb    a,#0
+02CA                 676                                             mov             dph,a
+*** _________________________________________________________________________________^
+*** ERROR #A45 IN 676 (Sarifm3.asm, LINE 676): UNDEFINED SYMBOL (PASS-2)
+02CC                 677                                             pop             psw
+*** _________________________________________________________________________________^
+*** ERROR #A45 IN 677 (Sarifm3.asm, LINE 677): UNDEFINED SYMBOL (PASS-2)
+02CE 22              678                                             ret
+*** WARNING #A41 IN 678 (Sarifm3.asm, LINE 678): MISSING 'END' STATEMENT
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE    13
+
+XREF SYMBOL TABLE LISTING
+---- ------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES / REFERENCES
+
+ACC. . . . . . . .    ----   -----          75 151 154 410
+ADDX . . . . . . .  C ADDR   02A9H   A      651#
+ALMUL. . . . . . .  C ADDR   01F0H   A      497#
+B. . . . . . . . .    ----   -----          500 503 505 509 513 517 521 526 530 537 541 545 551 555 559 565
+BIN30. . . . . . .  C ADDR   0017H   A      64# 88
+BIN31. . . . . . .  C ADDR   001BH   A      68# 72
+BIN32. . . . . . .  C ADDR   0029H   A      80# 85
+BIN41. . . . . . .  C ADDR   003AH   A      96# 106
+BINDEC . . . . . .  C ADDR   000CH   A      43#
+CLEAR. . . . . . .  C ADDR   0006H   A      21 25# 55
+CLR11. . . . . . .  C ADDR   0007H   A      27# 29
+CLRDEC . . . . . .  C ADDR   0000H   A      19#
+CLRNUM . . . . . .  C ADDR   0004H   A      22# 134
+DEC30. . . . . . .  C ADDR   0055H   A      144# 167
+DEC31. . . . . . .  C ADDR   005AH   A      149# 156
+DEC32. . . . . . .  C ADDR   0066H   A      160# 164
+DECBIN . . . . . .  C ADDR   0049H   A      123#
+DECSIZE. . . . . .  N NUMB   000AH   A      5# 20 54 79 92 95 148
+DECT2. . . . . . .  C ADDR   006FH   A      140 170#
+DEDPTR . . . . . .  C ADDR   02BDH   A      655 659 663 669#
+DIVIDE . . . . . .  C ADDR   012FH   A      356#
+DONE . . . . . . .  C ADDR   009EH   A      186 197#
+DONE1. . . . . . .  C ADDR   009CH   A      189 192 195#
+DOSH . . . . . . .  C ADDR   01B4H   A      431 447#
+DOSUB. . . . . . .  C ADDR   01A2H   A      415 419 423 427 428 432#
+DPH. . . . . . . .    ----   -----          203 239 274 277 289 312 674 676
+DPL. . . . . . . .    ----   -----          219 255 276 290 293 327 671 673
+FINIS. . . . . . .  C ADDR   01DFH   A      375 476#
+JFINIS . . . . . .  C ADDR   014AH   A      367 375#
+LADD . . . . . . .  C ADDR   0287H   A      602#
+LADDX. . . . . . .  C ADDR   0298H   A      626#
+LCMP . . . . . . .  C ADDR   0089H   A      182#
+LDC_LONG . . . . .  C ADDR   009FH   A      202#
+LDC_LTEMP. . . . .  C ADDR   00C1H   A      238#
+LDX_LONG . . . . .  C ADDR   00E7H   A      273#
+LDX_LTEMP. . . . .  C ADDR   010DH   A      311#
+LLMUL. . . . . . .  C ADDR   01F0H   A      496#
+LLSUB. . . . . . .  C ADDR   0275H   A      578#
+LMUL . . . . . . .  C ADDR   01F0H   A      498#
+LOOPS. . . . . . .  C ADDR   014CH   A      377# 410
+LSUB . . . . . . .  C ADDR   0275H   A      579#
+LTEMP. . . . . . .  N NUMB   0008H   A      3# 368 369 370 371 380 384 388 392 395 396 397 398 399 400 401 402 403
+                                           404 405 406 409 412 417 421 425 435 438 441 444 460 463 464 466 467 469
+                                           470 472 477 478 479 480 500 505 513 521 526 537 545 551 559 565
+MIDL . . . . . . .  C ADDR   017FH   A      372 407#
+NO . . . . . . . .  C ADDR   0167H   A      382 386 390 394#
+NOSUB. . . . . . .  C ADDR   019FH   A      416 420 424 429#
+NUMSIZE. . . . . .  N NUMB   0004H   A      6# 23 61 67 141 159
+OBOARD . . . . . .  C ADDR   00D9H   A      240 254#
+OBOARD1. . . . . .  C ADDR   0121H   A      313 326#
+ONBOAR1. . . . . .  C ADDR   00FFH   A      275 292#
+ONBOARD. . . . . .  C ADDR   00B3H   A      204 218#
+OV . . . . . . . .    ----   -----          196
+PSW. . . . . . . .    ----   -----          669 677
+RR4. . . . . . . .  N NUMB   0004H   A      7# 59 78 94 138 158
+RR5. . . . . . . .  N NUMB   0005H   A      8# 60 66 73 139 147
+XTEMP. . . . . . .  N NUMB   000CH   A      4# 359 360 361 362 448 450 451 453 454 456 457 459 481 482 483 484 502
+                                           503 507 508 511 515 516 519 523 524 528 529 531 532 533 535 539 540 542
+                                           543 547 548 553 554 556 557 561 562 567 569 570 571
+YES. . . . . . . .  C ADDR   0182H   A      381 385 389 393 411# 474
+A51 MACRO ASSEMBLER  SARIFM3                                                              08/16/2007 19:33:11 PAGE    14
+
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  1 WARNING(S), 39 ERROR(S)

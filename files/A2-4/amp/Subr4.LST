@@ -1,0 +1,1749 @@
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE     1
+
+
+MACRO ASSEMBLER A51 V6.14a
+NO OBJECT MODULE REQUESTED
+ASSEMBLER INVOKED BY: D:\PROGRAM FILES\CYGNAL\IDEFILES\C51\BIN\A51.EXE Subr4.asm XR GEN DB EP NOMOD51
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     loadUS: ;если идет тест измерени€ ус восстановить дл€ теста
+0000                   2                                     jb              biteizm,yestest
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 2 (Subr4.asm, LINE 2): UNDEFINED SYMBOL (PASS-2)
+0003                   3                                             mov             r1,#diap
+*** _____________________________________________________________________________________^
+*** ERROR #A45 IN 3 (Subr4.asm, LINE 3): UNDEFINED SYMBOL (PASS-2)
+0005 E7                4                             mov             a,@r1
+0006 23                5                             rl              a;*2
+0007 FC                6                             mov             r4,a                    ;save a
+0008 900046            7                             mov             dptr,#tabus
+000B 93                8                             movc    a,@a+dptr
+000C FA                9                             mov             r2,a                    ;high byte
+000D                  10                             mov             a,p4
+*** ___________________________________________________________________^
+*** ERROR #A45 IN 10 (Subr4.asm, LINE 10): UNDEFINED SYMBOL (PASS-2)
+000F 5401             11                             anl             a,#01
+0011 4A               12                             orl             a,r2
+0012                  13                             mov             p4,a
+*** _________________________________________________________________^
+*** ERROR #A45 IN 13 (Subr4.asm, LINE 13): UNDEFINED SYMBOL (PASS-2)
+0014 0C               14                             inc             r4
+0015 EC               15                             mov             a,r4
+0016 93               16                             movc    a,@a+dptr
+0017 FB               17                             mov             r3,a                    ;low byte
+0018                  18                             mov             a,p5
+*** ___________________________________________________________________^
+*** ERROR #A45 IN 18 (Subr4.asm, LINE 18): UNDEFINED SYMBOL (PASS-2)
+001A 5401             19                             anl             a,#01
+001C 4B               20                             orl             a,r3
+001D                  21                             mov             p5,a
+*** _________________________________________________________________^
+*** ERROR #A45 IN 21 (Subr4.asm, LINE 21): UNDEFINED SYMBOL (PASS-2)
+001F                  22                             mov             r1,#parT
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 22 (Subr4.asm, LINE 22): UNDEFINED SYMBOL (PASS-2)
+0021 B7010E           23                             cjne    @r1,#1,bret
+0024                  24                             mov             r1,#diap                  ;10s (parT=1)
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 24 (Subr4.asm, LINE 24): UNDEFINED SYMBOL (PASS-2)
+0026 7405             25                             mov             a,#5                      ;10-8..10-11 p4.1=1
+0028 C3               26                             clr             c
+0029 97               27                             subb    a,@r1
+002A 5006             28                             jnc             bret
+002C                  29                             mov             a,p4
+*** ___________________________________________________________________^
+*** ERROR #A45 IN 29 (Subr4.asm, LINE 29): UNDEFINED SYMBOL (PASS-2)
+002E 4402             30                             orl             a,#02
+0030                  31                             mov             p4,a                     ;10-8..10-11 p4.1=1
+*** _________________________________________________________________^
+*** ERROR #A45 IN 31 (Subr4.asm, LINE 31): UNDEFINED SYMBOL (PASS-2)
+0032                  32     bret:      call          louizm         ;us если вкл кн »«ћ≈–
+*** __________________________________________________^
+*** ERROR #A45 IN 32 (Subr4.asm, LINE 32): UNDEFINED SYMBOL (PASS-2)
+0035 22               33                             ret
+0036                  34     yestest:
+0036 5195             35                             call            lotpus          ;ус теста измерени€
+0038 22               36                             ret
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE     2
+
+                      37                             
+                      38     ;загр ус дл€ кор 0
+                      39     ;dptr-
+0039 E4               40     lospus:         clr             a
+                      41                             ;movc   a,@a+dptr
+                      42                             ;mov            r2,a                    ;high byte
+                      43                             ;mov            a,p4
+                      44                             ;anl            a,#01
+                      45                             ;orl            a,r2
+                      46                             ;mov            p4,a
+                      47                             ;inc            dptr
+003A E4               48                             clr             a
+003B 93               49                             movc    a,@a+dptr
+003C FB               50                             mov             r3,a                    ;low byte
+003D                  51                             mov             a,p5
+*** ___________________________________________________________________^
+*** ERROR #A45 IN 51 (Subr4.asm, LINE 51): UNDEFINED SYMBOL (PASS-2)
+003F 54BF             52                             anl             a,#0bfh;01
+0041 4B               53                             orl             a,r3
+0042                  54                             mov             p5,a
+*** _________________________________________________________________^
+*** ERROR #A45 IN 54 (Subr4.asm, LINE 54): UNDEFINED SYMBOL (PASS-2)
+0044 22               55                             ret
+                      56     
+0045 80               57     kor0us:         db              80h;18h,2eh             ;us режима коррекции 0
+                      58     
+                      59     ;us кнопка измерени€ выкл
+0046 88D6             60     tabus:     db           88h,0d6h         ;10-2
+0048 88F6             61                             db      88h,0f6h         ;10-3
+004A 88D6             62                             db              88h,0d6h         ;10-4
+004C 88F6             63                             db              88h,0f6h         ;10-5
+004E 9AD6             64                             db      9ah,0d6h         ;10-6
+0050 9AF6             65                             db              9ah,0f6h         ;10-7
+0052 ACD6             66                             db              0ach,0d6h        ;10-8
+0054 ACF6             67                             db      0ach,0f6h        ;10-9
+0056 C8D6             68                             db              0c8h,0d6h        ;10-10
+0058 C8F6             69                             db              0c8h,0f6h        ;10-11
+                      70     
+005A                  71     tabt11: 
+005A 66E6             72                             db              66h,0e6h;10-11
+005C                  73     tabt9:  
+005C 32E6             74                             db              32h,0e6h;10-9
+005E                  75     tabt7:  
+005E 18EE             76                             db              18h,0eeh;10-7
+                      77     
+                      78      ;загрузка текста в буфер 2 bufind+0..bufind9
+                      79     ;в зав от parT (Tизм)
+0060                  80     loadT:          mov             r1,#load;parT
+*** _____________________________________________________________^
+*** ERROR #A45 IN 80 (Subr4.asm, LINE 80): UNDEFINED SYMBOL (PASS-2)
+0062                  81     lolevT:         mov             r0,#bufind+0
+*** _____________________________________________________________^
+*** ERROR #A45 IN 81 (Subr4.asm, LINE 81): UNDEFINED SYMBOL (PASS-2)
+0064 7B0A             82                             mov             r3,#10
+0066                  83                             mov             b,#10
+*** _________________________________________________________________^
+*** ERROR #A45 IN 83 (Subr4.asm, LINE 83): UNDEFINED SYMBOL (PASS-2)
+0069 E7               84                             mov             a,@r1
+006A A4               85                             mul             ab
+006B FC               86                             mov             r4,a                    ;save a
+006C 90037D           87                             mov             dptr,#textT
+006F 93               88             lod1:   movc    a,@a+dptr
+0070 F6               89                             mov             @r0,a
+0071 08               90                             inc             r0
+0072 0C               91                             inc             r4
+0073 EC               92                             mov             a,r4
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE     3
+
+0074 DBF9             93                             djnz    r3,lod1
+0076 22               94                             ret     
+                      95     ;загрузка текста в буфер 2 bufind+0..bufind9                    
+                      96     ;dptr-адр строки текста         
+0077                  97     lotext:         
+0077 7B0A             98                             mov             r3,#10
+0079                  99                             mov             r0,#bufind+0
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 99 (Subr4.asm, LINE 99): UNDEFINED SYMBOL (PASS-2)
+007B E4              100     lodt:           clr             a
+007C 93              101                             movc    a,@a+dptr
+007D F6              102                             mov             @r0,a
+007E 08              103                             inc             r0
+007F A3              104                             inc             dptr
+0080 DBF9            105                             djnz    r3,lodt
+0082 22              106                             ret                                     
+                     107     
+                     108     
+                     109     
+                     110     
+                     111      ;задержка 100 мкс
+0083 7978            112     z_100:    mov R1,#78h     ;загрузка первого числа
+0085 7A02            113     z100:     mov R2,#2h     ;загрузка второго числа
+0087 DAFE            114     count:    djnz R2, count;декремент R2 и внутренний цикл, если R2<>0     
+0089 D9FA            115               djnz R1, z100 ;декремент R1 и внутренний цикл, если R1<>0
+008B 22              116               ret           
+                     117     
+                     118     ;задержка 34 мкс
+008C 7B8B            119     z_5:      mov R3,#8Bh      ;загрузка числа
+008E DBFE            120     ct:       djnz R3,ct
+0090 22              121               ret
+                     122     
+                     123     ;задержка 15 мс
+0091 79FA            124     z_15:     mov R1,#0FAh    ;загрузка первого числа
+0093 7AED            125     z15:      mov R2,#0EDh   ;загрузка второго числа
+0095 DAFE            126     zz:       djnz R2, zz   ;декремент R2 и внутренний цикл, если R2<>0
+0097 D9FA            127               djnz R1, z15  ;декремент R1 и внутренний цикл, если R1<>0
+0099 22              128               ret   
+                     129                                               
+                     130      ;задержка 1 мс
+009A 7910            131     z_1ms:     mov R1,#10h     
+009C 7AED            132     ss1:       mov R2,#0EDh    
+009E DAFE            133                djnz R2, $    
+00A0 D9FA            134                djnz R1, ss1   
+00A2 22              135                ret   
+                     136     
+                     137      ;????????
+                     138     ;задержка 1с
+00A3 7D1F            139     z_1s:   mov             r5,#01fh 
+00A5 7EFF            140     co2s:   mov     R6,#0ffh     
+00A7 7FFF            141     z1s:     mov    R7,#0ffh     
+00A9 DFFE            142     co1s:   djnz    R7, co1s        
+00AB DEFA            143             djnz    R6, z1s 
+00AD DDF6            144                     djnz    r5,co2s
+00AF 22              145               ret
+                     146     ;задержка 0,1с
+00B0 7D03            147     z_01s:           mov            r5,#03h 
+00B2 7EFF            148     co02s:          mov     R6,#0ffh     
+00B4 7FFF            149     z01s:           mov     R7,#0ffh     
+00B6 DFFE            150                             djnz    R7, $   
+00B8 DEFA            151                     djnz    R6, z01s 
+00BA DDF6            152                             djnz    r5,co02s
+00BC 22              153                      ret
+                     154                                               
+                     155     ;задержка 0,5с
+00BD 7D0D            156     z_05s:           mov            r5,#0dh 
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE     4
+
+00BF 7EFF            157     co05s:                  mov     R6,#0ffh     
+00C1 7FFF            158     z05s:           mov     R7,#0ffh     
+00C3 DFFE            159                                     djnz    R7, $   
+00C5 DEFA            160                     djnz    R6, z05s 
+00C7 DDF6            161                                             djnz    r5,co05s
+00C9 22              162                      ret                                                     
+                     163                                                               
+00CA 000007FF        164     chzap:  db      00,00,07h,0ffh             
+00CE 00000000        165     ch0:    db      00,00,00,00
+00D2 0000000A        166     ch10:   db      00,00,00,0ah                            ;10
+00D6 00000005        167     ch5:    db      00,00,00,05                                             ;5
+00DA 00000004        168     ch4:    db      00,00,00,04                                             ;4
+00DE 000003B9        169     ch954:  db 00,00,03,0b9h                                                ;954
+00E2 000003E8        170     ch10000:        db 00,00,03h,0e8h                                               ;10000
+00E6 00000064        171     ch100:  db 00,00,00,64h ;100
+00EA 00000002        172     ch2:    db      00,00,00,02                                             
+                     173     ;CH_953:        db 3fh,74h,37h,72h;0,953971
+                     174     ;CH_953:        db 3fh,74h,1ch,71h;0,953558
+                     175     ;CH_953:        db 3fh,74h,02,0d2h;0.953168
+00EE 00000001        176     ch1:    db  00,00,00,01
+00F2 49742400        177     ch_mln: db      49h,74h,24h,00;10*6
+00F6 3F800000        178     ch_1:   db      3fh,80h,00,00   
+00FA 40000000        179     ch_2:   db      40h,00,00,00;2
+00FE 40800000        180     ch_4:   db      40h,80h,00,00;4         
+0102 3F741EDF        181     CH_953: db 3fh,74h,1eh,0dfh             ;0,953596
+0106 47C35000        182     CHtho:  db      47h,0c3h,50h,00;48h,43h,50h,00;30d40 h  -000
+010A 3F800347        183     KD:             db      3fh,80h,03h,47h;1,0001
+010E 48435000        184     CH2tho: db      48h,43h,50h,00;200000
+0112 4856D800        185     ch_220: db  48h,56h,0d8h,00;220000 -035b60 h
+0116 4856D800        186     ch_200: db  48h,56h,0d8h,00;200000 -030d40 h
+011A 461C4000        187     ch_10th:db  46h,1ch,40h,00;10000-2710h
+011E 41200000        188     ch_10:  db      41h,20h,00,00;10d
+0122 48742400        189     ch_250: db      48h,74h,24h,00;250000
+0126 000186A0        190     chk:            db      00,01,86h,0a0h;
+012A 00000320        191     ch320h: db      00,00,03h,20h;320h=800d
+012E 00000150        192     ch150h: db      00,00,01h,50h;150h
+                     193     ;r1- мл байт 2х байтного числа
+0132                 194     tenmin:         ;-10
+0132 C3              195                             clr             c
+0133 E7              196                     mov             a,@r1
+0134 9405            197                             subb    a,#5;10
+0136 F7              198                             mov             @r1,a
+0137 19              199                             dec             r1
+0138 E7              200                             mov             a,@r1
+0139 9400            201                             subb    a,#0
+013B F7              202                             mov             @r1,a
+013C 22              203                             ret
+                     204       ;r0-обнуление €чеек пам€ти  
+013D 7F04            205       clear4:        mov    r7,#4
+013F E4              206                             clr             a
+0140 F6              207       cl4:          mov             @r0,a
+0141 08              208                             inc             r0
+0142 DFFC            209                             djnz    r7,cl4
+0144 22              210                             ret     
+                     211     
+                     212      ;r0-обнуление €чеек пам€ти 
+                     213      ;R7- 
+0145                 214       clearN:        
+0145 E4              215                             clr             a
+0146 F6              216       cl4N:         mov             @r0,a
+0147 08              217                             inc             r0
+0148 DFFC            218                             djnz    r7,cl4N
+014A 22              219                             ret     
+                     220     
+                     221       ;чтение номера байта с индикатора(2байта)
+                     222     ;bufind+8..bufind+9
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE     5
+
+                     223     ;-  - - -
+                     224     ;- - - - - - - - - -
+                     225     ;adec..adec+9
+                     226     ;ст            мл
+014B                 227     upak2:  mov             r0,#bufind+8;
+*** _____________________________________________________^
+*** ERROR #A45 IN 227 (Subr4.asm, LINE 227): UNDEFINED SYMBOL (PASS-2)
+014D                 228                     mov             r1,#adec+9
+*** _____________________________________________________________^
+*** ERROR #A45 IN 228 (Subr4.asm, LINE 228): UNDEFINED SYMBOL (PASS-2)
+014F 7F02            229                     mov             r7,#2;2bait
+0151 C3              230     upa2:   clr             c
+0152 E6              231                     mov             a,@r0
+0153 9430            232                     subb    a,#30h
+0155 F7              233                     mov             @r1,a
+0156 18              234                     dec             r0
+0157 19              235                     dec             r1
+0158 DFF7            236                     djnz    r7,upa2
+015A 22              237                     ret  
+                     238     
+                     239     
+                     240         
+                     241      ;bufind+4..bufind+9
+                     242     ;-  - - -
+                     243     ;- - - - - - - - - -
+                     244     ;adec..adec+9
+                     245     ;ст            мл
+015B                 246     upak:   mov             r0,#bufind+9;
+*** _____________________________________________________^
+*** ERROR #A45 IN 246 (Subr4.asm, LINE 246): UNDEFINED SYMBOL (PASS-2)
+015D                 247                     mov             r1,#adec+9
+*** _____________________________________________________________^
+*** ERROR #A45 IN 247 (Subr4.asm, LINE 247): UNDEFINED SYMBOL (PASS-2)
+015F 7F06            248                     mov             r7,#6
+0161 C3              249     upa:    clr             c
+0162 E6              250                     mov             a,@r0
+0163 9430            251                     subb    a,#30h
+0165 F7              252                     mov             @r1,a
+0166 18              253                     dec             r0
+0167 19              254                     dec             r1
+0168 DFF7            255                     djnz    r7,upa
+016A 22              256                     ret
+                     257     
+                     258      ;чтение номера байта с индикатора(3байта)
+                     259     ;bufind+3..bufind+9
+                     260     ;-  - - -
+                     261     ;- - - - - - - - - -
+                     262     ;adec..adec+9
+                     263     ;ст            мл
+016B                 264     upak3:  mov             r0,#bufind+9;
+*** _____________________________________________________^
+*** ERROR #A45 IN 264 (Subr4.asm, LINE 264): UNDEFINED SYMBOL (PASS-2)
+016D                 265                     mov             r1,#adec+9
+*** _____________________________________________________________^
+*** ERROR #A45 IN 265 (Subr4.asm, LINE 265): UNDEFINED SYMBOL (PASS-2)
+016F 7F03            266                     mov             r7,#3;3bait
+0171 C3              267     upa1:   clr             c
+0172 E6              268                     mov             a,@r0
+0173 9430            269                     subb    a,#30h
+0175 F7              270                     mov             @r1,a
+0176 18              271                     dec             r0
+0177 19              272                     dec             r1
+0178 DFF7            273                     djnz    r7,upa1
+017A 22              274                     ret
+                     275     
+                     276     ;вых-r2,r3-адрес €чее пам€ти прогр
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE     6
+
+017B                 277     findkoef:
+017B                 278                                     mov             r1,#diap
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 278 (Subr4.asm, LINE 278): UNDEFINED SYMBOL (PASS-2)
+017D E7              279                                     mov             a,@r1
+017E 23              280                                     rl              a                                          
+                                          ;diap*2(2bait )
+017F FC              281                                     mov             r4,a                                    ;sa
+                             ve
+0180 900191          282                                     mov             dptr,#diKDw             ;адрес таблицы поис
+                             ка коффициентов
+                     283                                     
+0183 93              284                                     movc    a,@a+dptr                       ;ст байт
+0184 FA              285                                     mov             r2,a
+0185 A3              286                                     inc             dptr
+0186 EC              287                                     mov             a,r4
+0187 93              288                                     movc    a,@a+dptr
+0188 FB              289                                     mov             r3,a                    ;мл байт
+0189 22              290                                     ret
+                     291     ;r2..r5 в опр €ч внешн озу
+018A                 292     findext:
+018A                 293                                     mov             r1,#diap
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 293 (Subr4.asm, LINE 293): UNDEFINED SYMBOL (PASS-2)
+018C E7              294                                     mov             a,@r1
+018D 23              295                                     rl              a                                          
+                                          ;diap*2(2bait )
+018E 23              296                                     rl              a                                          
+                                          ;diap*2(2bait )
+018F F9              297                                     mov             r1,a                                    ;r1
+                             -номер €чейки внешнего озу
+                     298                                     
+0190 22              299                                     ret
+                     300     
+                     301     ;адрес €чеек прзу  коффициентов диапазона KD
+                     302     ;(5000h..5027h)
+0191 5000            303     diKDw:  dw              5000h                   ;10-2
+0193 5004            304                                     dw              5004h                   ;10-3
+0195 5008            305                                     dw              5008h                   ;10-4
+0197 500C            306                                     dw              500ch                   ;10-5
+0199 5010            307                                     dw              5010h                   ;10-6
+019B 5014            308                                     dw              5014h                   ;10-7
+019D 5018            309                                     dw              5018h                   ;10-8
+019F 501C            310                                     dw              501ch                   ;10-9
+01A1 5020            311                                     dw              5020h                   ;10-10
+01A3 5024            312                                     dw              5024h                   ;10-11
+01A5 5028            313     dipar:  dw              5028h                   ;parol
+                     314     
+01A7 000186A0        315     chthou: db      00,01,86h,0a0h  ;100.000
+                     316     
+01AB                 317     move82:         mov     r2,ltemp                        ;ltemp->r2..r5
+*** ____________________________________________________^
+*** ERROR #A45 IN 317 (Subr4.asm, LINE 317): UNDEFINED SYMBOL (PASS-2)
+01AD                 318                                             mov     r3,ltemp+1
+*** ____________________________________________________________________________^
+*** ERROR #A45 IN 318 (Subr4.asm, LINE 318): UNDEFINED SYMBOL (PASS-2)
+01AF                 319                                             mov     r4,ltemp+2
+*** ____________________________________________________________________________^
+*** ERROR #A45 IN 319 (Subr4.asm, LINE 319): UNDEFINED SYMBOL (PASS-2)
+01B1                 320                                             mov     r5,ltemp+3
+*** ____________________________________________________________________________^
+*** ERROR #A45 IN 320 (Subr4.asm, LINE 320): UNDEFINED SYMBOL (PASS-2)
+01B3 22              321                                             ret
+                     322     ;bufind+4..bufind+9
+                     323     ;-  - - -
+                     324     ;- - - - - - - - - -
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE     7
+
+                     325     ;adec..adec+9
+                     326     ;ст            мл
+01B4                 327     upakA:  mov             r0,#bufind+7;
+*** _____________________________________________________^
+*** ERROR #A45 IN 327 (Subr4.asm, LINE 327): UNDEFINED SYMBOL (PASS-2)
+01B6                 328                     mov             r1,#adec+9
+*** _____________________________________________________________^
+*** ERROR #A45 IN 328 (Subr4.asm, LINE 328): UNDEFINED SYMBOL (PASS-2)
+01B8 7F04            329                     mov             r7,#4
+01BA C3              330     upaa4:  clr             c
+01BB E6              331                     mov             a,@r0
+01BC 9430            332                     subb    a,#30h
+01BE F7              333                     mov             @r1,a
+01BF 18              334                     dec             r0
+01C0 19              335                     dec             r1
+01C1 DFF7            336                     djnz    r7,upaa4
+01C3 22              337                     ret
+                     338     
+                     339     ;bufind+4..bufind+9
+                     340     ;-  - - -
+                     341     ;- - - - - - - - - -
+                     342     ;adec..adec+9
+                     343     ;ст            мл
+01C4                 344     upakB:  mov             r0,#bufind+8;
+*** _____________________________________________________^
+*** ERROR #A45 IN 344 (Subr4.asm, LINE 344): UNDEFINED SYMBOL (PASS-2)
+01C6                 345                     mov             r1,#adec+9
+*** _____________________________________________________________^
+*** ERROR #A45 IN 345 (Subr4.asm, LINE 345): UNDEFINED SYMBOL (PASS-2)
+01C8 7F05            346                     mov             r7,#5
+01CA C3              347     upab:   clr             c
+01CB E6              348                     mov             a,@r0
+01CC 9430            349                     subb    a,#30h
+01CE F7              350                     mov             @r1,a
+01CF 18              351                     dec             r0
+01D0 19              352                     dec             r1
+01D1 DFF7            353                     djnz    r7,upab
+01D3                 354                     clr                     bitznB
+*** _________________________________________________________________^
+*** ERROR #A45 IN 354 (Subr4.asm, LINE 354): UNDEFINED SYMBOL (PASS-2)
+01D5                 355                     mov             a,bufind+3
+*** ___________________________________________________________^
+*** ERROR #A45 IN 355 (Subr4.asm, LINE 355): UNDEFINED SYMBOL (PASS-2)
+01D7 B42D02          356                     cjne            a,#2dh,abret
+01DA                 357                     setb            bitznB
+*** _________________________________________________________^
+*** ERROR #A45 IN 357 (Subr4.asm, LINE 357): UNDEFINED SYMBOL (PASS-2)
+01DC                 358     abret:
+01DC 22              359                     ret
+01DD                 360     CH_B:                   db      ;       4bh,18h,96h,80h;989680h=10 **7
+01DD 4E6E6AA8        361                                             db      4eh,6eh,6ah,0a8h;10**9
+01E1 43FA0000        362     CH_500:         db              43h,0fah,00,00;1fah=500
+01E5 4856D800        363     CH_22T:         db              48h,56h,0d8h,00;46h,0abh,0e0h,00;55f0h=22000
+01E9 49742400        364     CH_fl:  db      49h,74h,24h,00;47h,0c3h,50h,00;100000
+                     365     
+                     366     
+                     367     
+                     368     ;управление AD7731
+                     369     ;r4=b1 r5=b2
+01ED                 370     iniacp: ;управление AD7731
+01ED 7403            371                             mov             a,#03
+                     372     
+01EF B1FC            373                             call    write
+01F1 EC              374                             mov             a,r4;#80h
+01F2 B1FC            375                             call    write
+01F4 ED              376                             mov             a,r5;#04
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE     8
+
+01F5 B1FC            377                             call    write
+01F7 7402            378                             mov             a,#02
+01F9 B1FC            379                             call    write
+01FB 74A1            380                             mov             a,#0a1h
+01FD B1FC            381                             call    write
+01FF 7474            382                             mov             a,#74h
+0201 B1FC            383                             call    write
+0203                 384                             jb              p1.5,$;p1.3,$
+*** _________________________________________________________________^
+*** ERROR #A17 IN 384 (Subr4.asm, LINE 384): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+0203 7402            385                             mov             a,#02
+0205 B1FC            386                             call    write
+0207 7481            387                             mov             a,#81h
+0209 B1FC            388                             call    write
+020B 7474            389                             mov             a,#74h
+020D B1FC            390                             call    write
+020F                 391                             jb              p1.5,$;p1.3,$
+*** _________________________________________________________________^
+*** ERROR #A17 IN 391 (Subr4.asm, LINE 391): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+020F 7402            392                             mov             a,#02
+0211 B1FC            393                             call    write
+0213 7421            394                             mov             a,#21h
+0215 B1FC            395                             call    write
+0217 7474            396                             mov             a,#74h
+0219 B1FC            397                             call    write
+021B 22              398                             ret
+                     399                             ;;;;;;;;;;;;;;;;
+                     400     ;;;;;;;;;;;;;;;;;
+                     401     ;;;;;;;;;;;;;;;;;
+021C 0000            402     tabB1_2:                db              00,00            ;B1,B2 в соотв с Tизм  
+021E 6000            403                                     db              60h,00h;40h,04h         ;10s
+0220 6000            404                                     db              60h,00;40h,04h          ;1s
+0222 6000            405                                     db              60h,00h;40h,04h         ;0,1s
+0224 6000            406                                     db              60h,00h;20h,04h         ;50ms
+0226 6000            407                                     db              60h,00h;20h,04h          ;10ms
+0228 1332            408                                     db              13h,32h         ;2ms
+                     409     
+                     410     ;загр ¬1,¬2 в завис от “                                
+022A                 411     loab12:                 mov             r1,#parT
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 411 (Subr4.asm, LINE 411): UNDEFINED SYMBOL (PASS-2)
+022C 90021C          412                                     mov             dptr,#tabB1_2
+022F E7              413                                     mov             a,@r1
+0230 23              414                                     rl              a;*2
+0231 FF              415                                     mov             r7,a                    ;save a
+0232 93              416                                     movc    a,@a+dptr
+0233 FC              417                                     mov             r4,a   ;b1
+0234 0F              418                                     inc             r7
+0235 EF              419                                     mov             a,r7
+0236 93              420                                     movc    a,@a+dptr
+0237 FD              421                                     mov             r5,a
+                     422                                     ;после загр ¬1,2 загр упр слово дл€ нового “
+                     423                             
+0238 22              424                                     ret
+                     425     
+                     426     
+0239                 427     loadr2: mov             r0,#abin+3              ;r2..r5
+*** _____________________________________________________^
+*** ERROR #A45 IN 427 (Subr4.asm, LINE 427): UNDEFINED SYMBOL (PASS-2)
+023B E6              428                     mov             a,@r0                   ; ст мл   
+023C FA              429                     mov             r2,a
+023D 18              430                     dec             r0
+023E E6              431                     mov             a,@r0
+023F FB              432                     mov             r3,a
+0240 18              433                     dec             r0
+0241 E6              434                     mov             a,@r0
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE     9
+
+0242 FC              435                     mov             r4,a
+0243 18              436                     dec             r0
+0244 E6              437                     mov             a,@r0
+0245 FD              438                     mov             r5,a
+0246 22              439                     ret
+                     440                                             
+                     441      ;;;;;;;;;;;;;;;;;;;      
+                     442      ;загрузка KD в зависимости от диап изм  
+                     443      ;koef->r8..r11
+0247                 444     loadKD:                 mov             r0,#diap
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 444 (Subr4.asm, LINE 444): UNDEFINED SYMBOL (PASS-2)
+0249 E6              445                                     mov             a,@r0
+024A 900265          446                                     mov             dptr,#diKDn
+024D                 447                                     mov             b,#4
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 447 (Subr4.asm, LINE 447): UNDEFINED SYMBOL (PASS-2)
+0250 A4              448                                     mul             ab
+0251 FF              449                                     mov             r7,a;save
+0252 93              450                                     movc    a,@a+dptr
+0253                 451                                     mov             r8,a
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 451 (Subr4.asm, LINE 451): UNDEFINED SYMBOL (PASS-2)
+0255 A3              452                                     inc             dptr
+0256 EF              453                                     mov             a,r7
+0257 93              454                                     movc    a,@a+dptr
+0258                 455                                     mov             r9,a
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 455 (Subr4.asm, LINE 455): UNDEFINED SYMBOL (PASS-2)
+025A A3              456                                     inc             dptr
+025B EF              457                                     mov             a,r7
+025C 93              458                                     movc    a,@a+dptr
+025D                 459                                     mov             r10,a
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 459 (Subr4.asm, LINE 459): UNDEFINED SYMBOL (PASS-2)
+025F A3              460                                     inc             dptr
+0260 EF              461                                     mov             a,r7
+0261 93              462                                     movc    a,@a+dptr
+0262                 463                                     mov             r11,a
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 463 (Subr4.asm, LINE 463): UNDEFINED SYMBOL (PASS-2)
+0264 22              464                                     ret
+                     465     
+0265 3F506B7B        466      diKDn:                 db              3fh,50h,6bh,7bh;3fh,80h,00,00           ;10-2
+0269 3F507FCC        467                                     db              3fh,50h,7fh,0cch;3fh,80h,00,00          ;10
+                             -3
+026D 3F4F9D0B        468                                     db              3fh,4fh,9dh,0bh;3fh,80h,00,00           ;10
+                             -4
+0271 3F4FE869        469                                     db              3fh,4fh,0e8h,69h;3fh,80h,00,00          ;10
+                             -5
+0275 3F50294A        470                                     db              3fh,50h,29h,4ah;3fh,80h,00,00;4fh,0e9h,11h 
+                                  ;0,81215   10-6
+0279 3F50639E        471                                      db             3fh,50h,63h,9eh;3fh,80h,00,00           ;10
+                             -7
+027D 3F4BC9F0        472                                     db              3fh,4bh,0c9h,0f0h;3fh,80h,00,00         ;10
+                             -8
+0281 3F4C063B        473                                     db              3fh,4ch,06h,3bh;3fh,80h,00,00           ;10
+                             -9
+0285 3F50EFDD        474                                     db              3fh,50h,0efh,0ddh;3fh,80h,00,00         ;10
+                             -10
+0289 3F512AD9        475                                     db              3fh,51h,2ah,0d9h;3fh,80h,00,00          ;10
+                             -11
+                     476     
+028D 00000039        477     ch57:   db      00,00,00,39h;57
+0291 00000014        478     ch20:   db      00,00,00,14h;20
+                     479     
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    10
+
+                     480     ;загр ус дл€ тестов ацп 
+                     481     ;dptr-
+0295                 482     lotpus: mov             r0,#vichR
+*** _____________________________________________________^
+*** ERROR #A45 IN 482 (Subr4.asm, LINE 482): UNDEFINED SYMBOL (PASS-2)
+0297 B6210D          483                                     cjne    @r0,#21h,te22
+029A 90005A          484                                     mov                     dptr,#tabt11;заслать ус 11ј
+029D E4              485     lotp:           clr             a
+029E 93              486                             movc    a,@a+dptr                               ;high byte
+029F                 487                             mov             p4,a
+*** _________________________________________________________________^
+*** ERROR #A45 IN 487 (Subr4.asm, LINE 487): UNDEFINED SYMBOL (PASS-2)
+02A1 A3              488                             inc             dptr
+02A2 E4              489                             clr             a
+02A3 93              490                             movc    a,@a+dptr                               ;low byte
+02A4                 491                             mov             p5,a
+*** _________________________________________________________________^
+*** ERROR #A45 IN 491 (Subr4.asm, LINE 491): UNDEFINED SYMBOL (PASS-2)
+02A6 22              492                             ret
+02A7 B62205          493     te22:                   cjne    @r0,#22h,te23
+02AA 90005C          494                             mov                     dptr,#tabt9;заслать ус 9ј       
+02AD 80EE            495                             jmp                     lotp
+                     496     
+02AF 90005E          497     te23:   mov                     dptr,#tabt7;заслать ус 7ј       
+02B2 80E9            498                             jmp                     lotp
+                     499     
+                     500     
+                     501     
+                     502     
+                     503     
+02B4 02030405        504     Tabn:           db              2,3,4,5,6,7,8,9,10,11                           ;пор€док ди
+                             апазонов степени
+02B8 06070809                
+02BC 0A0B                    
+                     505     
+02BE                 506     findR:                  mov                     r0,#diap
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 506 (Subr4.asm, LINE 506): UNDEFINED SYMBOL (PASS-2)
+02C0 E6              507                                                     mov                     a,@r0
+02C1 9002B4          508                                                     mov                     dptr,#Tabn
+02C4 93              509                                                     movc            a,@a+dptr
+02C5 22              510                                                     ret
+                     511     
+                     512     ;bufind=30h..39h                                                                           
+                                           ;
+02C6                 513     vvchif:                 clr             bitmig
+*** _________________________________________________________________^
+*** ERROR #A45 IN 513 (Subr4.asm, LINE 513): UNDEFINED SYMBOL (PASS-2)
+02C8                 514                                     mov             r1,#marker
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 514 (Subr4.asm, LINE 514): UNDEFINED SYMBOL (PASS-2)
+02CA E7              515                                     mov             a,@r1                   ;изм цифры
+02CB                 516                                     mov             r0,#bufind                      ;0000
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 516 (Subr4.asm, LINE 516): UNDEFINED SYMBOL (PASS-2)
+02CD 28              517                                     add             a,r0
+02CE F8              518                                     mov             r0,a
+02CF 06              519                                     inc             @r0
+02D0 B63A02          520                                     cjne    @r0,#3ah,chif
+02D3 7630            521                                     mov             @r0,#30h
+02D5                 522     chif:   
+02D5 22              523                             ret
+02D6                 524     vvchibl:        ;mov                    r0,#level
+                     525                                             ;cjne           @r0,#32h,vvchibl4;при наборе цифр в
+                              блоке
+02D6 80EE            526                                             jmp                     vvchif  ;при наборе цифр в 
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    11
+
+                             интервале                                    
+02D8                 527     vvchibl4:
+02D8                 528                             clr             bitmig
+*** _________________________________________________________________^
+*** ERROR #A45 IN 528 (Subr4.asm, LINE 528): UNDEFINED SYMBOL (PASS-2)
+02DA                 529                                     mov             r1,#marker
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 529 (Subr4.asm, LINE 529): UNDEFINED SYMBOL (PASS-2)
+02DC E7              530                                     mov             a,@r1                   ;изм цифры
+02DD                 531                                     mov             r0,#bufind                      ;1..4
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 531 (Subr4.asm, LINE 531): UNDEFINED SYMBOL (PASS-2)
+02DF 28              532                                     add             a,r0
+02E0 F8              533                                     mov             r0,a
+02E1 06              534                                     inc             @r0
+02E2 B63504          535                                     cjne    @r0,#35h,chifb
+02E5 7631            536                                     mov             @r0,#31h
+02E7 8005            537                                     jmp             chifb1
+02E9 B63002          538     chifb:  cjne    @r0,#30h,chifb1
+02EC 7631            539                                     mov             @r0,#31h
+02EE                 540     chifb1:
+02EE 22              541             ret
+                     542       ;перевод маркера влево
+02EF                 543     marle:  
+02EF                 544                     clr             bitmig
+*** _________________________________________________________^
+*** ERROR #A45 IN 544 (Subr4.asm, LINE 544): UNDEFINED SYMBOL (PASS-2)
+                     545                     ;mov            savba,#0   нельз€ обнул€ть
+02F1                 546             mov             r0,#marker
+*** _____________________________________________________^
+*** ERROR #A45 IN 546 (Subr4.asm, LINE 546): UNDEFINED SYMBOL (PASS-2)
+02F3 16              547                     dec             @r0
+02F4 E6              548                     mov             a,@r0
+02F5 C3              549                     clr             c
+02F6                 550                     subb    a,movleft         ;крайне левое положение
+*** ___________________________________________________^
+*** ERROR #A45 IN 550 (Subr4.asm, LINE 550): UNDEFINED SYMBOL (PASS-2)
+02F8 5001            551                     jnc             rler
+02FA 06              552                     inc             @r0
+02FB 22              553     rler:   ret
+                     554         
+                     555     ;перевод маркера вправо
+02FC                 556     marri:  clr             bitmig
+*** _________________________________________________^
+*** ERROR #A45 IN 556 (Subr4.asm, LINE 556): UNDEFINED SYMBOL (PASS-2)
+02FE                 557                     mov             r0,#marker
+*** _____________________________________________________________^
+*** ERROR #A45 IN 557 (Subr4.asm, LINE 557): UNDEFINED SYMBOL (PASS-2)
+0300 06              558                     inc         @r0
+0301                 559                     mov             a,movrig           ;крайне правое положение
+*** ___________________________________________________________^
+*** ERROR #A45 IN 559 (Subr4.asm, LINE 559): UNDEFINED SYMBOL (PASS-2)
+0303 C3              560                     clr             c
+0304 96              561                     subb    a,@r0
+0305 5001            562                     jnc             rrir
+0307 16              563                     dec             @r0
+0308 22              564     rrir:   ret
+                     565         
+                     566     ;konstA->bufind+4..bufind+7
+0309                 567     outA:           mov                     r0,#konstA
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 567 (Subr4.asm, LINE 567): UNDEFINED SYMBOL (PASS-2)
+030B B1EB            568                                     call            resar2
+030D                 569                                     call            ftol                    ;->hex
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 569 (Subr4.asm, LINE 569): UNDEFINED SYMBOL (PASS-2)
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    12
+
+0310                 570                                     mov             r0,#abin
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 570 (Subr4.asm, LINE 570): UNDEFINED SYMBOL (PASS-2)
+0312 B141            571                                     call            saver2
+0314                 572                                     mov                     r0,#adec
+*** _____________________________________________________________________________________^
+*** ERROR #A45 IN 572 (Subr4.asm, LINE 572): UNDEFINED SYMBOL (PASS-2)
+0316                 573                                     mov             r1,#abin+3
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 573 (Subr4.asm, LINE 573): UNDEFINED SYMBOL (PASS-2)
+0318                 574                                     call            bindec
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 574 (Subr4.asm, LINE 574): UNDEFINED SYMBOL (PASS-2)
+031B                 575                                     mov                     r0,#adec+9
+*** _____________________________________________________________________________________^
+*** ERROR #A45 IN 575 (Subr4.asm, LINE 575): UNDEFINED SYMBOL (PASS-2)
+031D                 576                                     mov                     r1,#bufind+7
+*** _____________________________________________________________________________________^
+*** ERROR #A45 IN 576 (Subr4.asm, LINE 576): UNDEFINED SYMBOL (PASS-2)
+031F 7F04            577                                     mov                     r7,#4
+0321 E6              578     outa2:  mov             a,@r0
+0322 2430            579                               add           a,#30h
+0324 F7              580                                     mov             @r1,a
+0325 19              581                                     dec             r1
+0326 18              582                                     dec             r0
+0327 DFF8            583                                     djnz    r7,outa2
+0329 22              584                                     ret
+                     585                                             
+                     586     ;konstB->bufind+4..bufind+8
+032A                 587     outB:           mov                     r0,#konstB
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 587 (Subr4.asm, LINE 587): UNDEFINED SYMBOL (PASS-2)
+032C B1EB            588                                     call            resar2
+032E EA              589                                     mov                     a,r2
+032F 5480            590                                     anl                     a,#80h
+0331 6007            591                                     jz                      outb3
+0333 EA              592     mov                     a,r2
+0334 547F            593                                     anl                     a,#7fh
+0336 FA              594                                     mov                     r2,a
+0337                 595                                     mov                     bufind+3,#2dh
+*** _________________________________________________________________________________^
+*** ERROR #A45 IN 595 (Subr4.asm, LINE 595): UNDEFINED SYMBOL (PASS-2)
+033A                 596     outb3:  call            ftol                    ;->hex
+*** _________________________________________________^
+*** ERROR #A45 IN 596 (Subr4.asm, LINE 596): UNDEFINED SYMBOL (PASS-2)
+033D                 597                                     mov             r0,#abin
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 597 (Subr4.asm, LINE 597): UNDEFINED SYMBOL (PASS-2)
+033F B141            598                                     call            saver2
+0341                 599                                     mov                     r0,#adec
+*** _____________________________________________________________________________________^
+*** ERROR #A45 IN 599 (Subr4.asm, LINE 599): UNDEFINED SYMBOL (PASS-2)
+0343                 600                                     mov             r1,#abin+3
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 600 (Subr4.asm, LINE 600): UNDEFINED SYMBOL (PASS-2)
+0345                 601                                     call            bindec
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 601 (Subr4.asm, LINE 601): UNDEFINED SYMBOL (PASS-2)
+0348                 602                                     mov                     r0,#adec+9
+*** _____________________________________________________________________________________^
+*** ERROR #A45 IN 602 (Subr4.asm, LINE 602): UNDEFINED SYMBOL (PASS-2)
+034A                 603                                     mov                     r1,#bufind+8
+*** _____________________________________________________________________________________^
+*** ERROR #A45 IN 603 (Subr4.asm, LINE 603): UNDEFINED SYMBOL (PASS-2)
+034C 7F05            604                                     mov                     r7,#5
+034E E6              605     outb2:  mov             a,@r0
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    13
+
+034F 2430            606                               add           a,#30h
+0351 F7              607                                     mov             @r1,a
+0352 19              608                                     dec             r1
+0353 18              609                                     dec             r0
+0354 DFF8            610                                     djnz    r7,outb2
+0356 22              611                                     ret
+                     612     
+                     613     
+                     614     ;пп мигани€ индикации
+0357                 615     mign:           mov             r0,#marker
+*** _____________________________________________________________^
+*** ERROR #A45 IN 615 (Subr4.asm, LINE 615): UNDEFINED SYMBOL (PASS-2)
+                     616                                     
+0359 B6FF03          617                                     cjne    @r0,#0ffh,mignn
+                     618                                     ;реж изм мигает *
+035C                 619                                     clr             bitmig
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 619 (Subr4.asm, LINE 619): UNDEFINED SYMBOL (PASS-2)
+035E 22              620                                     ret
+                     621     
+035F                 622     mignn:                  ;clr            c
+035F                 623                                     mov             a,#bufind
+*** ____________________________________________________________________________^
+*** ERROR #A45 IN 623 (Subr4.asm, LINE 623): UNDEFINED SYMBOL (PASS-2)
+0361 26              624                                     add             a,@r0                   ;a=bufind+marker
+0362 F9              625                                     mov             r1,a
+0363                 626                                     jb              bitmig,onmig
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 626 (Subr4.asm, LINE 626): UNDEFINED SYMBOL (PASS-2)
+0366                 627                                     mov             savba,@r1
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 627 (Subr4.asm, LINE 627): UNDEFINED SYMBOL (PASS-2)
+                     628                             ;       mov             a,@r1
+                     629                             ;       mov             savba,a
+0368 7720            630                                     mov             @r1,#" "
+                     631                                     
+036A                 632                                     setb    bitmig
+*** _________________________________________________________________^
+*** ERROR #A45 IN 632 (Subr4.asm, LINE 632): UNDEFINED SYMBOL (PASS-2)
+036C 22              633                                     ret
+                     634     
+036D                 635     onmig:                  mov             @r1,savba
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 635 (Subr4.asm, LINE 635): UNDEFINED SYMBOL (PASS-2)
+                     636                                     ;mov            a,savba
+                     637                                     ; mov           @r1,a
+036F                 638                                     clr             bitmig
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 638 (Subr4.asm, LINE 638): UNDEFINED SYMBOL (PASS-2)
+0371 11B0            639                                     call    z_01s
+0373 22              640                                     ret
+                     641     ;номер ошибки bufind+6
+0374 90050D          642     error:          mov             dptr,#teERR
+0377 1177            643                                             call    lotext
+0379                 644                                             mov             bufind+6,nuerr
+*** _________________________________________________________________________________^
+*** __________________________________________________________________________________________^
+*** ERROR #A45 IN 644 (Subr4.asm, LINE 644): UNDEFINED SYMBOL (PASS-2)
+*** ERROR #A45 IN 644 (Subr4.asm, LINE 644): UNDEFINED SYMBOL (PASS-2)
+037C 22              645                                     ret
+                     646     
+                     647     
+037D                 648     textT:          
+037D FD543D32        649                             db              0fdh,"T","=",32h,"m",67h,0fdh,0fdh,0fdh,0fdh ;load=
+                             0..5
+0381 6D67FDFD                
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    14
+
+0385 FDFD                    
+0387 FD543D31        650                             db              0fdh,"T","=",31h,30h,"m",67h,0fdh,0fdh,0fdh
+038B 306D67FD                
+038F FDFD                    
+0391 FD543D35        651                             db              0fdh,"T","=",35h,30h,"m",67h,0fdh,0fdh,0fdh
+0395 306D67FD                
+0399 FDFD                    
+039B FD543D64        652                             db              0fdh,"T","=",64h,31h,67h,0fdh,0fdh,0fdh,0fdh
+039F 3167FDFD                
+03A3 FDFD                    
+03A5 20202054        653                             db              " "," "," ","T","=",31h,67h," "," "," "
+03A9 3D316720                
+03AD 2020                    
+03AF 2020543D        654                             db              " "," ","T","=",31h,30h,67h," "," "," "  
+03B3 31306720                
+03B7 2020                    
+                     655     ;teNO:          db              0fdh,0fdh,0fdh,"H","E","T",0fdh,0fdh,0fdh,0fdh
+                     656     
+03B9 42753474        657     teVICH: db              "B",75h,34h,74h,79h,76h,74h,"T",77h," ";вычислить
+03BD 79767454                
+03C1 7720                    
+03C3 20413D20        658     teAequ0:        db              " ",'A','='," "," "," "," "," "," ",65h
+03C7 20202020                
+03CB 2065                    
+03CD 20423D2B        659     teBequ0:        db              " ",'B','=','+'," "," "," "," "," "," "
+03D1 20202020                
+03D5 2020                    
+03D7 20207145        660     teMENU: db              " "," ",71h,"E","H",72h," "," "," "," "
+03DB 48722020                
+03DF 2020                    
+                     661     
+03E1 20544579        662     teTESI: db      " ","T","E",79h,"T",2dh,74h,33h,71h," ";“≈—“ -»«ћ    11
+03E5 542D7433                
+03E9 7120                    
+03EB 54457954        663     teTESR: db      "T","E",79h,"T"," ","R",35h," "," "," ";“≈—“ RS 12
+03EF 20523520                
+03F3 2020                    
+03F5 20794B30        664     teSKOR: db      " ",79h,'K',30h,"P"," ","R",35h," "," ";— ќ– 232      13
+03F9 50205235                
+03FD 2020                    
+03FF 20204142        665     teAVK:  db      " "," ",'A','B','K'," "," "," "," "," "  ;A¬K                              
+                                  14
+0403 4B202020                
+0407 2020                    
+0409 204B4176        666     teKALIB:         db     " " ,'K','A',76h,74h,73h,"P "," "," "," "; јЋ»Ѕ–    15
+040D 74735020                
+0411 202020                  
+                     667     
+0414 20544579        668     teTE11:         db              " ",'T',"E",79h,'T'," ",2dh,31h,31h,'A';          21
+0418 54202D31                
+041C 3141                    
+041E 20544579        669     teTE9:          db              " ",'T',"E",79h,'T'," ",2dh,30h,39h,'A';                   
+                                                  22
+0422 54202D30                
+0426 3941                    
+0428 20544579        670     teTE7:          db              " ",'T',"E",79h,'T'," ",2dh,30h,37h,'A';                   
+                                                  23
+042C 54202D30                
+0430 3741                    
+                     671     
+                     672     
+0432 20203537        673     teS57_6:                db              " "," ",35h,37h,36h," "," "," "," "," ";57.6
+0436 36202020                
+043A 2020                    
+043C 20203139        674     teS19_2:                db              " "," ",31h,39h,32h," "," "," "," "," ";19,2
+0440 32202020                
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    15
+
+0444 2020                    
+                     675     
+0446 61415030        676     tePAR:          db              61h,'A',"P",30h,76h,77h," ",30h,30h,30h;пароль
+044A 76772030                
+044E 3030                    
+0450 20303030        677     teKD:                   db              " ",30h,30h,30h,30h,30h," "," "," ",'A';00000
+0454 30302020                
+0458 2041                    
+045A 74337120        678     teIZMK: db      74h,33h,71h," ","K",30h,"H",79h,"T"," "
+045E 4B304879                
+0462 5420                    
+0464 20204275        679     teOUT:          db      " "," ","B",75h,"X",30h,78h," "," "," "  ;¬џ’ќƒ
+0468 58307820                
+046C 2020                    
+046E 2020304C        680     teOLL:          db      " "," ",30h,'L','L'," "," "," "," "," "  ;OLL
+0472 4C202020                
+0476 2020                    
+0478 20203034        681     teCLE:          db      " "," ",30h,34h,74h,79h,'T','K','A' ," " ;ќ„»—“ ј
+047C 7479544B                
+0480 4120                    
+0482 20203041        682     teMEM:          db      " "," ",30h,'A',71h,79h,'T'," " ; ѕјћя“№
+0486 71795420                
+048A 20203341        683     teWR:           db      " "," ",33h,'A',61h,74h,79h,77h," "," ";«јѕ»—№
+048E 61747977                
+0492 2020                    
+0494 20206150        684     teLIST: db      " "," ",61h,'P',30h,79h,71h,30h,"T","P ";;ѕ–ќ—ћќ“–
+0498 30797130                
+049C 545020                  
+049F 20206130        685     teFULL: db      " "," ",61h,30h,76h,"H",'A',62h," "," ";ѕќЋЌјя
+04A3 76484162                
+04A7 2020                    
+04A9 20744854        686     teINT:  db      " ",74h,"H",'T'," ",30h,30h,30h,30h,67h;»Ќ“ 0000
+04AD 20303030                
+04B1 3067                    
+04B3 20207376        687     teBL:           db      " "," ",73h,76h,30h,'K'," "," "," "," ";ЅЋќ 
+04B7 304B2020                
+04BB 2020                    
+04BD 20207376        688     teBL0:  db      " "," ",73h,76h,30h,'K'," ",30h," "," ";ЅЋќ  0
+04C1 304B2030                
+04C5 2020                    
+04C7 30547934        689     teCH:           db      30h,'T',79h,34h,"E",'T'," ",30h,30h,30h;ќ“—„≈“ 000
+04CB 45542030                
+04CF 3030                    
+04D1 79544154        690     teSTAT:         db      79h,'T','A','T',74h,79h,'T',74h,'K','A';—“ј“»—“» ј
+04D5 74795474                
+04D9 4B41                    
+04DB 71744820        691     teMIN:  db      71h,74h,"H"," "," "," "," "," "," "," ";ћ»Ќ  00000
+04DF 20202020                
+04E3 2020                    
+04E5 71414B79        692     teMAX:  db      71h,'A','K',79h," "," "," "," "," "," ";ћј — 00000
+04E9 20202020                
+04ED 2020                    
+04EF 79504578        693     teMID:  db      79h,"P","E",78h," "," "," "," "," "," ";—–≈ƒ 00000
+04F3 20202020                
+04F7 2020                    
+                     694      ;;;;;;;;;;;;;;;;;;;         
+04F9 2020304C        695     teOLI:  db              " "," ",30h,"L","L"," ","I"," "," "," "
+04FD 4C204920                
+0501 2020                    
+0503 2020304C        696     teOLR:  db              " "," ",30h,"L","L"," ",66h," "," "," "
+0507 4C206620                
+050B 2020                    
+050D 20204552        697     teERR:  db              " "," ","E","R","R"," "," "," "," "," " ;ERR
+0511 52202020                
+0515 2020                    
+0517 2020454E        698     teEND:  db              " "," ","E","N","D"," "," "," "," "," " ;END
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    16
+
+051B 44202020                
+051F 2020                    
+                     699     
+                     700     ;dptr+4-приемник
+                     701     ;dptr-источник
+                     702     ;r7-кол байт  
+0521                 703     xCIKLWR:
+0521 7F04            704                             mov             r7,#4   
+0523 E0              705     lwrx:   movx    a,@dptr
+0524                 706                             push    dph
+*** _________________________________________________________^
+*** ERROR #A45 IN 706 (Subr4.asm, LINE 706): UNDEFINED SYMBOL (PASS-2)
+0526                 707                             push    dpl
+*** _________________________________________________________^
+*** ERROR #A45 IN 707 (Subr4.asm, LINE 707): UNDEFINED SYMBOL (PASS-2)
+0528 A3              708                             inc             dptr
+0529 A3              709                             inc             dptr
+052A A3              710                             inc             dptr
+052B A3              711                             inc             dptr
+052C F0              712                             movx    @dptr,a
+052D                 713                             pop             dpl
+*** _________________________________________________________________^
+*** ERROR #A45 IN 713 (Subr4.asm, LINE 713): UNDEFINED SYMBOL (PASS-2)
+052F                 714                             pop             dph
+*** _________________________________________________________________^
+*** ERROR #A45 IN 714 (Subr4.asm, LINE 714): UNDEFINED SYMBOL (PASS-2)
+                     715                             
+0531 A3              716                             inc             dptr
+0532 DFEF            717                             djnz    r7,lwrx
+0534 22              718                             ret
+                     719     ;r2..r5->@dptr..@dptr+3                         
+0535 EA              720     saveIr2:                mov     a,r2
+0536 F0              721                                             movx    @dptr,a
+0537 A3              722                                             inc     dptr
+0538 EB              723                                             mov     a,r3
+0539 F0              724                                             movx    @dptr,a
+053A A3              725                                             inc     dptr
+053B EC              726                                             mov     a,r4
+053C F0              727                                             movx    @dptr,a
+053D A3              728                                             inc     dptr
+053E ED              729                                             mov     a,r5
+053F F0              730                                             movx    @dptr,a
+0540 22              731                                             ret
+                     732     ;r2..r5-> @r0..@r0+3
+                     733     
+0541 EA              734     saver2:         mov     a,r2
+0542 F6              735                                             mov     @r0,a
+0543 08              736                                             inc     r0
+0544 EB              737                                             mov     a,r3
+0545 F6              738                                             mov     @r0,a
+0546 08              739                                             inc     r0
+0547 EC              740                                             mov     a,r4
+0548 F6              741                                             mov     @r0,a
+0549 08              742                                             inc     r0
+054A ED              743                                             mov     a,r5
+054B F6              744                                             mov     @r0,a
+054C 22              745                                             ret 
+054D 7F50            746     clmassix:       mov                     r7,#50h;28h
+054F                 747                             mov     dptr,#MASS0        ;забить массив A нул€ми
+*** _______________________________________________________________^
+*** ERROR #A45 IN 747 (Subr4.asm, LINE 747): UNDEFINED SYMBOL (PASS-2)
+0552 7400            748     clmax:          mov          a,#00h
+0554 F0              749                  movx    @dptr,a
+0555 A3              750                  inc     dptr
+0556 DFFA            751                 djnz                r7,clmax                
+0558                 752                  mov     chmas,a
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    17
+
+*** ______________________________________________^
+*** ERROR #A45 IN 752 (Subr4.asm, LINE 752): UNDEFINED SYMBOL (PASS-2)
+055A                 753                  clr     bitmas
+*** ______________________________________________^
+*** ERROR #A45 IN 753 (Subr4.asm, LINE 753): UNDEFINED SYMBOL (PASS-2)
+055C 22              754                 ret
+                     755     ;r1-€®шхьшъ
+                     756     ;r0-шЄ™юҐшъ
+                     757     ;r7-ъюы срщ™  
+055D                 758     CIKLWR:
+055D 7F04            759                             mov             r7,#4   
+055F E6              760     lwr:    mov     a,@r0
+0560 F7              761                             mov     @r1,a
+0561 09              762                             inc             r1
+0562 08              763                             inc             r0
+0563 DFFA            764                             djnz    r7,lwr
+0565 22              765                             ret     
+                     766     ;r2..r5-> @dptr..@dptr+3
+                     767     
+0566 B176            768     zmul:   call    maform
+0568                 769                     call    lmul
+*** _________________________________________________^
+*** ERROR #A45 IN 769 (Subr4.asm, LINE 769): UNDEFINED SYMBOL (PASS-2)
+056B B182            770                     call    bform
+056D 22              771                     ret
+                     772     
+056E B176            773     zdiv:   call    maform
+0570                 774                     call    divide
+*** _________________________________________________^
+*** ERROR #A45 IN 774 (Subr4.asm, LINE 774): UNDEFINED SYMBOL (PASS-2)
+0573 B182            775                     call    bform
+0575 22              776                     ret
+                     777     
+0576 EA              778     maform: mov a,r2
+0577 33              779             rlc a
+0578 5005            780             jnc             fo1m
+057A                 781                     setb            znmat
+*** _________________________________________________________^
+*** ERROR #A45 IN 781 (Subr4.asm, LINE 781): UNDEFINED SYMBOL (PASS-2)
+057C B188            782                     call   form4
+057E 22              783                     ret
+057F                 784     fo1m:   clr             znmat
+*** _________________________________________________^
+*** ERROR #A45 IN 784 (Subr4.asm, LINE 784): UNDEFINED SYMBOL (PASS-2)
+0581 22              785                     ret
+                     786     
+0582                 787     bform:  jnb             znmat,fo2m
+*** _________________________________________________^
+*** ERROR #A45 IN 787 (Subr4.asm, LINE 787): UNDEFINED SYMBOL (PASS-2)
+0585 B188            788                     call    form4
+0587 22              789     fo2m:   ret
+                     790       
+                     791     ;r2..r5 €х®хтхЄ™ш т фю€ ъюф
+0588 ED              792     form4:          mov a,r5
+0589 F4              793             cpl a
+058A 2401            794             add a,#1
+058C FD              795             mov r5,a
+058D EC              796             mov a,r4
+058E F4              797             cpl a
+058F 3400            798             addc    a,#0
+0591 FC              799             mov r4,a
+0592 EB              800             mov a,r3
+0593 F4              801                 cpl a
+0594 3400            802             addc    a,#0
+0596 FB              803             mov r3,a
+0597 EA              804             mov a,r2
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    18
+
+0598 F4              805             cpl a
+0599 3400            806             addc    a,#0
+059B FA              807             mov r2,a
+059C 22              808             ret
+                     809     
+059D B176            810     zcmp:   call            maform
+059F                 811                     call            lcmp
+*** _________________________________________________________^
+*** ERROR #A45 IN 811 (Subr4.asm, LINE 811): UNDEFINED SYMBOL (PASS-2)
+05A2                 812                     push            psw
+*** _________________________________________________________^
+*** ERROR #A45 IN 812 (Subr4.asm, LINE 812): UNDEFINED SYMBOL (PASS-2)
+05A4 B182            813                     call    bform
+05A6                 814                     pop             psw
+*** _________________________________________________________^
+*** ERROR #A45 IN 814 (Subr4.asm, LINE 814): UNDEFINED SYMBOL (PASS-2)
+05A8 22              815                     ret
+                     816     
+                     817     
+                     818     ;@r0..@r0+3->r8..r11
+                     819     
+05A9 E6              820     resar8: mov     a,@r0
+05AA                 821                     mov     ltemp,a
+*** _________________________________________________^
+*** ERROR #A45 IN 821 (Subr4.asm, LINE 821): UNDEFINED SYMBOL (PASS-2)
+05AC 08              822                     inc     r0
+05AD E6              823                     mov     a,@r0
+05AE                 824                     mov     ltemp+1,a
+*** _________________________________________________^
+*** ERROR #A45 IN 824 (Subr4.asm, LINE 824): UNDEFINED SYMBOL (PASS-2)
+05B0 08              825                     inc     r0
+05B1 E6              826                     mov     a,@r0
+05B2                 827                     mov     ltemp+2,a
+*** _________________________________________________^
+*** ERROR #A45 IN 827 (Subr4.asm, LINE 827): UNDEFINED SYMBOL (PASS-2)
+05B4 08              828                     inc     r0
+05B5 E6              829                     mov     a,@r0
+05B6                 830                     mov     ltemp+3,a
+*** _________________________________________________^
+*** ERROR #A45 IN 830 (Subr4.asm, LINE 830): UNDEFINED SYMBOL (PASS-2)
+05B8 22              831                     ret
+                     832     
+                     833     ;
+                     834     ;r0- рф®хЄ _Ґхщъш Ї€ръютрюую фтюшҐюую ҐшЄыр  
+                     835     ;r2,a фтюшҐюх ҐшЄыю 2 срщ™р 
+                     836     ;т_њ- @r0 Ї€ръютрюх фхЄ_™шҐюх ҐшЄыю BCD 3 срщ™р 
+                     837     ;r2 a    ҐшЄыю 180
+                     838     ;00 b4
+                     839     ;т_њ- mabin..mabin+2
+                     840     ;     80 01 00
+                     841      
+05B9 C8              842     cond:   xch     a,r0    
+05BA F9              843                     mov     r1,a
+05BB C8              844                     xch     a,r0
+05BC 7C03            845                     mov     r4,#03
+05BE 7700            846     dcoa:   mov     @r1,#00
+05C0 09              847                     inc     r1
+05C1 DCFB            848                     djnz    r4,dcoa
+05C3 7B10            849                     mov     r3,#10h
+05C5 C3              850     dcob:   clr     c
+05C6 33              851                     rlc     a
+05C7 CA              852                     xch     a,r2
+05C8 33              853                     rlc     a
+05C9 CA              854                     xch     a,r2
+05CA C8              855                     xch     a,r0
+05CB F9              856                     mov     r1,a
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    19
+
+05CC C8              857                     xch     a,r0
+05CD 7C03            858                     mov     r4,#03
+05CF FD              859                     mov     r5,a
+05D0 E7              860     dcoc:   mov     a,@r1 
+05D1 37              861                     addc    a,@r1
+05D2 D4              862                     da      a
+05D3 F7              863                     mov     @r1,a
+05D4 09              864                     inc     r1
+05D5 DCF9            865                     djnz    r4,dcoc
+05D7 ED              866                     mov     a,r5
+05D8 4003            867                     jc      dcod
+05DA DBE9            868                     djnz    r3,dcob
+05DC C3              869                     clr     c
+05DD 00              870     dcod:   nop
+05DE 22              871                     ret
+                     872     
+05DF                 873     move28: mov     ltemp,r2                        ;r2..r5->ltemp
+*** _________________________________________^
+*** ERROR #A45 IN 873 (Subr4.asm, LINE 873): UNDEFINED SYMBOL (PASS-2)
+05E1                 874                     mov     ltemp+1,3
+*** _________________________________________________^
+*** ERROR #A45 IN 874 (Subr4.asm, LINE 874): UNDEFINED SYMBOL (PASS-2)
+05E4                 875                     mov     ltemp+2,4
+*** _________________________________________________^
+*** ERROR #A45 IN 875 (Subr4.asm, LINE 875): UNDEFINED SYMBOL (PASS-2)
+05E7                 876                     mov     ltemp+3,5
+*** _________________________________________________^
+*** ERROR #A45 IN 876 (Subr4.asm, LINE 876): UNDEFINED SYMBOL (PASS-2)
+05EA 22              877                     ret
+                     878     
+                     879     ;@r0..@r0+3->r2..r5
+                     880     
+05EB E6              881     resar2: mov     a,@r0
+05EC FA              882                     mov     r2,a
+05ED 08              883                     inc     r0
+05EE E6              884                     mov     a,@r0
+05EF FB              885                     mov     r3,a
+05F0 08              886                     inc     r0
+05F1 E6              887                     mov     a,@r0
+05F2 FC              888                     mov     r4,a
+05F3 08              889                     inc     r0
+05F4 E6              890                     mov     a,@r0
+05F5 FD              891                     mov     r5,a
+05F6 22              892                     ret
+                     893     
+                     894     ;25mkc !!!!!!!!!!!!!!!1
+05F7 7B4B            895     z_9:      mov R3,#4Bh      ;загрузка числа
+05F9 DBFE            896                    djnz R3,$
+05FB 22              897               ret
+                     898     
+                     899     ;запись   передаваемый байт в acc
+                     900     ;передача байта послед кодом старшими разр€дами  вперед
+05FC 7A08            901     write:     mov R2,#8
+05FE C3              902                             clr  c  
+05FF                 903     wr1:            clr             p1.7;P1.2
+*** _________________________________________________________^
+*** ERROR #A17 IN 903 (Subr4.asm, LINE 903): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+05FF 00              904                         nop 
+0600 33              905                             rlc A
+0601                 906                             mov P1.6,C;P1.1,C
+*** _____________________________________________________^
+*** ERROR #A17 IN 906 (Subr4.asm, LINE 906): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+0601                 907                        call tim2
+*** _________________________________________________^
+*** ERROR #A45 IN 907 (Subr4.asm, LINE 907): UNDEFINED SYMBOL (PASS-2)
+0604                 908                        setb P1.7;P1.2
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    20
+
+*** _________________________________________________^
+*** ERROR #A17 IN 908 (Subr4.asm, LINE 908): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+0604                 909                call tim2
+*** _________________________________________^
+*** ERROR #A45 IN 909 (Subr4.asm, LINE 909): UNDEFINED SYMBOL (PASS-2)
+0607 DAF6            910                       djnz R2,wr1
+0609                 911                       clr P1.6;P1.1
+*** _______________________________________________^
+*** ERROR #A17 IN 911 (Subr4.asm, LINE 911): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+0609 22              912                                              ret
+                     913     
+                     914     ;чтение номера байта с индикатора(2байта)
+                     915     ;bufind+8..bufind+9
+                     916     ;-  - - -
+                     917     ;- - - - - - - - - -
+                     918     ;adec..adec+9
+                     919     ;ст            мл
+060A                 920     upak1:  mov             r0,#bufind+7;
+*** _____________________________________________________^
+*** ERROR #A45 IN 920 (Subr4.asm, LINE 920): UNDEFINED SYMBOL (PASS-2)
+060C                 921                                     mov             r1,#adec+9
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 921 (Subr4.asm, LINE 921): UNDEFINED SYMBOL (PASS-2)
+060E C3              922                                     clr             c
+060F E6              923                                     mov             a,@r0
+0610 9430            924                                     subb    a,#30h
+0612 FF              925                                     mov             r7,a
+0613 C3              926                                     clr             c
+0614 9405            927                                     subb    a,#5
+0616 4004            928                                     jc              upk1
+0618 7404            929                                     mov             a,#4
+061A 8001            930                                     jmp             upk2
+061C EF              931     upk1:           mov             a,r7
+061D F7              932     upk2:           mov             @r1,a
+061E 22              933                                     ret  
+                     934     ;r1-мл байт счетчика €чеек
+061F C3              935     chminus:        clr                     c
+0620 E7              936                                             mov                     a,@r1
+0621 9401            937                                             subb            a,#01
+0623 F7              938                                             mov                     @r1,a;low
+0624 19              939                                             dec                     r1
+0625 E7              940                                             mov                     a,@r1
+0626 9400            941                                             subb            a,#00
+0628 F7              942                                             mov                     @r1,a
+0629 22              943                                             ret
+                     944     
+                     945     
+                     946     ;чтение номера байта с индикатора(4байта)
+                     947     ;bufind+6..bufind+9
+                     948     ;-  - - -
+                     949     ;- - - - - - - - - -
+                     950     ;adec..adec+9
+                     951     ;ст            мл
+062A                 952     upak4:  mov             r0,#bufind+8;
+*** _____________________________________________________^
+*** ERROR #A45 IN 952 (Subr4.asm, LINE 952): UNDEFINED SYMBOL (PASS-2)
+062C                 953                     mov             r1,#adec+9
+*** _____________________________________________________________^
+*** ERROR #A45 IN 953 (Subr4.asm, LINE 953): UNDEFINED SYMBOL (PASS-2)
+062E 7F04            954                     mov             r7,#4
+0630 C3              955     upaa:   clr             c
+0631 E6              956                     mov             a,@r0
+0632 9430            957                     subb    a,#30h
+0634 F7              958                     mov             @r1,a
+0635 18              959                     dec             r0
+0636 19              960                     dec             r1
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    21
+
+0637 DFF7            961                     djnz    r7,upaa
+0639 22              962                     ret
+                     963     
+                     964     ;dptr-адр €чейки 1й соотв блока 
+063A                 965     adrblok:         mov            a,nblok
+*** ___________________________________________________________^
+*** ERROR #A45 IN 965 (Subr4.asm, LINE 965): UNDEFINED SYMBOL (PASS-2)
+063C C3              966                              clr            c
+063D 9401            967                              subb           a,#1
+063F FD              968                              mov            r5,a
+0640 E4              969                              clr            a
+0641 FC              970                              mov            r4,a
+0642 FB              971                              mov            r3,a
+0643 FA              972                              mov            r2,a
+0644 90012A          973                                     mov                     dptr,#ch320h
+0647                 974                                     CALL   ldc_ltemp                 ; ltemp <-320
+*** ________________________________________________________________^
+*** ERROR #A45 IN 974 (Subr4.asm, LINE 974): UNDEFINED SYMBOL (PASS-2)
+064A                 975                                     call            lmul;r2..r5
+*** _________________________________________________________________________^
+*** ERROR #A45 IN 975 (Subr4.asm, LINE 975): UNDEFINED SYMBOL (PASS-2)
+064D ED              976                                     mov                     a,r5
+064E 2450            977                                     add                     a,#50h
+0650                 978                                     mov                     dpl,a
+*** _________________________________________________________________________________^
+*** ERROR #A45 IN 978 (Subr4.asm, LINE 978): UNDEFINED SYMBOL (PASS-2)
+0652 EC              979                                     mov                     a,r4
+0653 3401            980                                     addc            a,#01           
+0655                 981                                     mov                     dph,a                   ;dptr-
+*** _________________________________________________________________________________^
+*** ERROR #A45 IN 981 (Subr4.asm, LINE 981): UNDEFINED SYMBOL (PASS-2)
+0657 22              982                                     ret
+                     983     
+                     984     ;
+                     985     ;saven_bl<-dptr  адрес след €чейки внешн озу 
+0658                 986     save_hl:                mov             r1,#saven_bl
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 986 (Subr4.asm, LINE 986): UNDEFINED SYMBOL (PASS-2)
+065A                 987                                                     mov             a,dph
+*** ___________________________________________________________________________________________^
+*** ERROR #A45 IN 987 (Subr4.asm, LINE 987): UNDEFINED SYMBOL (PASS-2)
+065C F7              988                                               mov           @r1,a
+065D 09              989                                                     inc             r1
+065E                 990                                                     mov             a,dpl
+*** ___________________________________________________________________________________________^
+*** ERROR #A45 IN 990 (Subr4.asm, LINE 990): UNDEFINED SYMBOL (PASS-2)
+0660 F7              991                                                     mov             @r1,a
+                     992                                                     ;;;;;;;;;не конец ли блока
+                     993                             
+                     994     
+0661                 995                                     mov                     r1,#volume+1;work+1
+*** _____________________________________________________________________________________^
+*** ERROR #A45 IN 995 (Subr4.asm, LINE 995): UNDEFINED SYMBOL (PASS-2)
+0663 D11F            996                                     call            chminus
+0665                 997                                     mov             r0,#volume
+*** _____________________________________________________________________________^
+*** ERROR #A45 IN 997 (Subr4.asm, LINE 997): UNDEFINED SYMBOL (PASS-2)
+0667 E6              998                                     mov             a,@r0
+0668                 999                                     jnb             acc.7,noendli
+*** _________________________________________________________________________^
+*** ERROR #A17 IN 999 (Subr4.asm, LINE 999): INVALID BYTE BASE IN BIT ADDRESS EXPRESSION
+0668                1000                                     clr                     bitbon                  ;блок закон
+                             чилс€
+*** _________________________________________________________________________________^
+*** ERROR #A45 IN 1000 (Subr4.asm, LINE 1000): UNDEFINED SYMBOL (PASS-2)
+                    1001                             
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    22
+
+066A                1002     noendli:        
+066A 22             1003                                             ret
+                    1004     ;загрузка dptr сохр ранее значением адреса €чейки
+066B                1005     resa_hl:                mov             r1,#saven_bl
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 1005 (Subr4.asm, LINE 1005): UNDEFINED SYMBOL (PASS-2)
+066D E7             1006                                                     mov             a,@r1
+066E                1007                                                     mov             dph,a
+*** _________________________________________________________________________________________^
+*** ERROR #A45 IN 1007 (Subr4.asm, LINE 1007): UNDEFINED SYMBOL (PASS-2)
+                    1008                                               
+0670 09             1009                                                     inc             r1
+0671 E7             1010                                                     mov             a,@r1
+0672                1011                                                     mov             dpl,a
+*** _________________________________________________________________________________________^
+*** ERROR #A45 IN 1011 (Subr4.asm, LINE 1011): UNDEFINED SYMBOL (PASS-2)
+0674 22             1012                                                     ret
+                    1013     ;загрузка rez_A3 в соотв €ч внешн озу
+0675                1014     loA3_X:                 mov             r0,#rez_A3
+*** _____________________________________________________________________^
+*** ERROR #A45 IN 1014 (Subr4.asm, LINE 1014): UNDEFINED SYMBOL (PASS-2)
+0677 B1EB           1015                                                     call    resar2
+                    1016                                                     
+0679 EA             1017                                                     mov             a,r2                    ;
+067A F0             1018                                                     movx    @dptr,a
+067B A3             1019                                                     inc             dptr
+067C EB             1020                                                     mov             a,r3
+067D F0             1021                                                     movx    @dptr,a
+067E A3             1022                                                     inc             dptr
+067F EC             1023                                                     mov             a,r4
+0680 F0             1024                                                     movx    @dptr,a
+0681 A3             1025                                                     inc             dptr
+0682 ED             1026                                                     mov             a,r5
+0683 F0             1027                                                     movx    @dptr,a
+0684 A3             1028                                                     inc             dptr;адрес след €чейки внеш
+                             н озу храним
+0685 22             1029                                                     ret             ;в €чейке saven_bl
+                    1030     ;чтение в rez_A3 из соотв €ч внешн озу
+0686                1031     reA3_X:         
+                    1032                                                     
+0686 E0             1033                                                     movx    a,@dptr
+0687 FA             1034                                                     mov             r2,a
+0688 A3             1035                                                     inc             dptr
+0689 E0             1036                                                     movx    a,@dptr
+068A FB             1037                                                     mov             r3,a
+068B A3             1038                                                     inc             dptr
+068C E0             1039                                                     movx    a,@dptr
+068D FC             1040                                                     mov             r4,a
+068E A3             1041                                                     inc             dptr
+068F E0             1042                                                     movx    a,@dptr
+0690 FD             1043                                                     mov             r5,a
+0691 A3             1044                                                     inc             dptr
+0692                1045                                                     mov             r0,#rez_A3
+*** _____________________________________________________________________________________________^
+*** ERROR #A45 IN 1045 (Subr4.asm, LINE 1045): UNDEFINED SYMBOL (PASS-2)
+0694 B141           1046                                                     call    saver2
+0696 22             1047                                                     ret
+*** WARNING #A41 IN 1047 (Subr4.asm, LINE 1047): MISSING 'END' STATEMENT
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    23
+
+XREF SYMBOL TABLE LISTING
+---- ------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES / REFERENCES
+
+ABIN . . . . . . .    ----   -----          427 570 573 597 600
+ABRET. . . . . . .  C ADDR   01DCH   A      356 358#
+ACC. . . . . . . .    ----   -----          999
+ADEC . . . . . . .    ----   -----          228 247 265 328 345 572 575 599 602 921 953
+ADRBLOK. . . . . .  C ADDR   063AH   A      965#
+B. . . . . . . . .    ----   -----          83 447
+BFORM. . . . . . .  C ADDR   0582H   A      770 775 787# 813
+BINDEC . . . . . .    ----   -----          574 601
+BITBON . . . . . .    ----   -----          1000
+BITEIZM. . . . . .    ----   -----          2
+BITMAS . . . . . .    ----   -----          753
+BITMIG . . . . . .    ----   -----          513 528 544 556 619 626 632 638
+BITZNB . . . . . .    ----   -----          354 357
+BRET . . . . . . .  C ADDR   0032H   A      23 28 32#
+BUFIND . . . . . .    ----   -----          81 99 227 246 264 327 344 355 516 531 576 595 603 623 644 920 952
+CH0. . . . . . . .  C ADDR   00CEH   A      165#
+CH1. . . . . . . .  C ADDR   00EEH   A      176#
+CH10 . . . . . . .  C ADDR   00D2H   A      166#
+CH100. . . . . . .  C ADDR   00E6H   A      171#
+CH10000. . . . . .  C ADDR   00E2H   A      170#
+CH150H . . . . . .  C ADDR   012EH   A      192#
+CH2. . . . . . . .  C ADDR   00EAH   A      172#
+CH20 . . . . . . .  C ADDR   0291H   A      478#
+CH2THO . . . . . .  C ADDR   010EH   A      184#
+CH320H . . . . . .  C ADDR   012AH   A      191# 973
+CH4. . . . . . . .  C ADDR   00DAH   A      168#
+CH5. . . . . . . .  C ADDR   00D6H   A      167#
+CH57 . . . . . . .  C ADDR   028DH   A      477#
+CH954. . . . . . .  C ADDR   00DEH   A      169#
+CHIF . . . . . . .  C ADDR   02D5H   A      520 522#
+CHIFB. . . . . . .  C ADDR   02E9H   A      535 538#
+CHIFB1 . . . . . .  C ADDR   02EEH   A      537 538 540#
+CHK. . . . . . . .  C ADDR   0126H   A      190#
+CHMAS. . . . . . .    ----   -----          752
+CHMINUS. . . . . .  C ADDR   061FH   A      935# 996
+CHTHO. . . . . . .  C ADDR   0106H   A      182#
+CHTHOU . . . . . .  C ADDR   01A7H   A      315#
+CHZAP. . . . . . .  C ADDR   00CAH   A      164#
+CH_1 . . . . . . .  C ADDR   00F6H   A      178#
+CH_10. . . . . . .  C ADDR   011EH   A      188#
+CH_10TH. . . . . .  C ADDR   011AH   A      187#
+CH_2 . . . . . . .  C ADDR   00FAH   A      179#
+CH_200 . . . . . .  C ADDR   0116H   A      186#
+CH_220 . . . . . .  C ADDR   0112H   A      185#
+CH_22T . . . . . .  C ADDR   01E5H   A      363#
+CH_250 . . . . . .  C ADDR   0122H   A      189#
+CH_4 . . . . . . .  C ADDR   00FEH   A      180#
+CH_500 . . . . . .  C ADDR   01E1H   A      362#
+CH_953 . . . . . .  C ADDR   0102H   A      181#
+CH_B . . . . . . .  C ADDR   01DDH   A      360#
+CH_FL. . . . . . .  C ADDR   01E9H   A      364#
+CH_MLN . . . . . .  C ADDR   00F2H   A      177#
+CIKLWR . . . . . .  C ADDR   055DH   A      758#
+CL4. . . . . . . .  C ADDR   0140H   A      207# 209
+CL4N . . . . . . .  C ADDR   0146H   A      216# 218
+CLEAR4 . . . . . .  C ADDR   013DH   A      205#
+CLEARN . . . . . .  C ADDR   0145H   A      214#
+CLMASSIX . . . . .  C ADDR   054DH   A      746#
+CLMAX. . . . . . .  C ADDR   0552H   A      748# 751
+CO02S. . . . . . .  C ADDR   00B2H   A      148# 152
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    24
+
+CO05S. . . . . . .  C ADDR   00BFH   A      157# 161
+CO1S . . . . . . .  C ADDR   00A9H   A      142# 142
+CO2S . . . . . . .  C ADDR   00A5H   A      140# 144
+COND . . . . . . .  C ADDR   05B9H   A      842#
+COUNT. . . . . . .  C ADDR   0087H   A      114# 114
+CT . . . . . . . .  C ADDR   008EH   A      120# 120
+DCOA . . . . . . .  C ADDR   05BEH   A      846# 848
+DCOB . . . . . . .  C ADDR   05C5H   A      850# 868
+DCOC . . . . . . .  C ADDR   05D0H   A      860# 865
+DCOD . . . . . . .  C ADDR   05DDH   A      867 870#
+DIAP . . . . . . .    ----   -----          3 24 278 293 444 506
+DIKDN. . . . . . .  C ADDR   0265H   A      446 466#
+DIKDW. . . . . . .  C ADDR   0191H   A      282 303#
+DIPAR. . . . . . .  C ADDR   01A5H   A      313#
+DIVIDE . . . . . .    ----   -----          774
+DPH. . . . . . . .    ----   -----          706 714 981 987 1007
+DPL. . . . . . . .    ----   -----          707 713 978 990 1011
+ERROR. . . . . . .  C ADDR   0374H   A      642#
+FINDEXT. . . . . .  C ADDR   018AH   A      292#
+FINDKOEF . . . . .  C ADDR   017BH   A      277#
+FINDR. . . . . . .  C ADDR   02BEH   A      506#
+FO1M . . . . . . .  C ADDR   057FH   A      780 784#
+FO2M . . . . . . .  C ADDR   0587H   A      787 789#
+FORM4. . . . . . .  C ADDR   0588H   A      782 788 792#
+FTOL . . . . . . .    ----   -----          569 596
+INIACP . . . . . .  C ADDR   01EDH   A      370#
+KD . . . . . . . .  C ADDR   010AH   A      183#
+KONSTA . . . . . .    ----   -----          567
+KONSTB . . . . . .    ----   -----          587
+KOR0US . . . . . .  C ADDR   0045H   A      57#
+LCMP . . . . . . .    ----   -----          811
+LDC_LTEMP. . . . .    ----   -----          974
+LMUL . . . . . . .    ----   -----          769 975
+LOA3_X . . . . . .  C ADDR   0675H   A      1014#
+LOAB12 . . . . . .  C ADDR   022AH   A      411#
+LOAD . . . . . . .    ----   -----          80
+LOADKD . . . . . .  C ADDR   0247H   A      444#
+LOADR2 . . . . . .  C ADDR   0239H   A      427#
+LOADT. . . . . . .  C ADDR   0060H   A      80#
+LOADUS . . . . . .  C ADDR   0000H   A      1#
+LOD1 . . . . . . .  C ADDR   006FH   A      88# 93
+LODT . . . . . . .  C ADDR   007BH   A      100# 105
+LOLEVT . . . . . .  C ADDR   0062H   A      81#
+LOSPUS . . . . . .  C ADDR   0039H   A      40#
+LOTEXT . . . . . .  C ADDR   0077H   A      97# 643
+LOTP . . . . . . .  C ADDR   029DH   A      485# 495 498
+LOTPUS . . . . . .  C ADDR   0295H   A      35 482#
+LOUIZM . . . . . .    ----   -----          32
+LTEMP. . . . . . .    ----   -----          317 318 319 320 821 824 827 830 873 874 875 876
+LWR. . . . . . . .  C ADDR   055FH   A      760# 764
+LWRX . . . . . . .  C ADDR   0523H   A      705# 717
+MAFORM . . . . . .  C ADDR   0576H   A      768 773 778# 810
+MARKER . . . . . .    ----   -----          514 529 546 557 615
+MARLE. . . . . . .  C ADDR   02EFH   A      543#
+MARRI. . . . . . .  C ADDR   02FCH   A      556#
+MASS0. . . . . . .    ----   -----          747
+MIGN . . . . . . .  C ADDR   0357H   A      615#
+MIGNN. . . . . . .  C ADDR   035FH   A      617 622#
+MOVE28 . . . . . .  C ADDR   05DFH   A      873#
+MOVE82 . . . . . .  C ADDR   01ABH   A      317#
+MOVLEFT. . . . . .    ----   -----          550
+MOVRIG . . . . . .    ----   -----          559
+NBLOK. . . . . . .    ----   -----          965
+NOENDLI. . . . . .  C ADDR   066AH   A      999 1002#
+NUERR. . . . . . .    ----   -----          644
+ONMIG. . . . . . .  C ADDR   036DH   A      626 635#
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    25
+
+OUTA . . . . . . .  C ADDR   0309H   A      567#
+OUTA2. . . . . . .  C ADDR   0321H   A      578# 583
+OUTB . . . . . . .  C ADDR   032AH   A      587#
+OUTB2. . . . . . .  C ADDR   034EH   A      605# 610
+OUTB3. . . . . . .  C ADDR   033AH   A      591 596#
+P1 . . . . . . . .    ----   -----          384 391 903 906 908 911
+P4 . . . . . . . .    ----   -----          10 13 29 31 487
+P5 . . . . . . . .    ----   -----          18 21 51 54 491
+PART . . . . . . .    ----   -----          22 411
+PSW. . . . . . . .    ----   -----          812 814
+R10. . . . . . . .    ----   -----          459
+R11. . . . . . . .    ----   -----          463
+R8 . . . . . . . .    ----   -----          451
+R9 . . . . . . . .    ----   -----          455
+REA3_X . . . . . .  C ADDR   0686H   A      1031#
+RESAR2 . . . . . .  C ADDR   05EBH   A      568 588 881# 1015
+RESAR8 . . . . . .  C ADDR   05A9H   A      820#
+RESA_HL. . . . . .  C ADDR   066BH   A      1005#
+REZ_A3 . . . . . .    ----   -----          1014 1045
+RLER . . . . . . .  C ADDR   02FBH   A      551 553#
+RRIR . . . . . . .  C ADDR   0308H   A      562 564#
+SAVBA. . . . . . .    ----   -----          627 635
+SAVEIR2. . . . . .  C ADDR   0535H   A      720#
+SAVEN_BL . . . . .    ----   -----          986 1005
+SAVER2 . . . . . .  C ADDR   0541H   A      571 598 734# 1046
+SAVE_HL. . . . . .  C ADDR   0658H   A      986#
+SS1. . . . . . . .  C ADDR   009CH   A      132# 134
+TABB1_2. . . . . .  C ADDR   021CH   A      402# 412
+TABN . . . . . . .  C ADDR   02B4H   A      504# 508
+TABT11 . . . . . .  C ADDR   005AH   A      71# 484
+TABT7. . . . . . .  C ADDR   005EH   A      75# 497
+TABT9. . . . . . .  C ADDR   005CH   A      73# 494
+TABUS. . . . . . .  C ADDR   0046H   A      7 60#
+TE22 . . . . . . .  C ADDR   02A7H   A      483 493#
+TE23 . . . . . . .  C ADDR   02AFH   A      493 497#
+TEAEQU0. . . . . .  C ADDR   03C3H   A      658#
+TEAVK. . . . . . .  C ADDR   03FFH   A      665#
+TEBEQU0. . . . . .  C ADDR   03CDH   A      659#
+TEBL . . . . . . .  C ADDR   04B3H   A      687#
+TEBL0. . . . . . .  C ADDR   04BDH   A      688#
+TECH . . . . . . .  C ADDR   04C7H   A      689#
+TECLE. . . . . . .  C ADDR   0478H   A      681#
+TEEND. . . . . . .  C ADDR   0517H   A      698#
+TEERR. . . . . . .  C ADDR   050DH   A      642 697#
+TEFULL . . . . . .  C ADDR   049FH   A      685#
+TEINT. . . . . . .  C ADDR   04A9H   A      686#
+TEIZMK . . . . . .  C ADDR   045AH   A      678#
+TEKALIB. . . . . .  C ADDR   0409H   A      666#
+TEKD . . . . . . .  C ADDR   0450H   A      677#
+TELIST . . . . . .  C ADDR   0494H   A      684#
+TEMAX. . . . . . .  C ADDR   04E5H   A      692#
+TEMEM. . . . . . .  C ADDR   0482H   A      682#
+TEMENU . . . . . .  C ADDR   03D7H   A      660#
+TEMID. . . . . . .  C ADDR   04EFH   A      693#
+TEMIN. . . . . . .  C ADDR   04DBH   A      691#
+TENMIN . . . . . .  C ADDR   0132H   A      194#
+TEOLI. . . . . . .  C ADDR   04F9H   A      695#
+TEOLL. . . . . . .  C ADDR   046EH   A      680#
+TEOLR. . . . . . .  C ADDR   0503H   A      696#
+TEOUT. . . . . . .  C ADDR   0464H   A      679#
+TEPAR. . . . . . .  C ADDR   0446H   A      676#
+TES19_2. . . . . .  C ADDR   043CH   A      674#
+TES57_6. . . . . .  C ADDR   0432H   A      673#
+TESKOR . . . . . .  C ADDR   03F5H   A      664#
+TESTAT . . . . . .  C ADDR   04D1H   A      690#
+TETE11 . . . . . .  C ADDR   0414H   A      668#
+A51 MACRO ASSEMBLER  SUBR4                                                                02/01/2007 11:27:16 PAGE    26
+
+TETE7. . . . . . .  C ADDR   0428H   A      670#
+TETE9. . . . . . .  C ADDR   041EH   A      669#
+TETESI . . . . . .  C ADDR   03E1H   A      662#
+TETESR . . . . . .  C ADDR   03EBH   A      663#
+TEVICH . . . . . .  C ADDR   03B9H   A      657#
+TEWR . . . . . . .  C ADDR   048AH   A      683#
+TEXTT. . . . . . .  C ADDR   037DH   A      87 648#
+TIM2 . . . . . . .    ----   -----          907 909
+UPA. . . . . . . .  C ADDR   0161H   A      249# 255
+UPA1 . . . . . . .  C ADDR   0171H   A      267# 273
+UPA2 . . . . . . .  C ADDR   0151H   A      230# 236
+UPAA . . . . . . .  C ADDR   0630H   A      955# 961
+UPAA4. . . . . . .  C ADDR   01BAH   A      330# 336
+UPAB . . . . . . .  C ADDR   01CAH   A      347# 353
+UPAK . . . . . . .  C ADDR   015BH   A      246#
+UPAK1. . . . . . .  C ADDR   060AH   A      920#
+UPAK2. . . . . . .  C ADDR   014BH   A      227#
+UPAK3. . . . . . .  C ADDR   016BH   A      264#
+UPAK4. . . . . . .  C ADDR   062AH   A      952#
+UPAKA. . . . . . .  C ADDR   01B4H   A      327#
+UPAKB. . . . . . .  C ADDR   01C4H   A      344#
+UPK1 . . . . . . .  C ADDR   061CH   A      928 931#
+UPK2 . . . . . . .  C ADDR   061DH   A      930 932#
+VICHR. . . . . . .    ----   -----          482
+VOLUME . . . . . .    ----   -----          995 997
+VVCHIBL. . . . . .  C ADDR   02D6H   A      524#
+VVCHIBL4 . . . . .  C ADDR   02D8H   A      527#
+VVCHIF . . . . . .  C ADDR   02C6H   A      513# 526
+WR1. . . . . . . .  C ADDR   05FFH   A      903# 910
+WRITE. . . . . . .  C ADDR   05FCH   A      373 375 377 379 381 383 386 388 390 393 395 397 901#
+XCIKLWR. . . . . .  C ADDR   0521H   A      703#
+YESTEST. . . . . .  C ADDR   0036H   A      2 34#
+Z01S . . . . . . .  C ADDR   00B4H   A      149# 151
+Z05S . . . . . . .  C ADDR   00C1H   A      158# 160
+Z100 . . . . . . .  C ADDR   0085H   A      113# 115
+Z15. . . . . . . .  C ADDR   0093H   A      125# 127
+Z1S. . . . . . . .  C ADDR   00A7H   A      141# 143
+ZCMP . . . . . . .  C ADDR   059DH   A      810#
+ZDIV . . . . . . .  C ADDR   056EH   A      773#
+ZMUL . . . . . . .  C ADDR   0566H   A      768#
+ZNMAT. . . . . . .    ----   -----          781 784 787
+ZZ . . . . . . . .  C ADDR   0095H   A      126# 126
+Z_01S. . . . . . .  C ADDR   00B0H   A      147# 639
+Z_05S. . . . . . .  C ADDR   00BDH   A      156#
+Z_100. . . . . . .  C ADDR   0083H   A      112#
+Z_15 . . . . . . .  C ADDR   0091H   A      124#
+Z_1MS. . . . . . .  C ADDR   009AH   A      131#
+Z_1S . . . . . . .  C ADDR   00A3H   A      139#
+Z_5. . . . . . . .  C ADDR   008CH   A      119#
+Z_9. . . . . . . .  C ADDR   05F7H   A      895#
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  1 WARNING(S), 139 ERROR(S)

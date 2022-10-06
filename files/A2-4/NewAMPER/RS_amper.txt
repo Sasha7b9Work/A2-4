@@ -1,0 +1,379 @@
+
+
+rez for use in 'abin'=4F long !!!
+
+
+?		rez_Ame, after write,	'bufind' wanted
+
+-	jmp	re11_7
+-	jmp	gotoKD
+-	jnc	rmo220		;A>220000
+	jnb	biteizm,rnotestizm
+-	jmp	temul
+
+write to 'bufind'
+	mov	r0,#adec+9	by dec r0,r1
+
+
+read from 'bufind+3..bufind+9'
+
+
+		adec
+mov	r0,#adec
+mov	r1,#abin+3	;hex->10
+call	bindec
+
+
+
+saver2: r2-r5 to (R0)+
+resar8: (R0)+ to r8-r11	; 2 - from R2
+
+
+??
+right2:		inc		@r1
+		call		lolevT
+		;call	loadT	;нажата кн-> в реж Tизм 
+
+
+
+Cells are refilled: 0xE1,E2,E3,E5
+
+after transfer p_out=FB, EIE2=FF ? 
+
+memory are used to adr=E8
+
+?jmp	nobavpv - 4;nobitizm - 2;	goonin - 4,
+labelA	- 2,	labelB - 5
+gocikle	- 4
+chdelmo	- 2
+tekaout	- 3
+out6		- 9,	viout	- 27
+
+
+n4delch:	...	n12delch:	cjne @r0
+
+
+Button what doing?	+/-		Start/Stop
+values parT
+
+knright:	mov		r1,#diap
+
+knvich:	mov		r0,#parT
+
+knizmon:	clr		knizm		;режим ИЗМ выкл
+
+knopt:	clr		bitizm	;tau ?
+
+knrazr:	mov		r0,#parN	;RAZR
+		mov		r1,#parT
+
+rikn:		mov		a,movleft
+
+knmenu:	jb		bitvi11,merr
+		jb		biteizm,menuoff
+		jb		bitklb,klboff
+		clr		bitizm		;off IZM
+		setb		bitmenu
+
+knAVP:	jb		bitklb,rendkalib	
+		jb		bitavp,meavp
+		setb		bitavp
+
+knleft:	jb		bitklb,lefkl
+		mov		r1,#diap
+
+knNUL:	jb		bitnul,ybnul
+		setb		bitnul
+
+knMEM:	jb		bitklb,bout7	;Память
+		clr		bitizm		;off IZM
+		mov		dptr,#teLIST	;CLE
+
+kvvod0:	mov		p3,#0f7h			;knopka vvod
+		jb		p3.7,ddoutf
+
+rebyte	12 'jmp'
+rebyte2: 4 bytes movc to R2--R5
+
+Массивы образовывать: 2 байта в начале АА и под длину, под КС в конце
+
+Timer2 for blinking
+
+parT=2 ~ 1 s
+     1 ~ 10 s
+    10h~ 0.1 s
+
+diap=5 ~ e-7 
+     9 ~ e-11
+     0 ~ e-2
+
+???? :
+		call	ldc_ltemp	;4 bytes load
+labelL1:	call		vvchibl;f	;увеличить цифру
+
+1) Timer2 for- sound 4 kHz		may use interrupt RS?
+
+parT=2 ~ 1 s
+
+rebyte:	clr		bitoll
+		jnb		p1.5,$	;ready ADC strob, 5 ms; for T=2 ms -1 ms 
+		jb		p1.5,$
+
+
+;в реж измерения прибор измеряет (кнопка ИЗМ не нажата )
+button IZM - turn on enter
+flag IZM=0 by below button
+;при нажатии кнопок (T,МЕНЮ ,ПАМЯТЬ ,ВЫЧ R)прибор выходит из реж измерения
+;и выдает т.н. буфер индикации	
+
+ПАМЯТЬ: 4 blochs by 200 by 5 (4)?
+
+
+	!!!		
+
+Subr7 loadT:	fill 'parT'
+call	clmassix	;сбросить массив скользящ.среднего
+call	loadT		;в буфер2 записать текст ~ Tizm
+
+
+
+knright:	mov		r1,#diap
+		;переключить диап.1 поз. вверх
+
+VERY OFTEN USED:		jmp	onmem11 , goto7
+onmem11:	mov	r0,#chkl
+		mov	@r0,#03
+		inc	r0
+		mov	@r0,#0e8h	;1000
+		jmp	out7		;to 'rti'	?goto7			
+
+
+
+rlabL2:	jmp		labL2			???
+rlabM:	jmp		labM
+ques:		jmp		out7
+ddoutfr:	jmp		ddoutf
+
+rfindmem:		jmp		findmem	??
+
+last I see:
+	;кнопка ПАМЯТЬ
+knMEM:		jb		bitklb,bout7;в реж калибровки не нажимать память
+
+
+
+knizmon:		clr		knizm		;уст реж ИЗМ ВЫКЛ
+
+
+keyb1:	...		slip 0:FE,FD,...BF
+		mov		a,p3
+		jb		acc.6,outviR;выход из режима выч R
+
+
+		mov		a,p3		;? Keyboard
+		jnb		acc.6,pyskst
+...
+pyskst:	jb	bitbon,bufon		;pysk/stop 
+		setb	bitbon	;уст реж буфер вкл
+...
+bufon:	clr		bitbon
+...
+	jmp		izmpaT
+
+
+izmpaT:	mov		r0,#parT		-- Tree cmd
+		mov		r1,#chkl
+...
+		jmp		out6
+
+
+	org	93h
+		jmp		keyb1	;IE6
+	org	9bh
+		jmp		keyb2	;IE7
+
+
+
+goonT:			  	mov		r0,#interva;high  byte loadr2 
+	...
+nott1:			cjne	@r0,#2,nott2		Key analyz?
+	
+
+moveA3: ...
+		jb		bitvich,rnorvich
+		jb		bitt2,rnorvich
+		jb		bitoll,rseeind
+		jb		bitmenu,rseeind
+		jb		bitmem,rseeind
+
+
+
+rebyte:	clr		bitoll			MainLoop?
+		jnb		p1.5,$		;?
+		jb		p1.5,$		;?
+
+
+labelA:		mov		a,chkl
+			jnb		acc.7,no0key;
+
+
+
+knKMP:	jmp		out7			???
+rout7:	jmp		out7	
+rlabelH:	jmp		labelH
+rknNUL:	jmp		knNUL
+rknleft:	jmp		knleft
+
+
+vvinte:		;inputed interval
+
+
+void HW_UART_INIT(void)
+{
+PCON |= 0x80;	// SMOD=1 (HW_UART uses Timer 1 overflow with no divide down).
+TMOD = 0x20;	// Configure Timer 1 for use by HW_UART CKCON |= 0x10; Timer 1 derived from SYSCLK
+			//TH1 = -HW_TIME_COUNT; TL1 = -HW_TIME_COUNT;
+TR1 = 1;		// Start Timer 1
+RI=0;			// Clear HW_UART receive and transmit TI=0; // complete indicators.
+SCON = 0x50;	// HW_UART : Mode 1, 8-bit UART, enable RX 
+}
+from mine Saratov.c
+   TH1    = (char)0xB2;//(SYSCLK/BAUDRATE/16);
+   CKCON |= 0x10;      // Timer1 uses SYSCLK as time base
+
+
+	формат команды ( от РС к прибору )
+АА  АА  cmd  lng bytes  ...  ks
+	answer 
+АА  АА  code  lng bytes<=255  ...  ks
+
+1-я доп.команда: гнать поток 4 байтовых плавающих слов=результатов измерений ? если м.быть так быстро результаты
+2	усреднение скользящее \ нет
+
+
+1	А0	выкл.АВП					bitavp	BIT	cellbit.5
+	А1	вкл.АВП
+
+2	Q0	установка 0					bitnul	BIT	cellbit1.7
+
+3	B0	выкл.выдачу рез-тов
+	B1	вкл.выдачу рез-тов
+	B2	вылать режим
+
+4	T0	время установления показаний	10 с
+	T1						1 с
+	T2	0.1
+	T3	50 мс
+	T4	10 мс
+	T5	2 мс
+
+5	H0	разрешение	4 разряда
+	H1			5
+	H2			6
+
+6	R0	выкл.режим вычисления R
+	R1	вкл.режим вычисления R
+	R2	ввести константы вычисления R
+
+7	M0	очистить массив N
+	M1	задать интервал времени, сколько и единицы ???? заполняется весь или до выкл.
+	M2	вкл.накопление массива
+	M3	выкл.
+	M4	выдать в RS array N
+	M5	задать массив адреса начала, конца
+
+8	I0	измерение выкл.
+	I1	измерение вкл.
+
+
+
+
+
+
+	SUBR7.asm
+testrs:	;jb	p0.3,goprogr
+		clr	IE.4
+
+
+;чтение памяти программ в r8..r11
+;вх-r2,r3-адр яч памяти прогр
+re4byte:	mov			dph,r2
+		mov			dpl,r3
+		clr			a
+		movc		a,@a+dptr
+
+
+bitv19	=1 ~ 19600
+
+yst1:	...				??????
+		mov	IE,#80h
+
+		IE
+
+Bit7:	EA:	Enable All Interrupts, 0: Disable all interrupt sources.
+Bit6:	IEGF0: General Purpose Flag 0. This is a general purpose flag for use under software control.
+Bit5: ET2: Enabler Timer 2 Interrupt, 0: Disable Timer 2 interrupt.
+Bit4: ES0: Enable UART0 Interrupt. 0: Disable UART0 interrupt.
+Bit3: ET1: Enable Timer 1 Interrupt. 1: Enable interrupt requests generated by the TF1 flag (TCON.7).
+Bit2: EX1: Enable External Interrupt 1. 1: Enable interrupt requests generated by the /INT1 pin.
+Bit1: ET0: Enable Timer 0 Interrupt. 1: Enable interrupt requests generated by the TF0 flag (TCON.5).
+Bit0: EX0: Enable External Interrupt 0. 1: Enable interrupt requests generated by the /INT0 pin.
+
+
+        mov     SBUF,#7
+        jnb     TI,$
+        clr     TI
+
+
+	clr	RI
+	clr	C
+	mov	A,SBUF
+
+
+SUB_RS232:
+	push	ACC
+	push	PSW
+        setb    PSW.3
+	clr	TI
+	jnb	RI,S_R2
+	clr	RI
+	clr	C
+	mov	A,SBUF
+	subb	A,#20h
+	jc	S_RS_COM	
+	mov	A,COUNT_RS
+	orl	A,COUNT_RS
+	jz	S_R3
+	add	A,#BUF_RS	
+	mov	R1,A
+	mov	A,SBUF
+	mov	@R1,A
+	dec	COUNT_RS
+	ljmp	S_R2
+S_RS_COM:
+	mov	COUNT_RS,#0
+	mov	A,SBUF
+	mov	R1,#BUF_RS
+	mov	@R1,A
+	cjne	A,#27,S_R0
+	mov	COUNT_RS,#4
+	ljmp	S_R2	
+S_R0:	cjne	A,#28,S_R1
+	mov	COUNT_RS,#4
+	ljmp	S_R2	
+S_R1:	cjne	A,#29,S_R3
+	clr	RUN_SYS.2	
+	clr	RUN_SYS.3	
+	mov	COUNT_RS,#0
+S_R3:	mov	@R1,#0	
+S_R2:	pop	PSW
+	pop	ACC
+        reti
+
+        mov     SCON,#50h
+        mov     TMOD,#00010101B	;timer 1, count 0
+        mov     TCON,#00000101B	;mode INT0, INT1
+        mov     IE,  #10001110B	;enable int1, t0 , t1
+        mov     IP,  #00000000B 
+
+

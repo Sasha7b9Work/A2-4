@@ -1,0 +1,1117 @@
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE     1
+
+
+MACRO ASSEMBLER A51 V6.14a
+OBJECT MODULE PLACED IN indicator8.OBJ
+ASSEMBLER INVOKED BY: D:\PROGRAM FILES\CYGNAL\IDEFILES\C51\BIN\A51.EXE indicator8.asm XR GEN DB EP NOMOD51
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ;файл процессора   индикации (f0230)
+                       2     NAME    MAIN
+                       3     
+0000                   4                     org 0
+0000 020000   F        5                     jmp     BEGIN
+0003                   6                     org 3
+0003 32                7                     reti
+                       8     
+0033                   9                     org 33h
+0033 020000   F       10                     jmp             intSPI;
+                      11     
+                      12     ;$include (c8051f200.inc) ; Include register definition file.
+                +1    13     ;-----------------------------------------------------------------------------
+                +1    14     ;       Copyright (C) 2001 CYGNAL INTEGRATED PRODUCTS, INC.
+                +1    15     ;       All rights reserved.
+                +1    16     ;
+                +1    17     ;
+                +1    18     ;       FILE NAME       : C8051F200.INC 
+                +1    19     ;       TARGET MCU      : C8051F206, 'F220, 'F221, 'F226, 'F230, 'F231 and F236. 
+                +1    20     ;       DESCRIPTION     : Register/bit definitions for the C8051F2xx product family.
+                +1    21     ;
+                +1    22     ;
+                +1    23     ;  REVISION 1.9     
+                +1    24     ;
+                +1    25     ;-----------------------------------------------------------------------------
+                +1    26     ;REGISTER DEFINITIONS
+                +1    27     ;
+  0080          +1    28     P0       DATA  080H   ; PORT 0
+  0081          +1    29     SP       DATA  081H   ; STACK POINTER
+  0082          +1    30     DPL      DATA  082H   ; DATA POINTER - LOW BYTE
+  0083          +1    31     DPH      DATA  083H   ; DATA POINTER - HIGH BYTE
+  0087          +1    32     PCON     DATA  087H   ; POWER CONTROL
+  0088          +1    33     TCON     DATA  088H   ; TIMER CONTROL
+  0089          +1    34     TMOD     DATA  089H   ; TIMER MODE
+  008A          +1    35     TL0      DATA  08AH   ; TIMER 0 - LOW BYTE
+  008B          +1    36     TL1      DATA  08BH   ; TIMER 1 - LOW BYTE
+  008C          +1    37     TH0      DATA  08CH   ; TIMER 0 - HIGH BYTE
+  008D          +1    38     TH1      DATA  08DH   ; TIMER 1 - HIGH BYTE
+  008E          +1    39     CKCON    DATA  08EH   ; CLOCK CONTROL
+  008F          +1    40     PSCTL    DATA  08FH   ; PROGRAM STORE R/W CONTROL
+  0090          +1    41     P1       DATA  090H   ; PORT 1
+  0098          +1    42     SCON     DATA  098H   ; SERIAL PORT CONTROL
+  0099          +1    43     SBUF     DATA  099H   ; SERIAL PORT BUFFER
+  009A          +1    44     SPI0CFG  DATA  09AH   ; SERIAL PERIPHERAL INTERFACE 0 CONFIGURATION
+  009B          +1    45     SPI0DAT  DATA  09BH   ; SERIAL PERIPHERAL INTERFACE 0 DATA
+  009D          +1    46     SPI0CKR  DATA  09DH   ; SERIAL PERIPHERAL INTERFACE 0 CLOCK RATE CONTROL
+  009E          +1    47     CPT0CN   DATA  09EH   ; COMPARATOR 0 CONTROL
+  009F          +1    48     CPT1CN   DATA  09FH   ; COMPARATOR 1 CONTROL 
+  00A0          +1    49     P2       DATA  0A0H   ; PORT 2
+  00A4          +1    50     PRT0CF   DATA  0A4H   ; PORT 0 CONFIGURATION
+  00A5          +1    51     PRT1CF   DATA  0A5H   ; PORT 1 CONFIGURATION
+  00A6          +1    52     PRT2CF   DATA  0A6H   ; PORT 2 CONFIGURATION
+  00A7          +1    53     PRT3CF   DATA  0A7H   ; PORT 3 CONFIGURATION 
+  00A8          +1    54     IE       DATA  0A8H   ; INTERRUPT ENABLE
+  00AD          +1    55     PRT1IF   DATA  0ADH   ; PORT 1 EXTERNAL INTERRUPT FLAGS
+  00AF          +1    56     EMI0CN   DATA  0AFH   ; EXTERNAL MEMORY INTERFACE CONTROL
+  00B0          +1    57     P3       DATA  0B0H   ; PORT 3
+  00B1          +1    58     OSCXCN   DATA  0B1H   ; EXTERNAL OSCILLATOR CONTROL
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE     2
+
+  00B2          +1    59     OSCICN   DATA  0B2H   ; INTERNAL OSCILLATOR CONTROL
+  00B6          +1    60     FLSCL    DATA  0B6H   ; FLASH MEMORY TIMING PRESCALER
+  00B7          +1    61     FLACL    DATA  0B7H   ; FLASH MEMORY READ LIMIT 
+  00B8          +1    62     IP       DATA  0B8H   ; INTERRUPT PRIORITY
+  00BB          +1    63     AMX0SL   DATA  0BBH   ; ADC 0 MUX CHANNEL SELECTION
+  00BC          +1    64     ADC0CF   DATA  0BCH   ; ADC 0 CONFIGURATION
+  00BE          +1    65     ADC0L    DATA  0BEH   ; ADC 0 DATA - LOW BYTE
+  00BF          +1    66     ADC0H    DATA  0BFH   ; ADC 0 DATA - HIGH BYTE
+  00C4          +1    67     ADC0GTL  DATA  0C4H   ; ADC 0 GREATER-THAN REGISTER - LOW BYTE
+  00C5          +1    68     ADC0GTH  DATA  0C5H   ; ADC 0 GREATER-THAN REGISTER - HIGH BYTE
+  00C6          +1    69     ADC0LTL  DATA  0C6H   ; ADC 0 LESS-THAN REGISTER - LOW BYTE
+  00C7          +1    70     ADC0LTH  DATA  0C7H   ; ADC 0 LESS-THAN REGISTER - HIGH BYTE
+  00C8          +1    71     T2CON    DATA  0C8H   ; TIMER 2 CONTROL
+  00CA          +1    72     RCAP2L   DATA  0CAH   ; TIMER 2 CAPTURE REGISTER - LOW BYTE
+  00CB          +1    73     RCAP2H   DATA  0CBH   ; TIMER 2 CAPTURE REGISTER - HIGH BYTE
+  00CC          +1    74     TL2      DATA  0CCH   ; TIMER 2 - LOW BYTE
+  00CD          +1    75     TH2      DATA  0CDH   ; TIMER 2 - HIGH BYTE
+  00D0          +1    76     PSW      DATA  0D0H   ; PROGRAM STATUS WORD
+  00D1          +1    77     REF0CN   DATA  0D1H   ; VOLTAGE REFERENCE 0 CONTROL
+  00E0          +1    78     ACC      DATA  0E0H   ; ACCUMULATOR
+  00E1          +1    79     PRT0MX   DATA  0E1H   ; PORT 0 MUX CONFIGURATION REGISTER
+  00E2          +1    80     PRT1MX   DATA  0E2H   ; PORT 1 MUX CONFIGURATION REGISTER
+  00E3          +1    81     PRT2MX   DATA  0E3H   ; PORT 2 MUX CONFIGURATION REGISTER
+  00E6          +1    82     EIE1     DATA  0E6H   ; EXTERNAL INTERRUPT ENABLE 1
+  00E7          +1    83     EIE2     DATA  0E7H   ; EXTERNAL INTERRUPT ENABLE 2
+  00E8          +1    84     ADC0CN   DATA  0E8H   ; ADC 0 CONTROL
+  00EF          +1    85     RSTSRC   DATA  0EFH   ; RESET SOURCE 
+  00F0          +1    86     B        DATA  0F0H   ; B REGISTER
+  00F1          +1    87     P0MODE   DATA  0F1H   ; PORT 0 MODE REGISTER
+  00F2          +1    88     P1MODE   DATA  0F2H   ; PORT 1 MODE REGISTER
+  00F3          +1    89     P2MODE   DATA  0F3H   ; PORT 2 MODE REGISTER
+  00F4          +1    90     P3MODE   DATA  0F4H   ; PORT 3 MODE REGISTER
+  00F6          +1    91     EIP1     DATA  0F6H   ; EXTERNAL INTERRUPT PRIORITY REGISTER 1
+  00F7          +1    92     EIP2     DATA  0F7H   ; EXTERNAL INTERRUPT PRIORITY REGISTER 2
+  00F8          +1    93     SPI0CN   DATA  0F8H   ; SERIAL PERIPHERAL INTERFACE 0 CONTROL 
+  00FF          +1    94     WDTCN    DATA  0FFH   ; WATCHDOG TIMER CONTROL 
+                +1    95     ;
+                +1    96     ;------------------------------------------------------------------------------
+                +1    97     ;BIT DEFINITIONS
+                +1    98     ;
+                +1    99     ; TCON 88H
+  0088          +1   100     IT0      BIT   TCON.0 ; EXT. INTERRUPT 0 TYPE
+  0089          +1   101     IE0      BIT   TCON.1 ; EXT. INTERRUPT 0 EDGE FLAG
+  008A          +1   102     IT1      BIT   TCON.2 ; EXT. INTERRUPT 1 TYPE
+  008B          +1   103     IE1      BIT   TCON.3 ; EXT. INTERRUPT 1 EDGE FLAG
+  008C          +1   104     TR0      BIT   TCON.4 ; TIMER 0 ON/OFF CONTROL
+  008D          +1   105     TF0      BIT   TCON.5 ; TIMER 0 OVERFLOW FLAG
+  008E          +1   106     TR1      BIT   TCON.6 ; TIMER 1 ON/OFF CONTROL
+  008F          +1   107     TF1      BIT   TCON.7 ; TIMER 1 OVERFLOW FLAG
+                +1   108     ;
+                +1   109     ; SCON 98H
+  0098          +1   110     RI       BIT   SCON.0 ; RECEIVE INTERRUPT FLAG
+  0099          +1   111     TI       BIT   SCON.1 ; TRANSMIT INTERRUPT FLAG
+  009A          +1   112     RB8      BIT   SCON.2 ; RECEIVE BIT 8
+  009B          +1   113     TB8      BIT   SCON.3 ; TRANSMIT BIT 8
+  009C          +1   114     REN      BIT   SCON.4 ; RECEIVE ENABLE
+  009D          +1   115     SM2      BIT   SCON.5 ; MULTIPROCESSOR COMMUNICATION ENABLE
+  009E          +1   116     SM1      BIT   SCON.6 ; SERIAL MODE CONTROL BIT 1
+  009F          +1   117     SM0      BIT   SCON.7 ; SERIAL MODE CONTROL BIT 0
+                +1   118     ; 
+                +1   119     ; IE A8H
+  00A8          +1   120     EX0      BIT   IE.0   ; EXTERNAL INTERRUPT 0 ENABLE
+  00A9          +1   121     ET0      BIT   IE.1   ; TIMER 0 INTERRUPT ENABLE
+  00AA          +1   122     EX1      BIT   IE.2   ; EXTERNAL INTERRUPT 1 ENABLE
+  00AB          +1   123     ET1      BIT   IE.3   ; TIMER 1 INTERRUPT ENABLE
+  00AC          +1   124     ES       BIT   IE.4   ; SERIAL PORT INTERRUPT ENABLE
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE     3
+
+  00AD          +1   125     ET2      BIT   IE.5   ; TIMER 2 INTERRUPT ENABLE
+  00AF          +1   126     EA       BIT   IE.7   ; GLOBAL INTERRUPT ENABLE
+                +1   127     ;
+                +1   128     ; IP B8H
+  00B8          +1   129     PX0      BIT   IP.0   ; EXTERNAL INTERRUPT 0 PRIORITY
+  00B9          +1   130     PT0      BIT   IP.1   ; TIMER 0 PRIORITY
+  00BA          +1   131     PX1      BIT   IP.2   ; EXTERNAL INTERRUPT 1 PRIORITY
+  00BB          +1   132     PT1      BIT   IP.3   ; TIMER 1 PRIORITY
+  00BC          +1   133     PS       BIT   IP.4   ; SERIAL PORT PRIORITY
+  00BD          +1   134     PT2      BIT   IP.5   ; TIMER 2 PRIORITY
+                +1   135     ;
+                +1   136     ; T2CON C8H
+  00C8          +1   137     CPRL2    BIT   T2CON.0 ; CAPTURE OR RELOAD SELECT
+  00C9          +1   138     CT2      BIT   T2CON.1 ; TIMER OR COUNTER SELECT
+  00CA          +1   139     TR2      BIT   T2CON.2 ; TIMER 2 ON/OFF CONTROL
+  00CB          +1   140     EXEN2    BIT   T2CON.3 ; TIMER 2 EXTERNAL ENABLE FLAG
+  00CC          +1   141     TCLK     BIT   T2CON.4 ; TRANSMIT CLOCK FLAG
+  00CD          +1   142     RCLK     BIT   T2CON.5 ; RECEIVE CLOCK FLAG
+  00CE          +1   143     EXF2     BIT   T2CON.6 ; EXTERNAL FLAG
+  00CF          +1   144     TF2      BIT   T2CON.7 ; TIMER 2 OVERFLOW FLAG
+                +1   145     ;
+                +1   146     ; PSW D0H
+  00D0          +1   147     P        BIT   PSW.0  ; ACCUMULATOR PARITY FLAG
+  00D1          +1   148     F1       BIT   PSW.1  ; USER FLAG 1
+  00D2          +1   149     OV       BIT   PSW.2  ; OVERFLOW FLAG
+  00D3          +1   150     RS0      BIT   PSW.3  ; REGISTER BANK SELECT 0
+  00D4          +1   151     RS1      BIT   PSW.4  ; REGISTER BANK SELECT 1
+  00D5          +1   152     F0       BIT   PSW.5  ; USER FLAG 0
+  00D6          +1   153     AC       BIT   PSW.6  ; AUXILIARY CARRY FLAG
+  00D7          +1   154     CY       BIT   PSW.7  ; CARRY FLAG
+                +1   155     ;
+                +1   156     ; ADC0CN E8H
+  00E8          +1   157     ADLJST   BIT   ADC0CN.0 ; ADC 0 RIGHT JUSTIFY DATA BIT
+  00E9          +1   158     ADWINT   BIT   ADC0CN.1 ; ADC 0 WINDOW COMPARE INTERRUPT FLAG
+  00EA          +1   159     ADSTM0   BIT   ADC0CN.2 ; ADC 0 START OF CONVERSION MODE BIT 0
+  00EB          +1   160     ADSTM1   BIT   ADC0CN.3 ; ADC 0 START OF CONVERSION MODE BIT 1
+  00EC          +1   161     ADBUSY   BIT   ADC0CN.4 ; ADC 0 BUSY FLAG
+  00ED          +1   162     ADCINT   BIT   ADC0CN.5 ; ADC 0 CONVERISION COMPLETE INTERRUPT FLAG 
+  00EE          +1   163     ADCTM    BIT   ADC0CN.6 ; ADC 0 TRACK MODE
+  00EF          +1   164     ADCEN    BIT   ADC0CN.7 ; ADC 0 ENABLE
+                +1   165     ;
+                +1   166     ; SPI0CN F8H
+  00F8          +1   167     SPIEN    BIT   SPI0CN.0 ; SPI 0 SPI ENABLE
+  00F9          +1   168     MSTEN    BIT   SPI0CN.1 ; SPI 0 MASTER ENABLE
+  00FA          +1   169     SLVSEL   BIT   SPI0CN.2 ; SPI 0 SLAVE SELECT
+  00FB          +1   170     TXBSY    BIT   SPI0CN.3 ; SPI 0 TX BUSY FLAG
+  00FC          +1   171     RXOVRN   BIT   SPI0CN.4 ; SPI 0 RX OVERRUN FLAG
+  00FD          +1   172     MODF     BIT   SPI0CN.5 ; SPI 0 MODE FAULT FLAG
+  00FE          +1   173     WCOL     BIT   SPI0CN.6 ; SPI 0 WRITE COLLISION FLAG
+  00FF          +1   174     SPIF     BIT   SPI0CN.7 ; SPI 0 INTERRUPT FLAG
+                     175     
+  00CA               176     TMR2RLL  DATA 0cah;    // TIMER 2 RELOAD LOW                                       */
+  00CB               177     TMR2RLH  DATA 0cbh;    // TIMER 2 RELOAD HIGH   
+----                 178                     DSEG
+                     179     
+  0040               180     bufind  DATA    40h;буфер кодированной индикации 10x2 byte
+  0054               181     numb    DATA    54h;
+  0055               182     makoi   DATA    55h;буфер некодированной информации 12 byte
+  0062               183     nbyte           DATA    62h
+                     184     
+  0020               185     cellbit         DATA    20h
+  0000               186     bitznak         BIT     cellbit.0       ;20.0   бит знака
+  0001               187     bipoint         BIT     cellbit.1       ;20.1   бит точки       
+  0002               188     znmat           BIT             cellbit.2       ;20.2
+  0003               189     bitport         BIT             cellbit.3       ;20.3
+  0004               190     bready          BIT             cellbit.4       ;20.4  флаг готовности строки
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE     4
+
+  0005               191     bitsv           BIT     cellbit.5       ;20.5 бит светодиода соответствующего знакоместа
+                     192     ;               XSEG 
+                     193     ;one    XDATA           30h
+                     194     
+                     195     
+                     196     
+                     197     
+                     198     ;         MASS0  xdata 0180h;
+  0184               199             MASS1  xdata 0184h;
+                     200     ;
+                     201     ;STRING_ROUTINES  SEGMENT  CODE
+                     202     
+                     203     ;       RSEG  STRING_ROUTINES
+                     204     
+                     205     
+                     206     
+                     207     ; This routine outputs a CR and a LF
+                     208     
+  000A               209     LF equ  0AH                ; line feed 
+  000D               210     CR      equ 0dh
+                     211     
+  0000               212      rr0            EQU 00
+  0001               213                     rr1       equ   01
+  0006               214                     rr6   equ 06
+  0002               215                     rr2       equ   02
+  0003               216                     rr3       equ   03
+  0007               217                     rr7   equ 07
+                     218     
+  0008               219                     r8   equ 08
+  0009               220                     r9        equ   09
+  000A               221                     r10       equ   10
+  000B               222                     r11   equ 11
+                     223     
+                     224             
+                     225                     MAIN SEGMENT CODE
+----                 226     rseg     Main          ; Switch to this code segment.
+                     227     
+                     228                  using    0              ; Specify register bank for the 
+                     229     
+0100                 230     org 100h
+                     231                              
+0100 7581E0          232     BEGIN:    mov  sp, #0e0h
+                     233                             
+0103 75D103          234                                     mov             REF0CN,#03h;=0x03;
+0106 75A400          235                                     mov             PRT0CF,#00h
+0109 75A500          236                                     mov             PRT1CF,#00h
+010C 75A600          237                                mov          PRT2CF,#00h
+010F 75A700          238                                mov          PRT3CF,#00h
+0112 75E301          239                                     mov             PRT2MX,#01
+                     240                     
+                     241      
+0115 75FFDE          242                                     mov             WDTCN,#0deh;=0xde;       //чряЁхЄ ЁрсюЄ_ WD
+                             T
+0118 75FFAD          243                                     mov             WDTCN,#0adh;=0xad;                         
+                                       
+011B 758922          244                                     mov             TMOD,#22h;=0x22;        //ЁхушёЄЁ Ёхцшьют
+                     245                             
+011E 758CF9          246                                     mov             TH0,#0f9h;=0xf9;//      ; +ёЄрютър ЄрщьхЁр
+0121 758AF9          247                                     mov             TL0,#0f9h;=0xf9; 
+                     248                             
+                     249                                     
+0124 75B167          250                                     mov             OSCXCN,#67h;=0x67;
+                     251     
+                     252             
+                     253     
+0127 E5B1            254     gener:     mov a, oscxcn
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE     5
+
+0129 B4E7FB          255                cjne a,#11100111b,gener
+                     256                            
+012C 75B288          257                                     mov             OSCICN,#88h;=0x84;
+012F 75CA00          258                             mov     TMR2RLL,#0;=0;
+0132 75CBD1          259                             mov             TMR2RLH,#0d1h;=0xd1;
+                     260       
+0135 D28E            261                                      setb  TCON.6                   ;ЁхушёЄЁ єяЁртыхш_
+0137 D28C            262                                      setb tcon.4
+                     263     
+0139 75EF00          264                                     mov     RSTSRC,#0;=00   ;//шёЄюўшъш ёсЁюёр 
+                     265     
+                     266                       
+                     267                                             
+013C 75F801          268                             mov             SPI0CN,#01
+013F 759D04          269                             mov             SPI0CKR,#04
+0142 75E601          270                             mov             EIE1,#01
+0145 75F601          271                             mov             EIP1,#01
+                     272                     ;;      mov             IE,#80h;//-_Єшх сыюъшЁютъш тёхї яЁхЁ_тршщ
+                     273     ;ozu
+                     274                             
+0148 E4              275                                                             clr     a
+0149 F5D0            276                                                             mov     psw,a
+014B 7800            277                                                             mov     r0,#00h 
+014D F6              278     mecle:                          mov     @r0,a                   ;обнуление озу 256 байт
+014E 08              279                                                             inc     r0
+014F B87FFB          280                                                             cjne    r0,#7fh,mecle
+0152 7880            281                                                             mov     r0,#80h
+0154 F6              282     meff:                                   mov     @r0,a 
+0155 08              283                                                             inc     r0
+0156 B8DFFB          284                                                             cjne    r0,#0dfh,meff
+0159 756200          285                                             mov             nbyte,#0;;;;11;;принимать с 0 байта
+                     286                                             ;;;;;;;;;;;;;;;
+015C 75A880          287                                             mov             IE,#80h;;;;;;;;;;;;;;;;;
+015F 7840            288             mov             r0,#bufind
+0161 763F            289     pp:     mov             @r0,#03fh
+0163 08              290             inc             r0
+0164 763F            291             mov             @r0,#03Fh
+0166 08              292             inc             r0
+0167 B854F7          293             cjne    r0,#bufind+20,pp
+                     294     
+016A                 295     start:
+                     296                        ;;;;;;
+016A C2A4            297                        clr          p2.4
+016C C2A5            298                        clr          p2.5
+016E 00              299                        nop
+016F 00              300                        nop
+0170 00              301                        nop
+0171 D2A4            302                        setb         p2.4
+0173 D2A5            303                        setb         p2.5
+                     304                        ;;;;;;
+                     305     
+0175 900000   F      306                             mov             dptr,#Tabpro0
+0178 7840            307                             mov             r0,#bufind
+017A 7954            308                             mov             r1,#numb
+017C 7700            309                             mov             @r1,#0
+017E                 310     again:
+017E 900000   F      311                             mov             dptr,#Tabpro0
+0181 C3              312                             clr             c
+0182 7401            313                             mov             a,#1
+0184 97              314                             subb    a,@r1
+0185 4005            315                             jc              oupp1
+0187 120000   F      316                             call    outp0                   ;numb=0,1
+018A 8003            317                             jmp             outgo
+018C 120000   F      318     oupp1:call      outp1                   ;numb=2..9
+018F 07              319     outgo:inc               @r1
+0190 08              320                             inc             r0                              ;следующий байт
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE     6
+
+0191 B70AEA          321                             cjne    @r1,#10,again
+                     322                             ;;;;;;;
+0194 3004D3          323                             jnb             bready ,start
+                     324                             ;обработка строки
+                     325                             ;принятая в makoi.. строка кодируется и записывается в bufind..
+                     326                             ;;;;;;;;
+                     327                             
+                     328     
+0197 7E00            329                                     mov             r6,#0
+0199 7855            330                                     mov             r0,#makoi
+019B 7940            331     www:                    mov             r1,#bufind
+019D EE              332                                     mov             a,r6
+019E 75F002          333                             mov             b,#2
+01A1 A4              334                             mul             ab
+01A2 29              335                             add             a,r1
+01A3 F9              336                             mov             r1,a    ;bufind+..
+01A4 E6              337                             mov             a,@r0     ;makoi+..
+01A5 5480            338                             anl             a,#80h
+01A7 C205            339                             clr             bitsv    ;старший бит каждого байта makoi отвечает 
+                             за светодиод
+01A9 6002            340                             jz              nobitsv
+01AB D205            341                             setb    bitsv
+01AD                 342     nobitsv:                        ;;;;;
+01AD E6              343                             mov             a,@r0     ;makoi+..
+01AE 547F            344                             anl             a,#7fh
+01B0 B42B08          345                             cjne    a,#2bh,no2b
+                     346                     ;       mov             r1,#bufind
+01B3 77ED            347                             mov             @r1,#0edh
+01B5 09              348                             inc             r1
+01B6 773F            349                             mov             @r1,#3fh
+01B8 020000   F      350                             jmp             anasv; next
+01BB B42D08          351     no2b:           cjne    a,#2dh,no2d
+                     352                     ;       mov             r1,#bufind
+01BE 77FF            353                             mov             @r1,#0ffh
+01C0 09              354                             inc             r1
+01C1 773F            355                             mov             @r1,#3fh
+01C3 020000   F      356                             jmp              anasv;next
+                     357                             ;;;;;;
+01C6 B44108          358     no2d:           cjne    a,#41h,no41
+                     359                     ;       mov             r1,#bufind
+01C9 77FF            360                             mov             @r1,#0ffh
+01CB 09              361                             inc             r1
+01CC 7708            362                             mov             @r1,#08h         ;'A'
+01CE 020000   F      363                             jmp              anasv;next
+01D1 E6              364     no41:           mov             a,@r0     ;makoi+.      ;;;;;;;
+01D2 B4FD08          365                             cjne    a,#0fdh,noff  ;только для начала (гашение индикатора)
+01D5 77FF            366                             mov             @r1,#0ffh
+01D7 09              367                             inc             r1
+01D8 77FF            368                             mov             @r1,#0ffh        ;
+01DA 020000   F      369                             jmp              next
+                     370     
+01DD E6              371     noff:            mov            a,@r0     ;makoi+.;;;;;;;;;
+01DE 547F            372                             anl             a,#7fh;маска на ст байт
+01E0 B4FE08          373                             cjne    a,#0feh,nonul ;только для начала (зажечь индикатора)
+01E3 7700            374                              mov    @r1,#00h
+01E5 09              375                             inc             r1
+01E6 7700            376                             mov             @r1,#00h         ;
+01E8 020000   F      377                             jmp              next
+01EB B42008          378     nonul:      cjne        a,#" ",noprob
+01EE 77FF            379                              mov    @r1,#0ffh
+01F0 09              380                             inc             r1
+01F1 77FF            381                             mov             @r1,#0ffh        ;
+01F3 020000   F      382                             jmp              anasv;next
+01F6 B45408          383     noprob:    cjne a,#"T",nolt      
+01F9 77ED            384                              mov    @r1,#0edh 
+01FB 09              385                             inc             r1
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE     7
+
+01FC 77FE            386                             mov             @r1,#0feh        ;
+01FE 020000   F      387                             jmp              anasv;next
+0201 B44508          388     nolt:           cjne    a,#"E",nole
+0204 77FF            389                               mov   @r1,#0ffh
+0206 09              390                             inc             r1
+0207 7706            391                             mov             @r1,#06h         ;
+0209 020000   F      392                             jmp             anasv; next
+020C B44808          393     nole:           cjne    a,#"H",noln
+020F 77FF            394                              mov    @r1,#0ffh
+0211 09              395                             inc             r1
+0212 7709            396                             mov             @r1,#09h         ;
+0214 020000   F      397                             jmp              anasv;next
+                     398     
+                     399     
+                     400     
+0217 B45308          401     noln:                   cjne    a,#"S",nols
+021A 77FF            402                              mov    @r1,#0ffh
+021C 09              403                             inc             r1
+021D 7727            404                             mov             @r1,#27h;12h     ;c
+021F 020000   F      405                             jmp              anasv;next        
+0222 B44208          406     nols:           cjne    a,#"B",nolb
+0225 77FB            407                              mov    @r1,#0fbh
+0227 09              408                             inc             r1
+0228 7702            409                             mov             @r1,#02h         ;
+022A 020000   F      410                             jmp              anasv;next
+                     411     
+022D B43D08          412     nolb:           cjne    a,#"=",noequ
+0230 77FF            413                              mov    @r1,#0ffh
+0232 09              414                             inc             r1
+0233 7737            415                             mov             @r1,#37h         ;
+0235 020000   F      416                             jmp              anasv;next
+0238 B47908          417     noequ:                          cjne    a,#79h,nolc;"С",nolc
+023B 77FF            418                              mov    @r1,#0ffh
+023D 09              419                             inc             r1
+023E 77C6            420                             mov             @r1,#0c6h        ;
+0240 020000   F      421                             jmp              anasv;next
+0243 B47108          422     nolc:           cjne    a,#71h,nolm;#"М",nolm      ; русские буквы спец кодирую т к при обы
+                             чной
+0246 77FA            423                              mov    @r1,#0fah          ; кодировке у них в старшем бите 1
+0248 09              424                             inc             r1
+0249 77C9            425                             mov             @r1,#0c9h        ;
+024B 020000   F      426                             jmp              anasv;next
+024E B47208          427     nolm:           cjne    a,#72h,nolu;#"Ю",nolu
+0251 77F3            428                              mov    @r1,#0f3h
+0253 09              429                             inc             r1
+0254 7709            430                             mov             @r1,#09h         ;
+0256 020000   F      431                             jmp              anasv;next
+0259 B47308          432     nolu:           cjne    a,#73h,nolbb;"Б",nolbb
+025C 77FF            433                              mov    @r1,#0ffh
+025E 09              434                             inc             r1
+025F 7702            435                             mov             @r1,#02h         ;
+0261 020000   F      436                             jmp              anasv;next
+0264 B45008          437     nolbb:          cjne    a,#"P",nolp
+0267 77FF            438                              mov    @r1,#0ffh
+0269 09              439                             inc             r1
+026A 770C            440                             mov             @r1,#0ch         ;
+026C 020000   F      441                             jmp              anasv;next
+026F B47408          442     nolp:           cjne    a,#74h,nolee;#"И",nolee
+0272 77DB            443                              mov    @r1,#0dbh
+0274 09              444                             inc             r1
+0275 77C9            445                             mov             @r1,#0c9h        ;
+0277 020000   F      446                             jmp              anasv;next
+027A B47508          447     nolee:          cjne    a,#75h,nolii;"Ы",nolii
+027D 77EF            448                               mov   @r1,#0efh
+027F 09              449                             inc             r1
+0280 7781            450                             mov             @r1,#81h         ;
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE     8
+
+0282 020000   F      451                             jmp              anasv;next
+0285 B47608          452     nolii:          cjne    a,#76h,noll;"Л",noll
+0288 77DB            453                              mov    @r1,#0dbh
+028A 09              454                             inc             r1
+028B 77F9            455                             mov             @r1,#0f9h        ;
+028D 020000   F      456                             jmp              anasv;next
+0290 B47708          457     noll:           cjne    a,#77h,nolzn;"Ь",nolzn
+0293 77FF            458                              mov    @r1,#0ffh
+0295 09              459                             inc             r1
+0296 7703            460                             mov             @r1,#03h         ;
+0298 020000   F      461                             jmp              anasv;next
+029B B47808          462     nolzn:          cjne    a,#78h,nolzd;"Д"
+029E 77DB            463                              mov    @r1,#0dbh
+02A0 09              464                             inc             r1
+02A1 77F1            465                             mov             @r1,#0f1h        ;
+02A3 020000   F      466                             jmp              anasv;next
+02A6 B46108          467     nolzd:          cjne    a,#61h,nolpp;"П"
+02A9 77FF            468                              mov    @r1,#0ffh
+02AB 09              469                             inc             r1
+02AC 77C8            470                             mov             @r1,#0c8h        ;
+02AE 020000   F      471                             jmp              anasv;next
+02B1 B46208          472     nolpp:          cjne    a,#62h,nolyy;"Я"
+02B4 77DE            473                              mov    @r1,#0deh
+02B6 09              474                             inc             r1
+02B7 7778            475                             mov             @r1,#78h         ;
+02B9 020000   F      476                             jmp              anasv;next
+02BC B44B08          477     nolyy:          cjne    a,#"K",nolk
+02BF 77F3            478                              mov    @r1,#0f3h
+02C1 09              479                             inc             r1
+02C2 778F            480                             mov             @r1,#8fh         ;
+02C4 020000   F      481                             jmp              anasv;next
+02C7 B46D07          482     nolk:           cjne    a,#"m",nolmm
+02CA 77EF            483                              mov    @r1,#0efh
+02CC 09              484                             inc             r1
+02CD 772B            485                             mov             @r1,#2bh         ;
+02CF 8077            486                             jmp              anasv;next
+02D1 B45807          487     nolmm:  cjne    a,#"X",nolx
+02D4 77D2            488                              mov    @r1,#0d2h
+02D6 09              489                             inc             r1
+02D7 77FF            490                             mov             @r1,#0ffh        ;
+02D9 806D            491                             jmp              anasv;next
+                     492     
+02DB B44C07          493     nolx:           cjne    a,#"L",noLLf
+02DE 77FF            494                             mov     @r1,#0ffh
+02E0 09              495                             inc             r1
+02E1 77C7            496                             mov             @r1,#0c7h        ;
+02E3 8063            497                             jmp              anasv
+02E5 B46307          498     noLLf:     cjne         a,#63h,noffm
+02E8 77FF            499                             mov     @r1,#0ffh
+02EA 09              500                             inc             r1
+02EB 77B9            501                             mov             @r1,#0b9h        ;      -1(-10,-11)
+02ED 8059            502                             jmp              anasv
+02EF B46407          503     noffm:  cjne            a,#64h,nopoi0
+02F2 77BF            504                             mov     @r1,#0bfh
+02F4 09              505                             inc             r1
+02F5 77C0            506                             mov             @r1,#0c0h        ;0.
+02F7 804F            507                             jmp              anasv
+                     508                             
+02F9 B46507          509     nopoi0:                 cjne            a,#65h,nopoll
+02FC 77DB            510                             mov     @r1,#0dbh
+02FE 09              511                             inc             r1
+02FF 77CF            512                             mov             @r1,#0cfh        ;V
+0301 8045            513                             jmp              anasv
+                     514     
+0303 B46607          515     nopoll:         cjne            a,#66h,noporr
+0306 77D7            516                                             mov     @r1,#0d7h
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE     9
+
+0308 09              517                             inc             r1
+0309 771C            518                             mov             @r1,#1ch         ;OM
+030B 803B            519                             jmp              anasv
+                     520     
+030D B44907          521     noporr:         cjne    a,#"I",noERI
+0310 77ED            522                             mov     @r1,#0edh
+0312 09              523                             inc             r1
+0313 77F6            524                             mov             @r1,#0f6h        ;
+0315 8031            525                             jmp              anasv
+0317 B45207          526     noERI:          cjne    a,#"R",noERR
+031A 77FF            527                             mov     @r1,#0ffh
+031C 09              528                             inc             r1
+031D 77C7            529                             mov             @r1,#0c7h        ;
+031F 8027            530                             jmp              anasv
+                     531     
+0321                 532     noERR:
+0321 E6              533                             mov             a,@r0     ;makoi+..
+0322 547F            534                             anl             a,#7fh
+0324 900000   F      535                             mov             dptr,#Tabma;                            
+0327 75F002          536                             mov             b,#2
+032A A4              537                             mul             ab
+032B FF              538                             mov             r7,a                            ;
+032C 93              539                             movc    a,@a+dptr               ;1-
+032D F7              540                             mov             @r1,a
+032E 09              541                             inc             r1
+032F 0F              542                             inc             r7
+0330 EF              543                             mov             a,r7
+0331 93              544                             movc    a,@a+dptr               ;2-
+0332 F7              545                             mov             @r1,a
+0333 300505          546                        jnb          bitsv,next
+0336 19              547                        dec          r1
+0337 E7              548                        mov          a,@r1
+0338 547F            549                        anl          a,#7fh
+033A F7              550                        mov          @r1,a
+033B 08              551             next:                   inc             r0
+033C 0E              552                                             inc             r6
+033D BE0D12          553                                             cjne    r6,#13,rwww
+                     554                              ;jb            bitizm,nopoin
+0340 5342BF          555                              anl            bufind+2,#0bfh;точка после 1й цифры
+                     556                              ;;;;;;;
+0343 C204            557     nopoin:  clr    bready          ;сбросить бит готовности строки
+0345 020000   F      558                             jmp             start
+                     559     
+0348 3005F0          560     anasv:          jnb             bitsv,next               ;анализ бита светодиодов
+034B 19              561                             dec             r1;high
+034C E7              562                             mov             a,@r1
+034D 547F            563                             anl             a,#7fh
+034F F7              564                             mov             @r1,a
+0350 80E9            565                             jmp             next
+                     566     
+0352 020000   F      567        rwww:        jmp             www
+                     568     ;выдать строку(bufind) с номером в(numb) в Р2,Р3 
+                     569     ;выдать строку(bufind) с номером в(numb) в Р0,Р3 
+                     570     ;загрузить 0 в порт p0  в соотв с n             
+0355                 571     outp0:
+0355 E6              572                             mov             a,@r0
+0356 F5B0            573                             mov             p3,a                    ;high byte
+0358 08              574                             inc             r0
+0359 E6              575                             mov             a,@r0
+035A F580            576                             mov             p0,a;   mov             p2,a                    ;lo
+                             w byte
+                     577     
+035C E7              578                             mov             a,@r1                   ;Tabpro+number
+035D 93              579                             movc    a,@a+dptr
+035E 52A0            580                             anl             p2,a;anl                p0,a                    ;cl
+                             r p0.6,p0,7..
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE    10
+
+                     581     
+0360 120000   F      582                             call    z_1m                    ;1ms
+0363 900000   F      583                             mov             dptr,#Tabpro1
+0366 E7              584                             mov             a,@r1                   ;Tabpro+number
+0367 93              585                             movc    a,@a+dptr
+0368 42A0            586                             orl             p2,a;orl                p0,a
+036A 22              587                             ret
+                     588     
+                     589     ;выдать строку(bufind) с номером в(numb) в Р2,Р3 
+                     590     ;выдать строку(bufind) с номером в(numb) в Р0,Р3 
+                     591     ;загрузить 0 в порт p1 в соотв с n              
+036B                 592     outp1:
+036B E6              593                             mov             a,@r0
+036C F5B0            594                             mov             p3,a                    ;high byte
+036E 08              595                             inc             r0
+036F E6              596                             mov             a,@r0
+0370 F580            597                             mov             p0,a;mov                p2,a                    ;lo
+                             w byte
+                     598     
+0372 E7              599                             mov             a,@r1                   ;Tabpro+number
+0373 93              600                             movc    a,@a+dptr
+0374 5290            601                             anl             p1,a                    ;clr p1.0..p1,7
+                     602     
+0376 120000   F      603                             call    z_1m                    ;1ms
+0379 900000   F      604                             mov             dptr,#Tabpro1
+037C E7              605                             mov             a,@r1                   ;Tabpro+number
+037D 93              606                             movc    a,@a+dptr
+037E 4290            607                             orl             p1,a
+0380 22              608                             ret
+                     609     
+                     610     
+                     611                     
+                     612     
+                     613     
+                     614                                     ;p0.6 p0.7 p1.0 p1.1 p1.2
+                     615                                     ;p2.6 p2.7 p1.0 p1.1 p1.2
+0381 7FBFFDFE        616     Tabpro0:                db 7fh,0bfh,0fdh,0feh,0f7h
+0385 F7                      
+                     617                                     ;p1.3 p1.4 p1.5 p1.6 p1.7
+0386 FBDFEF7F        618                                     db 0fbh,0dfh,0efh,7fh,0bfh
+038A BF                      
+                     619     
+                     620                                     ;p0.6 p0.7 p1.0 p1.1 p1.2
+                     621                                      ;p2.6 p2.7 p1.0 p1.1 p1.2
+038B 80400201        622     Tabpro1:                db 80h,40h,02h,01h,08h
+038F 08                      
+                     623                                     ;p1.3 p1.4 p1.5 p1.6 p1.7
+0390 04201080        624                                     db 04h,20h,10h,80h,40h
+0394 40                      
+                     625                                             
+                     626                                             
+                     627                                             
+                     628                                             
+                     629                                                     
+0395                 630     dkoi:                   ;       mov     r0,#makoi+4             ;ъюфшЁютър яюф шфшърЄюЁ
+0395 7943            631                                                     mov     r1,#bufind+3
+0397 900000   F      632     dko1:                           mov     dptr,#Tabma
+039A E6              633                                                     mov     a,@r0
+039B 93              634                                                     movc    a,@a+dptr
+039C F7              635                                                     mov     @r1,a
+039D 19              636                                                     dec     r1
+039E 18              637                                                     dec     r0
+                     638                                             ;       cjne    r0,#makoi,dko1
+039F 22              639                                                     ret 
+                     640     
+                     641     
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE    11
+
+03A0 FFC0            642     Tabma:  dw      0ffc0h          ;0
+03A2 FFF9            643                                     dw      0fff9h          ;1
+03A4 FF24            644                                     dw      0ff24h          ;2
+03A6 FF30            645                                     dw      0ff30h          ;3
+03A8 FF19            646                                     dw      0ff19h          ;4
+03AA FF12            647                                     dw      0ff12h          ;5
+03AC FF02            648                                     dw      0ff02h          ;6
+03AE DBFE            649                                     dw      0dbfeh          ;7
+03B0 FF00            650                                     dw      0ff00h          ;8
+03B2 FF10            651                                     dw      0ff10h          ;9
+                     652     
+                     653     ;прер SPI принимает 1й байт первого знакоместа 
+                     654     ;осн контроллер передает первым 1й байт
+                     655     ;принимает цифры(30..39) буквы(+-A..) и расп в makoi
+                     656      ;interrupt SPI
+03B4 C000            657     intSPI:                 push    rr0
+03B6 C001            658                                     push    rr1
+03B8 C002            659                                     push    rr2
+03BA C003            660                                     push    rr3
+03BC C007            661                                     push    rr7
+03BE C083            662                                     push    dph
+03C0 C082            663                                     push    dpl
+03C2 C0E0            664                                     push    acc
+03C4 C0F0            665                                     push    b
+03C6 C0D0            666                                     push   psw
+                     667     
+03C8 7855            668                                     mov             r0,#makoi
+03CA 7940            669                                     mov             r1,#bufind
+03CC E562            670                                     mov             a,nbyte
+                     671                                             
+03CE FA              672                                     mov             r2,a                    ;
+03CF C3              673                                     clr             c
+03D0 940A            674                                     subb    a,#10
+03D2 5037            675                                     jnc             byte10
+03D4                 676     nextSPI:                ;       call    adrbufi         ;r1-bufind+n
+03D4 120000   F      677                                     call    adrmakoi         ;r0-makoi+n
+03D7 E59B            678                                     mov             a,SPI0DAT
+03D9 FB              679                                     mov             r3,a;save
+                     680     
+03DA C3              681                                     clr             c
+03DB 9430            682                                     subb    a,#30h
+03DD 4069            683                                     jc              letter;+_ ""
+03DF EB              684     mmpp1:                  mov             a,r3
+03E0 C3              685                                     clr             c
+03E1 943A            686                                     subb    a,#3ah          ;;;;;; 17.08
+03E3 5063            687                                     jnc             letter
+03E5 C3              688                                     clr             c
+03E6 EB              689                                     mov             a,r3
+03E7 9430            690                                     subb    a,#30h          
+03E9 F6              691                                     mov             @r0,a           ;сохранить принятый байт в 
+                             makoi
+                     692                                                                     
+03EA 7862            693     outSPI1:                mov             r0,#nbyte
+03EC 06              694                                     inc             @r0                     ;       dec        
+                                  @r0;
+03ED B60C04          695                                     cjne    @r0,#12,outSPI
+03F0 7600            696                                     mov             @r0,#0;11
+03F2 D204            697                                     setb    bready          ;установить флаг готовности строки
+03F4 D0D0            698     outSPI:                 pop             psw                     ;после чего происходит деко
+                             дир принятых
+03F6 D0F0            699                                     pop             b                  ;символов под индикатор
+03F8 D0E0            700                                     pop             acc
+03FA D082            701                                     pop             dpl
+03FC D083            702                                     pop             dph
+03FE D007            703                                 pop         rr7
+0400 D003            704                                     pop             rr3
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE    12
+
+0402 D002            705                                     pop             rr2
+0404 D001            706                                     pop             rr1
+0406 D000            707                                     pop             rr0
+0408 C2FF            708                                     clr             SPI0CN.7
+040A 32              709                                     reti
+                     710     ;10й байт побитно записывается в  makoi.. makoi+7 
+                     711     ;0-не горит 1-горит соотв светодиод
+040B E562            712     byte10:         mov             a,nbyte
+040D B40A16          713                                             cjne    a,#10,byte11
+0410 120000   F      714                                             call    adrmakoi                ;r0-makoi+n
+0413 E59B            715                                             mov             a,SPI0DAT               ;byte 10,11
+0415 F6              716                                     mov             @r0,a           ;сохранить принятый байт в 
+                             makoi
+                     717                                        ;;;;;;;;;
+0416 7B08            718                                             mov             r3,#8
+0418 7855            719                                             mov             r0,#makoi
+041A 03              720     te10:                           rr              a               ;bit0->bit7
+041B FA              721                                             mov             r2,a;save
+041C 5480            722                                             anl             a,#80h
+041E 46              723                                             orl             a,@r0
+041F F6              724                                             mov             @r0,a
+0420 08              725                                             inc             r0
+0421 EA              726                                             mov             a,r2
+0422 DBF6            727                                             djnz    r3,te10
+                     728                                        ;;;;;;;;;
+0424 80C4            729     gobit:                          jmp             outSPI1;mov             r0,#nbyte
+                     730     
+                     731                                             
+                     732                                     
+0426 E59B            733     byte11:                 mov             a,SPI0DAT
+0428 54C0            734                                     anl             a,#0c0h
+042A B4C0C7          735                                     cjne    a,#0c0h,outSPI
+                     736                             
+042D 120000   F      737                                             call    adrmakoi                ;r0-makoi+n
+0430 E59B            738                                             mov             a,SPI0DAT               ;byte 11
+                     739                                             
+0432 F6              740                                             mov             @r0,a           ;сохранить принятый
+                              байт в makoi
+                     741                                             
+0433 7B02            742                                             mov             r3,#2
+0435 785D            743                                             mov             r0,#makoi+8
+0437 03              744     te11:                           rr              a               ;bit0->bit7
+0438 FA              745                                             mov             r2,a;save
+0439 5480            746                                             anl             a,#80h
+043B 46              747                                             orl             a,@r0
+043C F6              748                                             mov             @r0,a
+043D 08              749                                             inc             r0
+043E EA              750                                             mov             a,r2
+043F DBF6            751                                             djnz    r3,te11
+0441 80A7            752                                             jmp             outSPI1
+                     753     
+                     754     
+0443 7862            755                                             mov             r0,#nbyte
+0445 08              756                                             inc             r0;dec          @r0
+0446 80AC            757                                             jmp             outSPI;reti
+                     758     
+0448 EB              759     letter:                         mov             a,r3
+0449 F6              760                                              mov            @r0,a
+044A 809E            761                                             jmp              outSPI1
+                     762     
+                     763     ;r1+nbyte
+044C                 764     adrbufi:
+044C 7940            765                             mov             r1,#bufind
+044E E562            766                             mov             a,nbyte
+0450 75F002          767                             mov             b,#2
+0453 A4              768                             mul             ab
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE    13
+
+0454 29              769                             add             a,r1
+0455 F9              770                             mov             r1,a
+0456 22              771                             ret
+                     772     
+                     773     
+                     774     ;r0+nbyte
+0457                 775     adrmakoi:
+0457 7855            776                             mov             r0,#makoi
+0459 E562            777                             mov             a,nbyte
+045B 28              778                             add             a,r0
+045C F8              779                             mov             r0,a
+045D 22              780                             ret
+                     781     
+                     782     
+                     783     
+                     784     ;r2-юьхЁ срщЄр
+                     785     ;dptr-рфЁхё ъюфр
+                     786             ;               mov             r1,
+045E E562            787                             mov             a,nbyte
+0460 2582            788                             add             a,dpl
+0462 F582            789                             mov             dpl,a
+0464 E583            790                             mov             a,dph
+0466 3400            791                             addc    a,#0
+0468 F583            792                             mov             dph,a
+046A 22              793                             ret
+                     794                                                     
+                     795     ;задержка 15 ms 
+046B 79FA            796     z_15:     mov R1,#0FAh     
+046D 7AED            797     z15:      mov R2,#0EDh    
+046F DAFE            798     zz:       djnz R2, zz    
+0471 D9FA            799               djnz R1, z15   
+0473 22              800               ret   
+                     801                                               
+                     802     ;задержка 1 ms
+0474 7B16            803     z_1m:     mov r3,#16h    
+0476 7AED            804     z1:           mov R2,#0EDh   
+0478 DAFE            805                           djnz R2,$ 
+047A DBFA            806               djnz r3, z1  
+047C 22              807               ret   
+                     808     
+                     809     
+                     810     
+                     811     
+                     812     ; Routine outputs a null-terminated string whose
+                     813     ; address is given in DPTR. The string can be
+                     814     ; located in CODE or XDATA memory depending on
+                     815     ; the value of TXTBIT.
+                     816     
+                     817     
+                     818             END
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE    14
+
+XREF SYMBOL TABLE LISTING
+---- ------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES / REFERENCES
+
+AC . . . . . . . .  B ADDR   00D0H.6 A      153#
+ACC. . . . . . . .  D ADDR   00E0H   A      78# 664 700
+ADBUSY . . . . . .  B ADDR   00E8H.4 A      161#
+ADC0CF . . . . . .  D ADDR   00BCH   A      64#
+ADC0CN . . . . . .  D ADDR   00E8H   A      84# 157 158 159 160 161 162 163 164
+ADC0GTH. . . . . .  D ADDR   00C5H   A      68#
+ADC0GTL. . . . . .  D ADDR   00C4H   A      67#
+ADC0H. . . . . . .  D ADDR   00BFH   A      66#
+ADC0L. . . . . . .  D ADDR   00BEH   A      65#
+ADC0LTH. . . . . .  D ADDR   00C7H   A      70#
+ADC0LTL. . . . . .  D ADDR   00C6H   A      69#
+ADCEN. . . . . . .  B ADDR   00E8H.7 A      164#
+ADCINT . . . . . .  B ADDR   00E8H.5 A      162#
+ADCTM. . . . . . .  B ADDR   00E8H.6 A      163#
+ADLJST . . . . . .  B ADDR   00E8H.0 A      157#
+ADRBUFI. . . . . .  C ADDR   044CH   R   SEG=MAIN   764#
+ADRMAKOI . . . . .  C ADDR   0457H   R   SEG=MAIN   677 714 737 775#
+ADSTM0 . . . . . .  B ADDR   00E8H.2 A      159#
+ADSTM1 . . . . . .  B ADDR   00E8H.3 A      160#
+ADWINT . . . . . .  B ADDR   00E8H.1 A      158#
+AGAIN. . . . . . .  C ADDR   017EH   R   SEG=MAIN   310# 321
+AMX0SL . . . . . .  D ADDR   00BBH   A      63#
+ANASV. . . . . . .  C ADDR   0348H   R   SEG=MAIN   350 356 363 382 387 392 397 405 410 416 421 426 431 436 441 446
+                                           451 456 461 466 471 476 481 486 491 497 502 507 513 519 525 530 560#
+B. . . . . . . . .  D ADDR   00F0H   A      86# 333 536 665 699 767
+BEGIN. . . . . . .  C ADDR   0100H   R   SEG=MAIN   5 232#
+BIPOINT. . . . . .  B ADDR   0020H.1 A      187#
+BITPORT. . . . . .  B ADDR   0020H.3 A      189#
+BITSV. . . . . . .  B ADDR   0020H.5 A      191# 339 341 546 560
+BITZNAK. . . . . .  B ADDR   0020H.0 A      186#
+BREADY . . . . . .  B ADDR   0020H.4 A      190# 323 557 697
+BUFIND . . . . . .  D ADDR   0040H   A      180# 288 293 307 331 555 631 669 765
+BYTE10 . . . . . .  C ADDR   040BH   R   SEG=MAIN   675 712#
+BYTE11 . . . . . .  C ADDR   0426H   R   SEG=MAIN   713 733#
+CELLBIT. . . . . .  D ADDR   0020H   A      185# 186 187 188 189 190 191
+CKCON. . . . . . .  D ADDR   008EH   A      39#
+CPRL2. . . . . . .  B ADDR   00C8H.0 A      137#
+CPT0CN . . . . . .  D ADDR   009EH   A      47#
+CPT1CN . . . . . .  D ADDR   009FH   A      48#
+CR . . . . . . . .  N NUMB   000DH   A      210#
+CT2. . . . . . . .  B ADDR   00C8H.1 A      138#
+CY . . . . . . . .  B ADDR   00D0H.7 A      154#
+DKO1 . . . . . . .  C ADDR   0397H   R   SEG=MAIN   632#
+DKOI . . . . . . .  C ADDR   0395H   R   SEG=MAIN   630#
+DPH. . . . . . . .  D ADDR   0083H   A      31# 662 702 790 792
+DPL. . . . . . . .  D ADDR   0082H   A      30# 663 701 788 789
+EA . . . . . . . .  B ADDR   00A8H.7 A      126#
+EIE1 . . . . . . .  D ADDR   00E6H   A      82# 270
+EIE2 . . . . . . .  D ADDR   00E7H   A      83#
+EIP1 . . . . . . .  D ADDR   00F6H   A      91# 271
+EIP2 . . . . . . .  D ADDR   00F7H   A      92#
+EMI0CN . . . . . .  D ADDR   00AFH   A      56#
+ES . . . . . . . .  B ADDR   00A8H.4 A      124#
+ET0. . . . . . . .  B ADDR   00A8H.1 A      121#
+ET1. . . . . . . .  B ADDR   00A8H.3 A      123#
+ET2. . . . . . . .  B ADDR   00A8H.5 A      125#
+EX0. . . . . . . .  B ADDR   00A8H.0 A      120#
+EX1. . . . . . . .  B ADDR   00A8H.2 A      122#
+EXEN2. . . . . . .  B ADDR   00C8H.3 A      140#
+EXF2 . . . . . . .  B ADDR   00C8H.6 A      143#
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE    15
+
+F0 . . . . . . . .  B ADDR   00D0H.5 A      152#
+F1 . . . . . . . .  B ADDR   00D0H.1 A      148#
+FLACL. . . . . . .  D ADDR   00B7H   A      61#
+FLSCL. . . . . . .  D ADDR   00B6H   A      60#
+GENER. . . . . . .  C ADDR   0127H   R   SEG=MAIN   254# 255
+GOBIT. . . . . . .  C ADDR   0424H   R   SEG=MAIN   729#
+IE . . . . . . . .  D ADDR   00A8H   A      54# 120 121 122 123 124 125 126 287
+IE0. . . . . . . .  B ADDR   0088H.1 A      101#
+IE1. . . . . . . .  B ADDR   0088H.3 A      103#
+INTSPI . . . . . .  C ADDR   03B4H   R   SEG=MAIN   10 657#
+IP . . . . . . . .  D ADDR   00B8H   A      62# 129 130 131 132 133 134
+IT0. . . . . . . .  B ADDR   0088H.0 A      100#
+IT1. . . . . . . .  B ADDR   0088H.2 A      102#
+LETTER . . . . . .  C ADDR   0448H   R   SEG=MAIN   683 687 759#
+LF . . . . . . . .  N NUMB   000AH   A      209#
+MAIN . . . . . . .  C SEG    047DH       REL=UNIT   2 225# 226
+MAKOI. . . . . . .  D ADDR   0055H   A      182# 330 668 719 743 776
+MASS1. . . . . . .  X ADDR   0184H   A      199#
+MECLE. . . . . . .  C ADDR   014DH   R   SEG=MAIN   278# 280
+MEFF . . . . . . .  C ADDR   0154H   R   SEG=MAIN   282# 284
+MMPP1. . . . . . .  C ADDR   03DFH   R   SEG=MAIN   684#
+MODF . . . . . . .  B ADDR   00F8H.5 A      172#
+MSTEN. . . . . . .  B ADDR   00F8H.1 A      168#
+NBYTE. . . . . . .  D ADDR   0062H   A      183# 285 670 693 712 755 766 777 787
+NEXT . . . . . . .  C ADDR   033BH   R   SEG=MAIN   369 377 546 551# 560 565
+NEXTSPI. . . . . .  C ADDR   03D4H   R   SEG=MAIN   676#
+NO2B . . . . . . .  C ADDR   01BBH   R   SEG=MAIN   345 351#
+NO2D . . . . . . .  C ADDR   01C6H   R   SEG=MAIN   351 358#
+NO41 . . . . . . .  C ADDR   01D1H   R   SEG=MAIN   358 364#
+NOBITSV. . . . . .  C ADDR   01ADH   R   SEG=MAIN   340 342#
+NOEQU. . . . . . .  C ADDR   0238H   R   SEG=MAIN   412 417#
+NOERI. . . . . . .  C ADDR   0317H   R   SEG=MAIN   521 526#
+NOERR. . . . . . .  C ADDR   0321H   R   SEG=MAIN   526 532#
+NOFF . . . . . . .  C ADDR   01DDH   R   SEG=MAIN   365 371#
+NOFFM. . . . . . .  C ADDR   02EFH   R   SEG=MAIN   498 503#
+NOLB . . . . . . .  C ADDR   022DH   R   SEG=MAIN   406 412#
+NOLBB. . . . . . .  C ADDR   0264H   R   SEG=MAIN   432 437#
+NOLC . . . . . . .  C ADDR   0243H   R   SEG=MAIN   417 422#
+NOLE . . . . . . .  C ADDR   020CH   R   SEG=MAIN   388 393#
+NOLEE. . . . . . .  C ADDR   027AH   R   SEG=MAIN   442 447#
+NOLII. . . . . . .  C ADDR   0285H   R   SEG=MAIN   447 452#
+NOLK . . . . . . .  C ADDR   02C7H   R   SEG=MAIN   477 482#
+NOLL . . . . . . .  C ADDR   0290H   R   SEG=MAIN   452 457#
+NOLLF. . . . . . .  C ADDR   02E5H   R   SEG=MAIN   493 498#
+NOLM . . . . . . .  C ADDR   024EH   R   SEG=MAIN   422 427#
+NOLMM. . . . . . .  C ADDR   02D1H   R   SEG=MAIN   482 487#
+NOLN . . . . . . .  C ADDR   0217H   R   SEG=MAIN   393 401#
+NOLP . . . . . . .  C ADDR   026FH   R   SEG=MAIN   437 442#
+NOLPP. . . . . . .  C ADDR   02B1H   R   SEG=MAIN   467 472#
+NOLS . . . . . . .  C ADDR   0222H   R   SEG=MAIN   401 406#
+NOLT . . . . . . .  C ADDR   0201H   R   SEG=MAIN   383 388#
+NOLU . . . . . . .  C ADDR   0259H   R   SEG=MAIN   427 432#
+NOLX . . . . . . .  C ADDR   02DBH   R   SEG=MAIN   487 493#
+NOLYY. . . . . . .  C ADDR   02BCH   R   SEG=MAIN   472 477#
+NOLZD. . . . . . .  C ADDR   02A6H   R   SEG=MAIN   462 467#
+NOLZN. . . . . . .  C ADDR   029BH   R   SEG=MAIN   457 462#
+NONUL. . . . . . .  C ADDR   01EBH   R   SEG=MAIN   373 378#
+NOPOI0 . . . . . .  C ADDR   02F9H   R   SEG=MAIN   503 509#
+NOPOIN . . . . . .  C ADDR   0343H   R   SEG=MAIN   557#
+NOPOLL . . . . . .  C ADDR   0303H   R   SEG=MAIN   509 515#
+NOPORR . . . . . .  C ADDR   030DH   R   SEG=MAIN   515 521#
+NOPROB . . . . . .  C ADDR   01F6H   R   SEG=MAIN   378 383#
+NUMB . . . . . . .  D ADDR   0054H   A      181# 308
+OSCICN . . . . . .  D ADDR   00B2H   A      59# 257
+OSCXCN . . . . . .  D ADDR   00B1H   A      58# 250 254
+OUPP1. . . . . . .  C ADDR   018CH   R   SEG=MAIN   315 318#
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE    16
+
+OUTGO. . . . . . .  C ADDR   018FH   R   SEG=MAIN   317 319#
+OUTP0. . . . . . .  C ADDR   0355H   R   SEG=MAIN   316 571#
+OUTP1. . . . . . .  C ADDR   036BH   R   SEG=MAIN   318 592#
+OUTSPI . . . . . .  C ADDR   03F4H   R   SEG=MAIN   695 698# 735 757
+OUTSPI1. . . . . .  C ADDR   03EAH   R   SEG=MAIN   693# 729 752 761
+OV . . . . . . . .  B ADDR   00D0H.2 A      149#
+P. . . . . . . . .  B ADDR   00D0H.0 A      147#
+P0 . . . . . . . .  D ADDR   0080H   A      28# 576 597
+P0MODE . . . . . .  D ADDR   00F1H   A      87#
+P1 . . . . . . . .  D ADDR   0090H   A      41# 601 607
+P1MODE . . . . . .  D ADDR   00F2H   A      88#
+P2 . . . . . . . .  D ADDR   00A0H   A      49# 297 298 302 303 580 586
+P2MODE . . . . . .  D ADDR   00F3H   A      89#
+P3 . . . . . . . .  D ADDR   00B0H   A      57# 573 594
+P3MODE . . . . . .  D ADDR   00F4H   A      90#
+PCON . . . . . . .  D ADDR   0087H   A      32#
+PP . . . . . . . .  C ADDR   0161H   R   SEG=MAIN   289# 293
+PRT0CF . . . . . .  D ADDR   00A4H   A      50# 235
+PRT0MX . . . . . .  D ADDR   00E1H   A      79#
+PRT1CF . . . . . .  D ADDR   00A5H   A      51# 236
+PRT1IF . . . . . .  D ADDR   00ADH   A      55#
+PRT1MX . . . . . .  D ADDR   00E2H   A      80#
+PRT2CF . . . . . .  D ADDR   00A6H   A      52# 237
+PRT2MX . . . . . .  D ADDR   00E3H   A      81# 239
+PRT3CF . . . . . .  D ADDR   00A7H   A      53# 238
+PS . . . . . . . .  B ADDR   00B8H.4 A      133#
+PSCTL. . . . . . .  D ADDR   008FH   A      40#
+PSW. . . . . . . .  D ADDR   00D0H   A      76# 147 148 149 150 151 152 153 154 276 666 698
+PT0. . . . . . . .  B ADDR   00B8H.1 A      130#
+PT1. . . . . . . .  B ADDR   00B8H.3 A      132#
+PT2. . . . . . . .  B ADDR   00B8H.5 A      134#
+PX0. . . . . . . .  B ADDR   00B8H.0 A      129#
+PX1. . . . . . . .  B ADDR   00B8H.2 A      131#
+R10. . . . . . . .  N NUMB   000AH   A      221#
+R11. . . . . . . .  N NUMB   000BH   A      222#
+R8 . . . . . . . .  N NUMB   0008H   A      219#
+R9 . . . . . . . .  N NUMB   0009H   A      220#
+RB8. . . . . . . .  B ADDR   0098H.2 A      112#
+RCAP2H . . . . . .  D ADDR   00CBH   A      73#
+RCAP2L . . . . . .  D ADDR   00CAH   A      72#
+RCLK . . . . . . .  B ADDR   00C8H.5 A      142#
+REF0CN . . . . . .  D ADDR   00D1H   A      77# 234
+REN. . . . . . . .  B ADDR   0098H.4 A      114#
+RI . . . . . . . .  B ADDR   0098H.0 A      110#
+RR0. . . . . . . .  N NUMB   0000H   A      212# 657 707
+RR1. . . . . . . .  N NUMB   0001H   A      213# 658 706
+RR2. . . . . . . .  N NUMB   0002H   A      215# 659 705
+RR3. . . . . . . .  N NUMB   0003H   A      216# 660 704
+RR6. . . . . . . .  N NUMB   0006H   A      214#
+RR7. . . . . . . .  N NUMB   0007H   A      217# 661 703
+RS0. . . . . . . .  B ADDR   00D0H.3 A      150#
+RS1. . . . . . . .  B ADDR   00D0H.4 A      151#
+RSTSRC . . . . . .  D ADDR   00EFH   A      85# 264
+RWWW . . . . . . .  C ADDR   0352H   R   SEG=MAIN   553 567#
+RXOVRN . . . . . .  B ADDR   00F8H.4 A      171#
+SBUF . . . . . . .  D ADDR   0099H   A      43#
+SCON . . . . . . .  D ADDR   0098H   A      42# 110 111 112 113 114 115 116 117
+SLVSEL . . . . . .  B ADDR   00F8H.2 A      169#
+SM0. . . . . . . .  B ADDR   0098H.7 A      117#
+SM1. . . . . . . .  B ADDR   0098H.6 A      116#
+SM2. . . . . . . .  B ADDR   0098H.5 A      115#
+SP . . . . . . . .  D ADDR   0081H   A      29# 232
+SPI0CFG. . . . . .  D ADDR   009AH   A      44#
+SPI0CKR. . . . . .  D ADDR   009DH   A      46# 269
+SPI0CN . . . . . .  D ADDR   00F8H   A      93# 167 168 169 170 171 172 173 174 268 708
+SPI0DAT. . . . . .  D ADDR   009BH   A      45# 678 715 733 738
+A51 MACRO ASSEMBLER  INDICATOR8                                                           01/09/2007 10:02:24 PAGE    17
+
+SPIEN. . . . . . .  B ADDR   00F8H.0 A      167#
+SPIF . . . . . . .  B ADDR   00F8H.7 A      174#
+START. . . . . . .  C ADDR   016AH   R   SEG=MAIN   295# 323 558
+T2CON. . . . . . .  D ADDR   00C8H   A      71# 137 138 139 140 141 142 143 144
+TABMA. . . . . . .  C ADDR   03A0H   R   SEG=MAIN   535 632 642#
+TABPRO0. . . . . .  C ADDR   0381H   R   SEG=MAIN   306 311 616#
+TABPRO1. . . . . .  C ADDR   038BH   R   SEG=MAIN   583 604 622#
+TB8. . . . . . . .  B ADDR   0098H.3 A      113#
+TCLK . . . . . . .  B ADDR   00C8H.4 A      141#
+TCON . . . . . . .  D ADDR   0088H   A      33# 100 101 102 103 104 105 106 107 261 262
+TE10 . . . . . . .  C ADDR   041AH   R   SEG=MAIN   720# 727
+TE11 . . . . . . .  C ADDR   0437H   R   SEG=MAIN   744# 751
+TF0. . . . . . . .  B ADDR   0088H.5 A      105#
+TF1. . . . . . . .  B ADDR   0088H.7 A      107#
+TF2. . . . . . . .  B ADDR   00C8H.7 A      144#
+TH0. . . . . . . .  D ADDR   008CH   A      37# 246
+TH1. . . . . . . .  D ADDR   008DH   A      38#
+TH2. . . . . . . .  D ADDR   00CDH   A      75#
+TI . . . . . . . .  B ADDR   0098H.1 A      111#
+TL0. . . . . . . .  D ADDR   008AH   A      35# 247
+TL1. . . . . . . .  D ADDR   008BH   A      36#
+TL2. . . . . . . .  D ADDR   00CCH   A      74#
+TMOD . . . . . . .  D ADDR   0089H   A      34# 244
+TMR2RLH. . . . . .  D ADDR   00CBH   A      177# 259
+TMR2RLL. . . . . .  D ADDR   00CAH   A      176# 258
+TR0. . . . . . . .  B ADDR   0088H.4 A      104#
+TR1. . . . . . . .  B ADDR   0088H.6 A      106#
+TR2. . . . . . . .  B ADDR   00C8H.2 A      139#
+TXBSY. . . . . . .  B ADDR   00F8H.3 A      170#
+WCOL . . . . . . .  B ADDR   00F8H.6 A      173#
+WDTCN. . . . . . .  D ADDR   00FFH   A      94# 242 243
+WWW. . . . . . . .  C ADDR   019BH   R   SEG=MAIN   331# 567
+Z1 . . . . . . . .  C ADDR   0476H   R   SEG=MAIN   804# 806
+Z15. . . . . . . .  C ADDR   046DH   R   SEG=MAIN   797# 799
+ZNMAT. . . . . . .  B ADDR   0020H.2 A      188#
+ZZ . . . . . . . .  C ADDR   046FH   R   SEG=MAIN   798# 798
+Z_15 . . . . . . .  C ADDR   046BH   R   SEG=MAIN   796#
+Z_1M . . . . . . .  C ADDR   0474H   R   SEG=MAIN   582 603 803#
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

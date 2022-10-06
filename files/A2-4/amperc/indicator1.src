@@ -1,0 +1,682 @@
+//;файл процессора   индикации (f0230)
+NAME 	MAIN
+
+		org 0
+		jmp	BEGIN
+		org 3
+		reti
+
+		org 33h
+		jmp		intSPI;
+
+$include (c8051f200.inc)               ; Include register definition file.
+
+TMR2RLL  DATA 0cah;    // TIMER 2 RELOAD LOW                                       */
+TMR2RLH  DATA 0cbh;    // TIMER 2 RELOAD HIGH 	
+		DSEG
+
+bufind	DATA	40h;буфер кодированной индикации 10x2 byte
+numb   	DATA	54h;
+makoi 	DATA	55h;буфер некодированной информации 12 byte
+;из осн прцессора приходят 12байт некодир инф-ции в makoi..makoi+11
+;mako+10,+11 биты светодиодов и точек
+nbyte		DATA	62h
+
+cellbit		DATA	20h
+bitznak		BIT 	cellbit.0	;20.0	бит знака
+bipoint		BIT 	cellbit.1	;20.1	бит точки	
+znmat		BIT		cellbit.2	;20.2
+bitport		BIT		cellbit.3	;20.3
+bready		BIT		cellbit.4	;20.4  флаг готовности строки
+bitsv		BIT 	cellbit.5	;20.5 бит светодиода соответствующего знакоместа
+;		XSEG 
+;one	XDATA		30h
+
+
+
+
+;	  MASS0  xdata 0180h;
+	MASS1  xdata 0184h;
+;
+;STRING_ROUTINES  SEGMENT  CODE
+
+;	RSEG  STRING_ROUTINES
+
+
+
+; This routine outputs a CR and a LF
+
+LF equ  0AH                ; line feed 
+CR	equ 0dh
+
+ rr0		EQU 00
+		rr1	  equ	01
+		rr6   equ 06
+		rr2	  equ	02
+		rr3	  equ	03
+		rr7   equ 07
+
+		r8   equ 08
+		r9	  equ	09
+		r10	  equ	10
+		r11   equ 11
+
+	
+		MAIN SEGMENT CODE
+rseg     Main          ; Switch to this code segment.
+
+             using    0              ; Specify register bank for the 
+
+org 100h
+			 
+BEGIN:	  mov  sp, #0e0h
+			
+				mov		REF0CN,#03h;=0x03;
+				mov		PRT0CF,#00h
+				mov		PRT1CF,#00h
+			   mov		PRT2CF,#00h
+			   mov		PRT3CF,#00h
+			  	mov		PRT2MX,#01
+		
+ 
+				mov		WDTCN,#0deh;=0xde;	 //чряЁхЄ ЁрсюЄ_ WDT
+				mov		WDTCN,#0adh;=0xad;                                   
+				mov		TMOD,#22h;=0x22;	//ЁхушёЄЁ Ёхцшьют
+			//	mov		CKCON,#30h;=0x30; //ёшёЄ ўрёЄюЄр/12     
+				mov		TH0,#0f9h;=0xf9;//	; +ёЄрэютър ЄрщьхЁр
+				mov		TL0,#0f9h;=0xf9; 
+			
+				
+				mov		OSCXCN,#67h;=0x67;
+
+ 	
+
+gener:     mov a, oscxcn
+           cjne a,#11100111b,gener
+                       
+  				mov		OSCICN,#88h;=0x84;
+    			mov 	TMR2RLL,#0;=0;
+    			mov		TMR2RLH,#0d1h;=0xd1;
+  
+				 setb  TCON.6			;ЁхушёЄЁ єяЁртыхэш_
+		 		 setb tcon.4
+
+				mov	RSTSRC,#0;=00	;//шёЄюўэшъш ёсЁюёр 
+
+		  
+					
+			mov		SPI0CN,#01
+			mov		SPI0CKR,#04
+			mov		EIE1,#01
+			mov		EIP1,#01
+		;;	mov		IE,#80h;//-э_Єшх сыюъшЁютъш тёхї яЁхЁ_трэшщ
+;ozu
+			
+							clr	a
+							mov	psw,a
+							mov	r0,#00h	
+mecle:				mov	@r0,a 			;обнуление озу 256 байт
+							inc	r0
+							cjne	r0,#7fh,mecle
+							mov	r0,#80h
+meff:					mov	@r0,a 
+							inc	r0
+							cjne	r0,#0dfh,meff
+					mov		nbyte,#0;;;;11;;принимать с 0 байта
+					;;;;;;;;;;;;;;;
+					mov		IE,#80h;;;;;;;;;;;;;;;;;
+	mov		r0,#bufind
+pp:	mov		@r0,#03fh
+	inc		r0
+	mov		@r0,#03Fh
+	inc		r0
+	cjne	r0,#bufind+20,pp
+
+start:
+		   ;;;;;;
+		   clr		p2.4
+		   clr		p2.5
+		   nop
+		   nop
+		   nop
+		   setb		p2.4
+		   setb		p2.5
+		   ;;;;;;
+
+			mov		dptr,#Tabpro0
+			mov		r0,#bufind
+			mov		r1,#numb
+			mov		@r1,#0
+again:
+			mov		dptr,#Tabpro0
+			clr		c
+			mov		a,#1
+			subb	a,@r1
+			jc		oupp1
+			call	outp0			;numb=0,1
+			jmp		outgo
+oupp1:call	outp1			;numb=2..9
+outgo:inc		@r1
+			inc		r0				;следующий байт
+			cjne	@r1,#10,again
+			;;;;;;;
+			jnb		bready ,start
+			;обработка строки
+			;принятая в makoi.. строка кодируется и записывается в bufind..
+			;;;;;;;;
+			
+
+				mov		r6,#0
+				mov		r0,#makoi
+www:			mov		r1,#bufind
+				mov		a,r6
+			mov		b,#2
+			mul		ab
+			add		a,r1
+			mov		r1,a	;bufind+..
+			mov		a,@r0	  ;makoi+..
+			anl		a,#80h
+			clr		bitsv	 ;старший бит каждого байта makoi отвечает за светодиод
+			jz		nobitsv
+			setb	bitsv
+nobitsv:			;;;;;
+			mov		a,@r0	  ;makoi+..
+			anl		a,#7fh
+			cjne	a,#2bh,no2b
+		;	mov		r1,#bufind
+			mov		@r1,#0edh
+			inc		r1
+			mov		@r1,#3fh
+			jmp		anasv; next
+no2b:		cjne	a,#2dh,no2d
+		;	mov		r1,#bufind
+			mov		@r1,#0ffh
+			inc		r1
+			mov		@r1,#3fh
+			jmp		 anasv;next
+			;;;;;;
+no2d:	 	cjne	a,#41h,no41
+		;	mov		r1,#bufind
+			mov		@r1,#0ffh
+			inc		r1
+			mov		@r1,#08h	 ;'A'
+			jmp		 anasv;next
+no41:   	mov		a,@r0	  ;makoi+.	;;;;;;;
+			cjne	a,#0fdh,noff  ;только для начала (гашение индикатора)
+			mov		@r1,#0ffh
+			inc		r1
+			mov		@r1,#0ffh	 ;
+			jmp		 next
+
+noff:		 mov		a,@r0	  ;makoi+.;;;;;;;;;
+			anl		a,#7fh;маска на ст байт
+			cjne	a,#0feh,nonul ;только для начала (зажечь индикатора)
+			 mov	@r1,#00h
+			inc		r1
+			mov		@r1,#00h	 ;
+			jmp		 next
+nonul:	    cjne	a,#" ",noprob
+			 mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#0ffh	 ;
+			jmp		 anasv;next
+noprob:	   cjne	a,#"T",nolt	 
+			 mov	@r1,#0edh 
+			inc		r1
+			mov		@r1,#0feh	 ;
+			jmp		 anasv;next
+nolt:		cjne	a,#"E",nole
+			  mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#06h	 ;
+			jmp		anasv; next
+nole:		cjne	a,#"H",noln
+			 mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#09h	 ;
+			jmp		 anasv;next
+
+
+
+noln:			cjne	a,#67h,nols
+			 mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#27h;12h	 ;c
+			jmp		 anasv;next	   
+nols:			cjne	a,#"S",nolss
+			 mov	@r1,#0feh
+			inc		r1
+			mov		@r1,#72h	 ;S
+			jmp		 anasv;next	   
+
+
+nolss:	cjne	a,#"B",nolb
+			 mov	@r1,#0fbh
+			inc		r1
+			mov		@r1,#02h	 ;
+			jmp		 anasv;next
+
+nolb:		cjne	a,#"=",noequ
+			 mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#37h	 ;
+			jmp		 anasv;next
+noequ:			 	cjne	a,#79h,nolc;"С",nolc
+			 mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#0c6h	 ;
+			jmp		 anasv;next
+nolc:		cjne	a,#71h,nolm;#"М",nolm	   ; русские буквы спец кодирую т к при обычной
+			 mov	@r1,#0fah	   ; кодировке у них в старшем бите 1
+			inc		r1
+			mov		@r1,#0c9h	 ;
+			jmp		 anasv;next
+nolm:		cjne	a,#72h,nolu;#"Ю",nolu
+			 mov	@r1,#0f3h
+			inc		r1
+			mov		@r1,#09h	 ;
+			jmp		 anasv;next
+nolu:		cjne	a,#73h,nolbb;"Б",nolbb
+			 mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#02h	 ;
+			jmp		 anasv;next
+nolbb:		cjne	a,#"P",nolp
+			 mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#0ch	 ;
+			jmp		 anasv;next
+nolp:	   	cjne	a,#74h,nolee;#"И",nolee
+			 mov	@r1,#0dbh
+			inc		r1
+			mov		@r1,#0c9h	 ;
+			jmp		 anasv;next
+nolee:		cjne	a,#75h,nolii;"Ы",nolii
+			  mov	@r1,#0efh
+			inc		r1
+			mov		@r1,#81h	 ;
+			jmp		 anasv;next
+nolii:		cjne	a,#76h,noll;"Л",noll
+			 mov	@r1,#0dbh
+			inc		r1
+			mov		@r1,#0f9h	 ;
+			jmp		 anasv;next
+noll:		cjne	a,#77h,nolzn;"Ь",nolzn
+			 mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#03h	 ;
+			jmp		 anasv;next
+nolzn:		cjne	a,#78h,nolzd;"Д"
+			 mov	@r1,#0dbh
+			inc		r1
+			mov		@r1,#0f1h	 ;
+			jmp		 anasv;next
+nolzd:		cjne	a,#61h,nolpp;"П"
+			 mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#0c8h	 ;
+			jmp		 anasv;next
+nolpp:		cjne	a,#62h,nolyy;"Я"
+			 mov	@r1,#0deh
+			inc		r1
+			mov		@r1,#78h	 ;
+			jmp		 anasv;next
+nolyy:		cjne	a,#"K",nolk
+			 mov	@r1,#0f3h
+			inc		r1
+			mov		@r1,#8fh	 ;
+			jmp		 anasv;next
+nolk:		cjne	a,#"m",nolmm
+			 mov	@r1,#0efh
+			inc		r1
+			mov		@r1,#2bh	 ;
+			jmp		 anasv;next
+nolmm:	cjne	a,#"X",nolx
+			 mov	@r1,#0d2h
+			inc		r1
+			mov		@r1,#0ffh	 ;
+			jmp		 anasv;next
+
+nolx:		cjne	a,#"L",noLLf
+			mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#0c7h	 ;
+			jmp		 anasv
+noLLf:	   cjne		a,#63h,noffm
+			mov	@r1,#0ffh
+			inc		r1
+			mov		@r1,#0b9h	 ;	-1(-10,-11)
+			jmp		 anasv
+noffm:	cjne		a,#64h,nopoi0
+			mov	@r1,#0bfh
+			inc		r1
+			mov		@r1,#0c0h	 ;0.
+			jmp		 anasv
+			
+nopoi0:			cjne		a,#65h,nopoll
+			mov	@r1,#0dbh
+			inc		r1
+			mov		@r1,#0cfh	 ;V
+			jmp		 anasv
+
+nopoll:		cjne		a,#66h,noporr
+					mov	@r1,#0d7h
+			inc		r1
+			mov		@r1,#1ch	 ;OM
+			jmp		 anasv
+
+noporr:		cjne	a,#"I",noERI
+			mov	@r1,#0edh
+			inc		r1
+			mov		@r1,#0f6h	 ;
+			jmp		 anasv
+noERI:		cjne	a,#"R",noERR
+			mov	@r1,#0f3h
+			inc		r1
+			mov		@r1,#8eh	 ;
+			jmp		 anasv
+
+noERR:
+				cjne	a,#"N",noNN
+			mov	@r1,#0f6h
+			inc		r1
+			mov		@r1,#0c9h	 ;
+			jmp		 anasv
+noNN:		cjne	a,#"D",noDD
+			mov	@r1,#0deh
+			inc		r1
+			mov		@r1,#0cfh	 ;
+			jmp		 anasv
+noDD:		mov		a,@r0	  ;makoi+..
+			anl		a,#7fh
+			mov		dptr,#Tabma;				
+			mov		b,#2
+			mul		ab
+			mov		r7,a				;
+			movc	a,@a+dptr		;1-
+			mov		@r1,a
+			inc		r1
+			inc		r7
+			mov		a,r7
+			movc	a,@a+dptr		;2-
+			mov		@r1,a
+		   jnb		bitsv,next
+		   dec		r1
+		   mov		a,@r1
+		   anl		a,#7fh
+		   mov		@r1,a
+next:			inc		r0
+					inc		r6
+					cjne	r6,#13,rwww
+				
+;			 jnb		bitizm,nopoin
+
+				mov		a,makoi+11
+			 jnb		acc.4,nopoi1
+			 anl		bufind+2,#0bfh;точка после 1й цифры
+			 mov		a,makoi+11
+nopoi1:	 jnb		acc.3,nopoin
+				anl		bufind+12,#0bfh;точка после 8й цифры
+			 ;;;;;;;
+nopoin:	 clr	bready		;сбросить бит готовности строки
+			jmp		start
+
+anasv:		jnb		bitsv,next		 ;анализ бита светодиодов
+			dec		r1;high
+			mov		a,@r1
+			anl		a,#7fh
+			mov		@r1,a
+			jmp		next
+
+   rwww:	jmp		www
+;выдать строку(bufind) с номером в(numb) в Р2,Р3 
+;выдать строку(bufind) с номером в(numb) в Р0,Р3 
+;загрузить 0 в порт p0  в соотв с n 		
+outp0:
+			mov		a,@r0
+			mov		p3,a			;high byte
+			inc		r0
+			mov		a,@r0
+			mov		p0,a;	mov		p2,a			;low byte
+
+			mov		a,@r1			;Tabpro+number
+			movc	a,@a+dptr
+			anl		p2,a;anl		p0,a			;clr p0.6,p0,7..
+
+			call	z_1m			;1ms
+			mov		dptr,#Tabpro1
+			mov		a,@r1			;Tabpro+number
+			movc	a,@a+dptr
+			orl		p2,a;orl		p0,a
+			ret
+
+;выдать строку(bufind) с номером в(numb) в Р2,Р3 
+;выдать строку(bufind) с номером в(numb) в Р0,Р3 
+;загрузить 0 в порт p1 в соотв с n 		
+outp1:
+			mov		a,@r0
+			mov		p3,a			;high byte
+			inc		r0
+			mov		a,@r0
+			mov		p0,a;mov		p2,a			;low byte
+
+			mov		a,@r1			;Tabpro+number
+			movc	a,@a+dptr
+			anl		p1,a			;clr p1.0..p1,7
+
+			call	z_1m			;1ms
+			mov		dptr,#Tabpro1
+			mov		a,@r1			;Tabpro+number
+			movc	a,@a+dptr
+			orl		p1,a
+			ret
+
+
+		
+
+
+				;p0.6 p0.7 p1.0 p1.1 p1.2
+				;p2.6 p2.7 p1.0 p1.1 p1.2
+Tabpro0:		db 7fh,0bfh,0fdh,0feh,0f7h
+				;p1.3 p1.4 p1.5 p1.6 p1.7
+				db 0fbh,0dfh,0efh,7fh,0bfh
+
+				;p0.6 p0.7 p1.0 p1.1 p1.2
+				 ;p2.6 p2.7 p1.0 p1.1 p1.2
+Tabpro1:		db 80h,40h,02h,01h,08h
+				;p1.3 p1.4 p1.5 p1.6 p1.7
+				db 04h,20h,10h,80h,40h
+					
+					
+					
+					
+						
+dkoi:			;	mov	r0,#makoi+4		;ъюфшЁютър яюф шэфшърЄюЁ
+						mov	r1,#bufind+3
+dko1:				mov	dptr,#Tabma
+						mov	a,@r0
+						movc	a,@a+dptr
+						mov	@r1,a
+						dec	r1
+						dec	r0
+					;	cjne	r0,#makoi,dko1
+						ret 
+
+
+Tabma:	dw	0ffc0h		;0
+				dw	0fff9h		;1
+				dw	0ff24h		;2
+				dw	0ff30h		;3
+				dw	0ff19h		;4
+				dw	0ff12h		;5
+				dw	0ff02h		;6
+				dw	0dbfeh		;7
+				dw	0ff00h		;8
+				dw	0ff10h		;9
+
+;прер SPI принимает 1й байт первого знакоместа 
+;осн контроллер передает первым 1й байт
+;принимает цифры(30..39) буквы(+-A..) и расп в makoi
+ ;interrupt SPI
+intSPI:			push 	rr0
+				push 	rr1
+				push 	rr2
+				push	rr3
+				push    rr7
+				push	dph
+				push	dpl
+				push  	acc
+				push    b
+				push   psw
+
+				mov		r0,#makoi
+				mov		r1,#bufind
+				mov		a,nbyte
+					
+				mov		r2,a			;
+				clr		c
+				subb	a,#10
+				jnc		byte10
+nextSPI:		;	call	adrbufi		;r1-bufind+n
+				call	adrmakoi	 ;r0-makoi+n
+				mov		a,SPI0DAT
+				mov		r3,a;save
+
+				clr		c
+				subb	a,#30h
+				jc		letter;+_ ""
+mmpp1:			mov		a,r3
+				clr		c
+				subb	a,#3ah		;;;;;; 17.08
+				jnc		letter
+				clr		c
+				mov		a,r3
+				subb	a,#30h		
+				mov		@r0,a		;сохранить принятый байт в makoi
+								
+outSPI1:		mov		r0,#nbyte
+				inc		@r0			;	dec		@r0;
+				cjne	@r0,#12,outSPI
+				mov		@r0,#0;11
+				setb	bready		;установить флаг готовности строки
+outSPI:			pop		psw			;после чего происходит декодир принятых
+				pop		b		   ;символов под индикатор
+				pop		acc
+				pop		dpl
+				pop		dph
+			    pop		rr7
+				pop		rr3
+				pop		rr2
+				pop		rr1
+				pop		rr0
+				clr		SPI0CN.7
+				reti
+;10й байт побитно записывается в  makoi.. makoi+7 
+;0-не горит 1-горит соотв светодиод
+byte10:		mov		a,nbyte
+					cjne	a,#10,byte11
+					call	adrmakoi	 	;r0-makoi+n
+					mov		a,SPI0DAT		;byte 10,11
+     				mov		@r0,a		;сохранить принятый байт в makoi
+				   ;;;;;;;;;
+				   	mov		r3,#8
+					mov		r0,#makoi
+te10:   			rr		a		;bit0->bit7
+					mov		r2,a;save
+					anl		a,#80h
+					orl		a,@r0
+					mov		@r0,a
+					inc		r0
+					mov		a,r2
+					djnz	r3,te10
+				   ;;;;;;;;;
+gobit:				jmp		outSPI1;mov		r0,#nbyte
+
+					
+ 				
+byte11:			mov		a,SPI0DAT
+				anl		a,#0c0h
+				cjne	a,#0c0h,outSPI
+			
+					call	adrmakoi	 	;r0-makoi+n
+					mov		a,SPI0DAT		;byte 11
+					
+					mov		@r0,a		;сохранить принятый байт в makoi
+					
+					mov		r3,#2
+					mov		r0,#makoi+8
+te11:   			rr		a		;bit0->bit7
+					mov		r2,a;save
+					anl		a,#80h
+					orl		a,@r0
+					mov		@r0,a
+					inc		r0
+					mov		a,r2
+					djnz	r3,te11
+					jmp		outSPI1
+
+
+					mov		r0,#nbyte
+					inc		r0;dec		@r0
+					jmp		outSPI;reti
+
+letter:				mov		a,r3
+					 mov		@r0,a
+					jmp		 outSPI1
+
+;r1+nbyte
+adrbufi:
+			mov		r1,#bufind
+			mov		a,nbyte
+			mov		b,#2
+			mul		ab
+			add		a,r1
+			mov		r1,a
+			ret
+
+
+;r0+nbyte
+adrmakoi:
+			mov		r0,#makoi
+			mov		a,nbyte
+			add		a,r0
+			mov		r0,a
+			ret
+
+
+
+;r2-эюьхЁ срщЄр
+;dptr-рфЁхё ъюфр
+	;		mov		r1,
+			mov		a,nbyte
+			add		a,dpl
+			mov		dpl,a
+			mov		a,dph
+			addc	a,#0
+			mov		dph,a
+			ret
+						
+;задержка 15 ms 
+z_15:     mov R1,#0FAh     
+z15:      mov R2,#0EDh    
+zz:       djnz R2, zz 	 
+          djnz R1, z15   
+          ret   
+					  
+;задержка 1 ms
+z_1m:     mov r3,#16h    
+z1:	      mov R2,#0EDh   
+		      djnz R2,$ 
+          djnz r3, z1  
+          ret   
+
+
+
+
+; Routine outputs a null-terminated string whose
+; address is given in DPTR. The string can be
+; located in CODE or XDATA memory depending on
+; the value of TXTBIT.
+
+
+	END

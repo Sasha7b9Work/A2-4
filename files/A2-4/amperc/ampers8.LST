@@ -1,0 +1,855 @@
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 1   
+
+
+C51 COMPILER V6.14, COMPILATION OF MODULE AMPERS8
+OBJECT MODULE PLACED IN ampers8.OBJ
+COMPILER INVOKED BY: D:\PROGRAM FILES\CYGNAL\IDEFILES\C51\BIN\C51.EXE ampers8.c DB OE
+
+stmt level    source
+
+   1          #include <stdio.h>
+   2          #include <math.h>
+   3          #include <c8051f310.h>
+   4          #include<stdlib.h>
+   5          
+   6          //------------------------------------------------------------------------------------
+   7          // 16-bit SFR Definitions for 'F02x
+   8          //------------------------------------------------------------------------------------
+   9          
+  10          
+  11          //sfr P2MDIN   = 0xF3;    // PORT 2 INPUT MODE REGISTER   
+  12          //sfr TMR2CN   = 0xC8;    // TIMER 2 CONTROL               
+  13          //sfr P0MDIN   = 0xF1;    // PORT 0 INPUT MODE REGISTER  
+  14          //sfr P3MDIN   = 0xF4;    // PORT 3 INPUT MODE REGISTER  
+  15          //sfr P0SKIP   = 0xD4;    // PORT 0 CROSSBAR SKIP
+  16          //sfr P1SKIP   = 0xD5;    // PORT 1 CROSSBAR SKIP                                     */
+  17          //sfr IT01CF   = 0xE4;    // INT0/INT1 CONFIGURATION                                         */
+  18          //sfr AMX0N    = 0xBA;    // ADC0 MUX NEGATIVE CHANNEL SELECTION                      */
+  19          //sfr AMX0P    = 0xBB;    // ADC0 MUX POSITIVE CHANNEL SELECTION
+  20          //sfr TMR2RLL  = 0xCA;    // TIMER 2 RELOAD LOW                                       */
+  21          //sfr TMR2RLH  = 0xCB;    // TIMER 2 RELOAD HIGH                                      */
+  22          //sfr TMR2L    = 0xCC;    // TIMER 2 LOW BYTE                                         */
+  23          //sfr TMR2H    = 0xCD;    // TIMER 2 HIGH BYTE 
+  24          //sfr SMB0CF   = 0xC1;    // SMBUS CONFIGURATION        
+  25          //sfr CLKSEL   = 0xA9;    // CLOCK SOURCE SELECT 
+  26            
+  27          //sbit TF2L    = TMR2CN ^ 6; // TIMER 2 LOW BYTE OVERFLOW FLAG                        */
+  28          //sbit TF2H    = TMR2CN ^ 7; // TIMER 2 HIGH BYTE OVERFLOW FLAG        
+  29           sfr VDM0CN   = 0xFF;    // VDD MONITOR CONTROL                   
+  30          /////////////
+  31           sbit  BIT6p1=P1^6;
+  32           sbit  BIT7p1=P1^7;
+  33           sbit  BITacp=P1^6	;//бит acp
+  34           sbit  BIT5p1=P1^5;
+  35           sbit  Rdat=P1^6;//
+  36          
+  37          
+  38          bit  BITzn;		//бит знака	
+  39          
+  40          //-----------------------------------------------------------------------------
+  41          // Global CONSTANTS
+  42          //-----------------------------------------------------------------------------
+  43          #define TIMER2_RATE     1000           // Timer 2 overflow rate in Hz
+  44          
+  45          #define SOAK_TIME          15          // Soak Time in Seconds
+  46          
+  47          //sbit	P3.1=P3^1;
+  48          
+  49          //void main (void)
+  50          //{
+  51          	int		j;
+  52          	int		a;
+  53          	unsigned char     save;
+  54          	char portread;
+  55          
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 2   
+
+  56          	char data dj;
+  57          	char  data dk;
+  58          	int	 data tdelay;
+  59          	int	 data acc;
+  60          	char data PP;
+  61          	char data 	marbuf;
+  62          	char data	address;
+  63          	
+  64          	char data 	marbuf;
+  65          
+  66          	char data  bufind [32]_at_ 0x2e;
+  67          	unsigned data	wriacp;
+  68          	unsigned char	rezacp;
+  69          	char data R3R4R5[3];//3байта
+  70          	unsigned  long ccc;//3байта
+  71          	int ddd;
+  72          //	char ccc;
+  73          //	char buffer[10];
+  74          //	long lll=0xee;
+  75          
+  76          //	char str [6];
+  77           char buffer [10];
+  78            int n, a=0xfe, b=3;
+  79            unsigned long  k;
+  80          
+  81          
+  82          //-----------------------------------------------------------------------------
+  83          // Function PROTOTYPES
+  84          //-----------------------------------------------------------------------------
+  85          void wait_one_second (void);
+  86          //void del_second(void);	
+  87          void del_second (int tdelay);
+  88          void wait_soak_time (unsigned char soak_time);
+  89          void write ();
+  90          void read ();
+  91          void loop ();
+  92          void ind();
+  93          void wwind();
+  94          void d100mk_second();
+  95          void d15ms_second();
+  96          void del_2mks_second();
+  97          void del_34mks_second();
+  98          void tim2();
+  99          void tim();
+ 100          void  chtadc();	
+ 101          void  zapadc();
+ 102          void real();
+ 103          void zreal();
+ 104          void rrr();
+ 105          
+ 106          
+ 107          
+ 108          main ()
+ 109          {
+ 110   1       	SP=0x0e0;
+ 111   1      	PCA0L=0x00;
+ 112   1      	PCA0MD= 0x00;//00000000;
+ 113   1      	P0MDOUT=0x00;//00000000;
+ 114   1      	P1MDOUT=0xbf;//10111111;
+ 115   1      	P2MDOUT=0x3f;//00111111;
+ 116   1      	P2MDIN=0xff;//11111111;
+ 117   1      	P3MDOUT =0x17;//00010111;
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 3   
+
+ 118   1      	P0MDIN=0xf2;//11110010;
+ 119   1      	P3MDIN=0xff;//11111111;
+ 120   1          P0SKIP=0x8d;//10001101;
+ 121   1      	/////////////////////
+ 122   1      	P1SKIP=0x0f;//00001111;
+ 123   1          P1MDIN=0xf0;//11110000;
+ 124   1      	XBR0= 0x05;//00000101;
+ 125   1      	XBR1 =0x42;//01000010;
+ 126   1      	IT01CF=0x00;//00000000;
+ 127   1       
+ 128   1      	SMB0CF=0xc2;//11000010; 
+ 129   1      	SCON0=0x10;                                   
+ 130   1      	TMOD=0x22;//00100010;	//регистр режимов
+ 131   1      	CKCON=0x30;//00110000;    //сист частота/12                 ; Установка таймера
+ 132   1      	TH0=0x0f9;
+ 133   1      	TL0=0x0f9; 
+ 134   1      	EIE1=0x80;//10000000;
+ 135   1      
+ 136   1      	AMX0P=0x13;//00010011;
+ 137   1      	AMX0N=0x1f;//00011111;
+ 138   1      	ADC0CF=0xf8;//11111000;
+ 139   1      	ADC0CN=0x80;//10000000;
+ 140   1      	OSCXCN=0xe7;//11100111;
+ 141   1      
+ 142   1      //gener:     mov a, oscxcn
+ 143   1      //           cjne a,#11100111b,gener
+ 144   1      
+ 145   1      	marbuf=OSCXCN;
+ 146   1      	if    (OSCXCN!=0xe7){
+ 147   2      			;
+ 148   2      }
+ 149   1         CLKSEL=0x01;//00000001;                    
+ 150   1        OSCICN=0x43;//01000011; 
+ 151   1         TMR2RLL=0;
+ 152   1         TMR2RLH=0xd1;
+ 153   1         TMR2CN=0x0c;//00001100;
+ 154   1      	TMR2CN=TMR2CN&0xbf;  //tmr2cn.6=0
+ 155   1      	TMR3L=0xcc;
+ 156   1      	TMR3H=0x0f8;
+ 157   1      	TMR3RLL=0xcc;
+ 158   1      	TMR3RLH=0xf8;
+ 159   1      	TMR3CN=0x04;//00000100;
+ 160   1          TCON=TCON|0x40;  //TCON.6=1 регистр управления
+ 161   1      	TCON=TCON|0x10;//	 tcon.4=1
+ 162   1      
+ 163   1      	VDM0CN=0x80;//упр монитором питания
+ 164   1      	RSTSRC=02	;//источники сброса 
+ 165   1      
+ 166   1      	//IE=0x80;//10000000	;//Снятие блокировки всех прерываний
+ 167   1           
+ 168   1      	 SP=  0xe0;    
+ 169   1          IP=IP|0x10;//00010000;//IP.4=1
+ 170   1      	TL1=0;//Занесение константы в младший байт таймера 1
+ 171   1          TH1=0xd0;//Занесение константы в старший байт таймера 1
+ 172   1      	PCA0CPH2=0x80;
+ 173   1      	PCA0CPL2=0x80;
+ 174   1          PCA0MD=0x05;//00000101;
+ 175   1      	PCA0CPM0=0x20;//00100000;
+ 176   1      	PCA0CPM1=0x20;//00100000;
+ 177   1      	PCA0CPM2=0x03;//00000011;
+ 178   1      	CPT1CN=0x80;//10000000;
+ 179   1      	CPT0CN=0x80;//10000000;
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 4   
+
+ 180   1      	REF0CN=0x02;//00000010;
+ 181   1      	ADC0H=0;
+ 182   1      	ADC0L=0;
+ 183   1      
+ 184   1      ;;;;;;;;;;;;;;;;;
+ 185   1      //start: 
+ 186   1           
+ 187   1      	//////////////////////
+ 188   1      //инициализация индикатора
+ 189   1      
+ 190   1      //start:
+ 191   1      	P3=P3&0xef;//	  clr P3.4
+ 192   1      	
+ 193   1      	d100mk_second();	//		call z_100         ;строб
+ 194   1      	P3=P3|0x10;//	setb P3.4
+ 195   1      
+ 196   1      	P3=P3&0xF3;//   clr P3.3,p3.2
+ 197   1      
+ 198   1      	 d15ms_second();//  call z_15         ;задержка 15 мс
+ 199   1      //          clr c          ;установка регистра команд
+ 200   1          acc=0x30;//     mov A,#30h     ;устанавливаем разрядность шины
+ 201   1      	write();//		call x1              ;переход к записи
+ 202   1      	d15ms_second();//	call z_15         ;задержка 15 мс
+ 203   1      	write();//		call x1               ;переход к записи
+ 204   1      	d100mk_second();//	call z_100        ;задержка 100 мкс
+ 205   1               
+ 206   1      	write();//		call x1               ;запись
+ 207   1           //////////////
+ 208   1      	// goto start ;   
+ 209   1      	loop();//		call loop            ;проверка флага BF
+ 210   1      	//goto start
+ 211   1          acc=0x38;//      mov A,#38h     ;устанавливаем режим развертки изображения в две строки
+ 212   1           write();//   	call x1               ;запись
+ 213   1           loop();//   	call loop                     ;проверка флага BF
+ 214   1      
+ 215   1           acc=0x06;//   	mov A,#06h     ;устанавливаем режим автоматического перемещения курсора слева-направо 
+             -после вывода каждого символа 
+ 216   1           write();//    	call x1               ;запись
+ 217   1      	 loop();//		call loop                     ;проверка флага BF 
+ 218   1      
+ 219   1           acc=0x02;//     mov A,#02h     ;начало строки адресуется в начале DDRAM
+ 220   1      	write();//				call x1               ;запись
+ 221   1      	loop();//				call loop                     ;проверка флага BF
+ 222   1      
+ 223   1            acc=0x0c;//    mov A,#0Ch     ;включаем отбражение на экране ЖКИ-модуля, без отображения курсоров
+ 224   1      	write();//				call x1               ;запись
+ 225   1      	loop();//				call loop                     ;проверка флага BF
+ 226   1      	acc=0x01;
+ 227   1      	write();//
+ 228   1      
+ 229   1      	for (j=0;j<33;j++){
+ 230   2      		bufind[j]=0x21;		
+ 231   2      	}
+ 232   1      
+ 233   1      	ind();
+ 234   1      	wait_one_second ();
+ 235   1      	wait_one_second ();
+ 236   1      
+ 237   1      	/////////////////////////////
+ 238   1      eee:
+ 239   1      	for (j=0;j<=4;j++){
+ 240   2      		bufind[j]=0x2a;//2d;		
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 5   
+
+ 241   2      	}	
+ 242   1      	for (j=5;j<12;j++){
+ 243   2      		bufind[j]=0x30;		
+ 244   2      	}
+ 245   1      
+ 246   1      	for (j=12;j<33;j++){
+ 247   2      		bufind[j]=0x2a;//2d;		
+ 248   2      	}
+ 249   1      	ind();
+ 250   1      	///////////
+ 251   1      wriacp=0x67;
+ 252   1      for (dj=0;dj<8;dj++){
+ 253   2      	wriacp=wriacp>>1;
+ 254   2      }
+ 255   1      /////////////////////////////////
+ 256   1      ////////////////////////////////
+ 257   1      //инициализация ACP
+ 258   1      	for (j=0;j<0xff;j++){
+ 259   2      			;		
+ 260   2      	}
+ 261   1      
+ 262   1      	while	(BIT5p1!=1){
+ 263   2      	;
+ 264   2      	}
+ 265   1      
+ 266   1      	while	(BIT5p1!=0){
+ 267   2      	;
+ 268   2      	}
+ 269   1      	tim();
+ 270   1      
+ 271   1      	wriacp=0x64;//запись INSR
+ 272   1      	zreal();
+ 273   1      	tim();
+ 274   1      	wriacp=0x60;
+ 275   1      	zreal();	//старший байт УС
+ 276   1      	wriacp=0x20;
+ 277   1      	zreal();	//второй байт УС
+ 278   1      	wriacp=0x0f;//07;//03;//00;
+ 279   1      	zreal();	//первый байт УС
+ 280   1      	wriacp=0x3c;//a0;//0c;//4d;
+ 281   1      	zreal();	//младший байт УС
+ 282   1      
+ 283   1      //////////////////////////////////
+ 284   1      //измерение ACP
+ 285   1      
+ 286   1      hhh:
+ 287   1      	while	(BIT5p1!=1){
+ 288   2      	;
+ 289   2      	}
+ 290   1      
+ 291   1      	while	(BIT5p1!=0){
+ 292   2      	;
+ 293   2      	}
+ 294   1      	tim();
+ 295   1      	wriacp=0xc0;//запись INSR
+ 296   1      	zreal();
+ 297   1      	tim();
+ 298   1      	
+ 299   1      	rrr();//real();//чтение acp
+ 300   1      	R3R4R5[0]=rezacp;
+ 301   1      	rrr();//чтение acp
+ 302   1      	R3R4R5[1]=rezacp;
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 6   
+
+ 303   1      	rrr();//чтение acp
+ 304   1      	R3R4R5[2]=rezacp;
+ 305   1      ///////////////////////////////////
+ 306   1      	dj=R3R4R5[0];//&0x80;
+ 307   1      	dj=dj&0x80;
+ 308   1      	if (dj!=0x00){
+ 309   2      		R3R4R5[0]=R3R4R5[0]&0x7f;//bit7=1 знак "+"
+ 310   2      		bufind[5]=0x2b;//bufind[4]=0x2b;	
+ 311   2      	}
+ 312   1      	else
+ 313   1      		{
+ 314   2      		
+ 315   2      		R3R4R5[0]=~R3R4R5[0];//bit7=0 знак "-"
+ 316   2      		R3R4R5[1]=~R3R4R5[1];
+ 317   2      		R3R4R5[2]=~R3R4R5[2];
+ 318   2      		R3R4R5[0]=R3R4R5[0]&0x7f;
+ 319   2      		bufind[5]=0x2d;//bufind[4]=0x2d;
+ 320   2      	}
+ 321   1      ///////////////////////////////////
+ 322   1      //преобразование и выдача на индикатор
+ 323   1      
+ 324   1       
+ 325   1      	k=0;
+ 326   1      	ccc=0x00;
+ 327   1       
+ 328   1       	ccc=R3R4R5[0];
+ 329   1      	ccc=ccc&0x0000ff;
+ 330   1       	ccc=ccc<<16;
+ 331   1       	k=ccc;
+ 332   1      
+ 333   1      	ccc=0x00;
+ 334   1       	ccc=ccc+R3R4R5[1];
+ 335   1      	ccc=ccc&0x0000ff;
+ 336   1       	ccc=ccc<<8;
+ 337   1      	k=k|ccc;
+ 338   1      
+ 339   1      	ccc=0x00;
+ 340   1      	ccc=ccc+R3R4R5[2];
+ 341   1      	ccc=ccc&0x0000ff;
+ 342   1      	k=k|ccc;
+ 343   1      
+ 344   1      //преобр рез ACP в коды индикатора
+ 345   1      	n=sprintf(buffer,"%ld",k);
+ 346   1      
+ 347   1      //в послед ячейке буфера всегда в конце 0
+ 348   1      	a=0;
+ 349   1      	while (buffer[a]!=0){
+ 350   2      		a++;
+ 351   2      		//ddd=buffer[a];
+ 352   2      	}
+ 353   1      	a--;
+ 354   1      	for (j=12;j>5;j--){//4;j--){
+ 355   2      		bufind[j]=buffer[a];
+ 356   2      		a--;
+ 357   2      	}
+ 358   1      ////////////////
+ 359   1      	for (j=6;j<12;j++){//j=5
+ 360   2      			if 	(bufind[j]<0x30)
+ 361   2      				bufind[j]=0x30;
+ 362   2      				//////////
+ 363   2      				if 	(bufind[j]>0x39)
+ 364   2      					bufind[j]=0x30;
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 7   
+
+ 365   2      	}
+ 366   1      
+ 367   1      	ind();
+ 368   1      goto hhh;
+ 369   1      ////////
+ 370   1      
+ 371   1      	goto eee;
+ 372   1      	
+ 373   1      	
+ 374   1      	
+ 375   1      	
+ 376   1      	
+ 377   1      	
+ 378   1      	
+ 379   1      	
+ 380   1      		
+ 381   1      
+ 382   1      }
+ 383          
+ 384          //-----------------------------------------------------------------------------
+ 385          // Support Subroutines
+ 386          //-----------------------------------------------------------------------------
+ 387          //пп записи
+ 388          void write ()	//запись команд (X1)
+ 389          {
+ 390   1          P3= P3&0xfd; //p3.1=0   mov P3.1,c        
+ 391   1          P2=acc;
+ 392   1      	P3=P3|0x08;	  //P3.3=1
+ 393   1      				
+ 394   1      	del_34mks_second();// задержка   call z_5
+ 395   1      					
+ 396   1      	P3=P3&0xf7;//  P3.3=0
+ 397   1      	P2=0xFF;
+ 398   1      }
+ 399          
+ 400          //пп записи данных 
+ 401          void writeD ()	//запись(X1)
+ 402          {
+ 403   1          P3= P3|0x02; //p3.1=1   mov P3.1,c        
+ 404   1          P2=acc;
+ 405   1      	P3=P3|0x08;	  //P3.3=1
+ 406   1      				
+ 407   1      	del_34mks_second();// задержка   call z_5
+ 408   1      					
+ 409   1      	P3=P3&0xf7;//  P3.3=0
+ 410   1      	P2=0xFF;
+ 411   1      }
+ 412          
+ 413          
+ 414          
+ 415          
+ 416          // пп чтение     x2  
+ 417          void read ()
+ 418          {
+ 419   1                P3= P3&0xfd; //p3.1=0  mov P3.1,c        
+ 420   1                P3=P3|0x0c;	//setb P3.2,	  setb P3.3
+ 421   1      		  del_2mks_second();//			call z_2
+ 422   1      		  acc=P2;    //  mov A,P2
+ 423   1      		  P3=P3&0xf3; // clr P3.3  clr P3.2
+ 424   1      		  
+ 425   1      		  
+ 426   1      }
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 8   
+
+ 427          //-----------------------------------------------------------------------------
+ 428          // wait_soak_time
+ 429          //-----------------------------------------------------------------------------
+ 430          //
+ 431          // This routine waits for the number of seconds indicated in the constant
+ 432          // <SOAK_TIME>.
+ 433          // 
+ 434          void wait_soak_time (unsigned char soak_time)
+ 435          {
+ 436   1         unsigned char i;
+ 437   1      
+ 438   1         for( i = soak_time; i != 0; i--) {
+ 439   2            wait_one_second();
+ 440   2            printf ("Soaking...%d\n", (int) i);
+ 441   2         }
+ 442   1      }
+ 443           //-----------------------------------------------------------------------------
+ 444          // wait_one_second
+ 445          //-----------------------------------------------------------------------------
+ 446          //
+ 447          // This routine uses timer 2 to insert a delay of approximately one second.
+ 448          // Timer 2 overflows <TIMER2_RATE> times per second
+ 449          //
+ 450          void wait_one_second (void)
+ 451          {
+ 452   1         unsigned int count;
+ 453   1         TF2H = 0;                           // Clear Timer2 overflow flag
+ 454   1         TR2 = 1;                            // Start Timer2
+ 455   1         
+ 456   1         for (count = TIMER2_RATE; count != 0; count--) {
+ 457   2            while (!TF2H);                   // wait for overflow
+ 458   2            TF2H = 0;                        // clear overflow indicator
+ 459   2         }
+ 460   1      
+ 461   1         TR2 = 0;                            // Stop Timer2
+ 462   1      }
+ 463          //задержка 2 мкс
+ 464          void del_2mks_second (void)
+ 465          {
+ 466   1      	unsigned int count;
+ 467   1      	for (count = 4; count != 0; count--) {
+ 468   2      	;
+ 469   2      	}
+ 470   1      }
+ 471          
+ 472          //задержка 34 мкс(z_5)!!!!!!!!!!!!!
+ 473          void del_34mks_second (void)
+ 474          {
+ 475   1      	unsigned int count;
+ 476   1      	for (count = 0x2e; count != 0; count--) {
+ 477   2      	;
+ 478   2      	}
+ 479   1      }
+ 480          
+ 481          //задержка 15 мс(z_15)!!!!!!!!!!!!!1
+ 482          void d15ms_second (void)
+ 483          {
+ 484   1      	 int count;
+ 485   1      	int hcount;
+ 486   1      
+ 487   1      	for (count = 0xed; count != 0; count--) 
+ 488   1      		for (hcount=0x50;hcount!=0;hcount--)
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 9   
+
+ 489   1      			;
+ 490   1      }
+ 491          
+ 492          //задержка 100mkc !!!!!!!!!!!!!!!!!
+ 493          void d100mk_second (void)
+ 494          {
+ 495   1      	 int chee;
+ 496   1      	int cheet;
+ 497   1      
+ 498   1      	for (chee = 0x24; chee != 0; chee--) 
+ 499   1      		for (cheet=0x02;cheet!=0;cheet--)
+ 500   1      			;
+ 501   1      }
+ 502          
+ 503          
+ 504          
+ 505          
+ 506          //проверка флага BF
+ 507          void loop(void)
+ 508          {     read();	//call x2       ;ожидание флага готовности
+ 509   1      	   // jb ACC.7,loop     ;переход на чтение, если бит А(7)=1
+ 510   1      			     //        ;возврат, если бит А(7)<>1
+ 511   1      		
+ 512   1      while	 (acc!=0){
+ 513   2      		read();	//call x2       ;ожидание флага готовности
+ 514   2      		acc=acc &0x80;
+ 515   2      		 }				 
+ 516   1      }
+ 517          
+ 518          //задержка 100 мкс
+ 519          void del_second (unsigned int tdelay)
+ 520          {
+*** WARNING C235 IN LINE 520 OF AMPERS8.C: parameter 1: different types
+ 521   1      	unsigned int count;
+ 522   1      	for (count = tdelay; count != 0; count--) {
+ 523   2      	;
+ 524   2      	}
+ 525   1      }
+ 526          
+ 527          //пп выдачи на индикатор буфера 2e..4e
+ 528          void ind()
+ 529          {	
+ 530   1      	int		i;
+ 531   1      
+ 532   1      	loop();//call	loop
+ 533   1      	acc=0x80;//установка адреса
+ 534   1          write();
+ 535   1      
+ 536   1      	for (i=0;i<17;i++){
+ 537   2      		loop();
+ 538   2      		acc=bufind[i];//	mov A,@R0      ;пересылаем содержимое R0 в аккумулятор
+ 539   2      		writeD();//          call x1               ;запись
+ 540   2      
+ 541   2      	}
+ 542   1           
+ 543   1      	loop();//		  	  call loop                     ;проверка флага BF
+ 544   1      	acc=0xc0;//    mov A,#0C0h 
+ 545   1      	write();//        	call x1               ;запись
+ 546   1      			    	
+ 547   1      
+ 548   1      	for (i=17;i<33;i++){
+ 549   2      		   
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 10  
+
+ 550   2      //          clr c          ;установка регистра команд
+ 551   2      		loop();//			call loop                     ;проверка флага BF
+ 552   2      
+ 553   2      		acc=bufind[i];// 	mov A,@R0     ;пересылаем содержимое R0 в аккумулятор
+ 554   2      		writeD();//         	call x1               ;запись
+ 555   2      
+ 556   2      
+ 557   2      	}		
+ 558   1      }
+ 559          
+ 560          
+ 561          //запись ACP
+ 562          //wriacp->p1.6
+ 563          void zreal()
+ 564          {
+ 565   1      	int	i;
+ 566   1      	int portwri,save;
+ 567   1      
+ 568   1      	dk=0;
+ 569   1      //d7
+ 570   1      	portwri=0;
+ 571   1      	BIT7p1=1;
+ 572   1      	portwri=portwri|wriacp;
+ 573   1      	portwri=portwri>>1;
+ 574   1      	portwri=portwri&0x40;//выделить бит p1.6
+ 575   1      	P1=P1&0xbf;
+ 576   1      	P1=P1|portwri;//P1=portwri;//7й бит байта
+ 577   1      	tim2();
+ 578   1      	BIT7p1=0;
+ 579   1      	tim2();
+ 580   1      //d6
+ 581   1      	portwri=0;
+ 582   1      	BIT7p1=1;
+ 583   1      	portwri=portwri|wriacp;
+ 584   1      	portwri=portwri&0x40;//выделить бит p1.6
+ 585   1      	P1=P1&0xbf;
+ 586   1      	P1=P1|portwri;//P1=portwri;//6й бит байта
+ 587   1      	tim2();
+ 588   1      	BIT7p1=0;
+ 589   1      	tim2();
+ 590   1      //d5..d0
+ 591   1      	portwri=0;
+ 592   1      	BIT7p1=1;
+ 593   1      	portwri=portwri|wriacp;
+ 594   1      	for (i=0;i<6;i++){
+ 595   2      		BIT7p1=1;
+ 596   2      		//portwri=portwri|wriacp;
+ 597   2      		portwri=portwri<<1;
+ 598   2      		save=portwri;
+ 599   2      		save=save&0x40;//portwri=portwri&0x40;//выделить бит p1.6
+ 600   2      		P1=P1&0xbf;
+ 601   2      		P1=P1|save;//dk=portwri;//P1=portwri;
+ 602   2      		tim2();
+ 603   2      		BIT7p1=0;
+ 604   2      
+ 605   2      		tim2();
+ 606   2      	}
+ 607   1      	BITacp=1;//p1.6=1
+ 608   1      
+ 609   1      }
+ 610          
+ 611          
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 11  
+
+ 612          //пп чтения acp в rezacp
+ 613          void rrr()
+ 614          
+ 615          {
+ 616   1      	
+ 617   1      	save=0;
+ 618   1      	rezacp=0;
+ 619   1      	portread=0;
+ 620   1      	
+ 621   1      	for	(j=0;j<=6;j++){
+ 622   2      		
+ 623   2      		BIT7p1=1;
+ 624   2      		tim2();
+ 625   2      		BIT7p1=0;
+ 626   2      
+ 627   2      			
+ 628   2      		portread=portread|Rdat;
+ 629   2      		portread=portread<<1;
+ 630   2      		tim2();
+ 631   2      	}
+ 632   1      		rezacp=portread;//+
+ 633   1      //d0
+ 634   1      		BIT7p1=1;
+ 635   1      		tim2();
+ 636   1      		BIT7p1=0;
+ 637   1      		rezacp=rezacp|Rdat;//d0
+ 638   1      		tim2();
+ 639   1      
+ 640   1      }
+ 641          
+ 642          void www()
+ 643          
+ 644          {
+ 645   1      	
+ 646   1      	
+ 647   1      	save=0;
+ 648   1      
+ 649   1      
+ 650   1      	for	(j=0;j<=7;j++){
+ 651   2      		
+ 652   2      		BIT7p1=1;
+ 653   2      		Rdat=wriacp;
+ 654   2      		BIT7p1=0;
+ 655   2      		wriacp=wriacp>>1;
+ 656   2      	
+ 657   2      		tim2();
+ 658   2      	}
+ 659   1      	BITacp=1;//p1.6=1
+ 660   1      }
+ 661          
+ 662          
+ 663          
+ 664          //запись ACP
+ 665          //wriacp->p1.6
+ 666          void zapadc()
+ 667          {
+ 668   1      
+ 669   1      
+ 670   1      }
+ 671          
+ 672          //чтение ACP
+ 673          //результат в rezacp
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 12  
+
+ 674          void chtadc()
+ 675          {
+ 676   1      
+ 677   1      }
+ 678          
+ 679          //чтение ACP
+ 680          //результат в rezacp
+ 681          void real1()
+ 682          {
+ 683   1      	
+ 684   1      }
+ 685          
+ 686          //чтение ACP
+ 687          //результат в rezacp
+ 688          void real2()//real
+ 689          {
+ 690   1      
+ 691   1      }
+ 692          
+ 693          
+ 694          //
+ 695          
+ 696          void real()
+ 697          {
+ 698   1      	int	i;
+ 699   1      	int portread;
+ 700   1      
+ 701   1      		rezacp=0;
+ 702   1      
+ 703   1      //d7
+ 704   1      			BIT7p1=1;
+ 705   1      		tim2();
+ 706   1      		BIT7p1=0;
+ 707   1      
+ 708   1      		portread=P1;
+ 709   1      		portread=portread&0x40;//выделить бит p1.6
+ 710   1      		portread=portread<<1;
+ 711   1      	
+ 712   1      		rezacp=rezacp|portread;//+
+ 713   1      		
+ 714   1      
+ 715   1      		tim2();
+ 716   1      		
+ 717   1      //d6
+ 718   1      		BIT7p1=1;
+ 719   1      		tim2();
+ 720   1      		BIT7p1=0;
+ 721   1      
+ 722   1      		portread=P1;
+ 723   1      		portread=portread&0x40;//выделить бит p1.6
+ 724   1      		
+ 725   1      	
+ 726   1      		rezacp=rezacp|portread;//+
+ 727   1      		
+ 728   1      		tim2();
+ 729   1      
+ 730   1      
+ 731   1      		save=0;//rezacp;
+ 732   1      
+ 733   1      	for (i=0;i<6;i++){
+ 734   2      
+ 735   2      			BIT7p1=1;
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 13  
+
+ 736   2      		tim2();
+ 737   2      		BIT7p1=0;
+ 738   2      
+ 739   2      		portread=P1;
+ 740   2      		portread=portread&0x40;//выделить бит p1.6
+ 741   2      	//	portread=portread<<1;
+ 742   2      	
+ 743   2      		//rezacp=rezacp|portread;//+
+ 744   2      		//rezacp=rezacp>>1;
+ 745   2      		save=save|portread;
+ 746   2      		save=save>>1;
+ 747   2      		//rezacp=rezacp<<5;
+ 748   2      		//rezacp=rezacp|save;
+ 749   2      
+ 750   2      		tim2();
+ 751   2      		}
+ 752   1      		save=save<<5;
+ 753   1      		rezacp=rezacp|save;
+ 754   1      }
+ 755          
+ 756          
+ 757          
+ 758          
+ 759          //~5mks
+ 760          void tim2()
+ 761          {
+ 762   1      	unsigned int count;
+ 763   1      	for (count = 0x05; count != 0; count--) {
+ 764   2      	;
+ 765   2      	}
+ 766   1      }
+ 767          
+ 768          //~14mks
+ 769          void tim()
+ 770          {
+ 771   1      	unsigned int count;
+ 772   1      	for (count = 0x0e; count != 0; count--) {
+ 773   2      	;
+ 774   2      	}
+ 775   1      }
+ 776          
+ 777          
+ 778          //-----------------------------------------------------------------------------
+ 779          // Initialization Subroutines
+ 780          //-----------------------------------------------------------------------------
+ 781          
+ 782          //-----------------------------------------------------------------------------
+ 783          // SYSCLK_Init
+ 784          //-----------------------------------------------------------------------------
+ 785          //
+ 786          // This routine initializes the system clock to use an 22.1184MHz crystal
+ 787          // as its clock source.
+ 788          //
+ 789          void SYSCLK_Init (void)
+ 790          {
+ 791   1         int i;                              // delay counter
+ 792   1      
+ 793   1         OSCXCN = 0x67;                      // start external oscillator with
+ 794   1                                             // 22.1184MHz crystal
+ 795   1      
+ 796   1         for (i=0; i < 256; i++) ;           // XTLVLD blanking interval (>1ms)
+ 797   1      
+C51 COMPILER V6.14  AMPERS8                                                                03/14/2006 13:29:26 PAGE 14  
+
+ 798   1         while (!(OSCXCN & 0x80)) ;          // Wait for crystal osc. to settle
+ 799   1      
+ 800   1         OSCICN = 0x88;                      // select external oscillator as SYSCLK
+ 801   1                                             // source and enable missing clock
+ 802   1                                             // detector
+ 803   1      }
+ 804          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1768    ----
+   CONSTANT SIZE    =     18    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     45      13
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
