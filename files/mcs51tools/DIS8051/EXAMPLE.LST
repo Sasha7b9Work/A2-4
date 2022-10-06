@@ -1,0 +1,65 @@
+                ;============================================================;
+                ;         Routine to transmit "EXAMPLE" text string          ;
+                ;============================================================;
+                
+                ;
+                ;	Assembly directives
+                ;
+                
+ 0000           	CPU	"8051.TBL"	;CPU Instruction table
+ 0000           	HOF	"BIN8"	  	;Output file = binary
+                
+                
+ 0000           	ORG	0000H
+                
+ 0000 020100    	LJMP	BEGIN		;Reset vector
+                
+                
+                ;
+                
+ 0100           	ORG	100H
+                
+ 0100           BEGIN:
+ 0100 900118    	MOV	DPTR,#EXAMPLE	;Address of EXAMPLE message
+ 0103 120108    	CALL	MESSAGE		;Transmit the message
+                
+ 0106 80FE      	SJMP	$		;Loop here forever
+                
+                ;-------------------------------------------------------------
+                
+                ;
+                ;	Message output routine
+                ;
+                
+ 0108           MESSAGE:
+ 0108 E4        	CLR	A		;Zero offset
+ 0109 93        	MOVC	A,@A+DPTR	;Get a message character
+ 010A A3        	INC	DPTR		;Point to next character
+ 010B B40001    	CJNE	A,#0,SENDIT	;End of Message ?
+                
+                ;
+                ;	Message transmission complete, Return to caller
+                ;
+                
+ 010E 22        	RET
+                
+                ;
+                ;	Transmit a character
+                ;
+                
+ 010F           SENDIT:
+ 010F 3099FD    	JNB	.TI,$		;Wait until transmitter ready
+ 0112 C299      	CLR	.TI		;Clear transmit ready
+ 0114 F599      	MOV	.SBUF,A		;Transmit the character
+ 0116 2108      	AJMP	MESSAGE		;Get the next character
+                
+                ;-------------------------------------------------------------
+                
+ 0118           EXAMPLE:
+ 0118 4558414D50	DFB	"EXAMPLE",0
+                
+                
+ 0000           	END
+0100  BEGIN              0118  EXAMPLE            0108  MESSAGE            
+010F  SENDIT             
+

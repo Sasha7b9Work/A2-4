@@ -1,0 +1,38 @@
+IAR Embedded Workbench for 8051 MSC-51 v7.20C Incl Keygen
+ IAR Embedded Workbench for 8051 is an integrated          
+ development environment for building and debugging        
+ embedded applications. A wide range of 8051 chips         
+ supported. The compiler for 8051 uses C/C++. C-SPY        
+ supports RTOS-aware debugging on hardware or in a         
+ simulator.                                                
+ Key components                                            
+  Integrated development environment with project         
+ management tools and editor                               
+  Highly optimizing 8051 compiler supporting C and C++    
+  Configuration files for 8051 devices from different     
+ manufacturers                                             
+  Run-time libraries with complete source code            
+  Relocating 8051 assembler                               
+  Linker and librarian tools                              
+  C-SPY debugger with 8051 simulator and support for RTOS-
+ aware debugging on hardware                               
+  ROM-monitor and JTAG drivers as well as source code and 
+ project for creating your own ROM-monitor driver          
+  Example projects for 8051 and code templates            
+  User and reference guides, both printed and in PDF      
+ format                                                    
+  Context-sensitive online help                           
+ And more...                                               
+ 1) Unpack                                                 
+ 2) Install                                                
+ 3) Run the 'IARID.EXE' to find your computer id.          
+ 4) Run the 'iarkgn_gui.exe'.                              
+ 5) Enter the hardware ID into the keygen.                 
+ 6) Enjoy!                                                 
+ NOTE: We included the command-line version as well, as on 
+ some computers the GUI doesnt accept the hardware key for 
+ some strange reason, thus we included both the GUI and    
+ CLI version for your enjoyment!                           
+ Oh, and...                                                
+      !SUPPORT DENMARK AND THE FREEDOM AND SPEECH!         
+
